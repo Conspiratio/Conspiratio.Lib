@@ -1,8 +1,6 @@
-# Conspiratio
+# Über das Spiel Conspiratio
 
 Das Fanprojekt namens "Conspiratio" ist eine freie Wirtschaftssimulation der Neuzeit, die sich stark am Kultspielt "Die Fugger 2" orientiert.
-
-## Über das Spiel Conspiratio
 
 Zu Beginn erbt der Spieler eine heruntergekommene Produktionsstätte und das bescheidene Ersparte eines Verwandten. Damit kann er sein Geschick als Kaufmann unter Beweis stellen, indem er Waren herstellt und verkauft, wohl durchdachte Investionen tätigt oder sich als gewiefter Exporteur durchsetzt. Der Spieler kann den neu gewonnenen Reichtum und den damit verbundenen Einfluss nutzen um:
 
@@ -14,9 +12,15 @@ Zu Beginn erbt der Spieler eine heruntergekommene Produktionsstätte und das bes
 
 Doch Vorsicht! Auch manche Konkurrenten werden von niederträchtigen Maßnahmen nicht zurückschrecken ...
 
-## Mitmachen
+# Über dieses Repository
 
-### Git Workflow
+Ziel ist ein Rewrite der Oberfläche und eine Portierung sowie Refaktorisierung der Gameplaylogiken und der gesamten Architektur von der aktuellen Windows Forms Version zu einem Unity Spiel, da wir hier viel mehr multimediale und vor allem grafische Möglichkeiten haben und es eine gewisse Plattformunabhängigkeit gibt. Dieser neue Unity Client wird vollständig Open-Source sein, wir möchten andere Menschen möglich einfach in die Mitarbeit und Mitentwicklung einbeziehen und aus dem Hobbyprojekt soll ein Communityprojekt, von Fans für Fans, werden.
+
+Zur Planung und Steuerung der Entwicklung sollen Github Issues dienen.
+
+# Mitmachen
+
+## Git Workflow
 
 **Wichtig: Wir committen und pushen nie direkt in den master Branch!**  
 Der Grund ist einfach mangelnde Transparenz und fehlendes 4-Augen-Prinzip bzw. fehlende Kontrolle durch mind. einen anderen Entwickler.
@@ -32,7 +36,7 @@ Es sollten außerdem Umlaute und Sonderzeichen vermieden werden und es können a
 
 Ist der eigene Branch dann soweit stabil und enthält alle gewünschten Änderungen/Erweiterungen, dann kann  mittels Pull Request eine Anfrage auf den Merge in den master Branch erstellt werden. Diese sollte immer einem anderen Entwickler zur Prüfung zugewiesen werden, welche einen kleinen Code Review macht, ggf. Feedback zum Code gibt und nach Ausbesserung den Branch dann auch mergt. Eigene Branches sollten nur in Ausnahmefällen selbst gemergt werden (z.B. zeitliche Dringlichkeit).
 
-### Code Guidelines
+## Code Guidelines
 
 Als Coding-Richtlinien für C# nutzen wir insbesondere für neuen Code folgende Referenz, da sich diese mittlerweile als Standard durchgesetzt hat:  
 https://docs.microsoft.com/de-de/dotnet/csharp/programming-guide/inside-a-program/coding-conventions
@@ -45,11 +49,11 @@ Dabei ist bitte zu beachten, dass wir hier als Sprache der Kommentare im Code un
 Alter Code kann und sollte gerne nach und nach auf diese Richtlinien umgestellt werden, damit es später kein Durcheinander gibt, das hat aber zunächst mal nicht die höchste Priorität. Sollte man aber älteren Code verändern oder refaktorisieren, dann sollte man sich die Mühe machen, und hier auch die neuen Guidelines anwenden, frei nach dem Pfadfindermotto:  
 _Hinterlasse einen Ort (Code) immer in einem besseren Zustand als du ihn vorgefunden hast._
 
-### Dokumentation
+## Dokumentation
 
 Die Dokumentation von umfangreichen Features oder sonstigen interessanten Methoden, Klassen etc. im Code erfolgt im Github Wiki. Das Github Wiki soll ausschließlich der technischen Dokuementation und nicht der Dokumentation für die Spieler dienen, dafür wird es ein eigenes Wiki geben.
 
-### Changelog
+## Changelog
 
 Vorab: Wir nutzen einiges aus diesem Konzept hier: https://keepachangelog.com/de/1.0.0/
 
@@ -61,15 +65,3 @@ Im Changelog nutzen wir folgende Gruppen zur Unterteilung der Änderungen:
 - Änderungen
 - Korrekturen
 - Balancing
-
-## Kompilierung
-
-Folgt.
-
-## Sonstige Systemvoraussetzungen:
-
-Folgt.
-
-## Setup
-
-Folgt.
