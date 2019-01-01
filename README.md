@@ -1,0 +1,2 @@
+# Conspiratio
+Wirtschaftssimulation der Neuzeit
