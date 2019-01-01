@@ -1,6 +1,18 @@
 # Conspiratio
 
-Wirtschaftssimulation der Neuzeit
+Das Fanprojekt namens "Conspiratio" ist eine freie Wirtschaftssimulation der Neuzeit, die sich stark am Kultspielt "Die Fugger 2" orientiert.
+
+## Über das Spiel Conspiratio
+
+Zu Beginn erbt der Spieler eine heruntergekommene Produktionsstätte und das bescheidene Ersparte eines Verwandten. Damit kann er sein Geschick als Kaufmann unter Beweis stellen, indem er Waren herstellt und verkauft, wohl durchdachte Investionen tätigt oder sich als gewiefter Exporteur durchsetzt. Der Spieler kann den neu gewonnenen Reichtum und den damit verbundenen Einfluss nutzen um:
+
+- Noch weitere Produktionsstätten zu erwerben,
+- Titel und Privilegien zu erlangen,
+- Spione und Saboteure auszusenden
+- Angesehene Amtsinhaber zu manipulieren,
+- oder sogar selbst ein mächtiger Amtsträger zu werden.
+
+Doch Vorsicht! Auch manche Konkurrenten werden von niederträchtigen Maßnahmen nicht zurückschrecken ...
 
 ## Mitmachen
 
