@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Erweiterungen
+- Spezielle Ereignisse hinzugefügt
+
 ## 1.4.1 - 24.12.2018
 
 ### Erweiterungen
@@ -66,12 +69,11 @@ Folgende Fehler wurden behoben:
 Folgende Erweiterungen/Änderungen wurden implementiert:
 - Die angezeigten Stadtinformationen wurden erweitert:
 - Es werden nun alle produzierbaren Rohstoffe einer Stadt angezeigt.
-        - Lagerbestand wird ebenfalls angezeigt.
-        - Haupt- werden gegenüber Nebenproduktionen optisch hervorgehoben.
+  - Lagerbestand wird ebenfalls angezeigt.
+  - Haupt- werden gegenüber Nebenproduktionen optisch hervorgehoben.
 - Lagerraum funktioniert jetzt wie in Fugger 2
 - Musikstücke und Soundeffekte wurden auf ein neues Format umgestellt.
-- Zahlreiche sonstige kleinere Optimierungen, welche Conspiratio 
-         als gesamtes besser spielbar machen.
+- Zahlreiche sonstige kleinere Optimierungen, welche Conspiratio als gesamtes besser spielbar machen.
 - Ein Geldklimpergeräusch wird nun bei jeder Abrechnung abgespielt.
 - Die Mengeneingabe wurde überarbeitet
 
@@ -97,9 +99,9 @@ Folgende Erweiterungen/Änderungen wurden implementiert:
 - Die Fertigstellung eines Wohnsitzes wird nun am Rundenende angezeigt
 - Gerichtsverfahren wurden erweitert
 - Folgende Privilegien wurden implementiert:
-- Günstige Kredite (Freigeschalten als Vogt/Vögtin)
-- Zollfrei (Freigeschalten als Zöllner/Zöllnerin) 
-- Prediger (Freigeschalten als Priester/Priesterin)
+  - Günstige Kredite (Freigeschalten als Vogt/Vögtin)
+  - Zollfrei (Freigeschalten als Zöllner/Zöllnerin) 
+  - Prediger (Freigeschalten als Priester/Priesterin)
 - Speicherstände werden verschlüsselt abgespeichert
 - Anwesen können erweitert bzw. ausgebaut werden
 - Setup erneuert
@@ -107,16 +109,12 @@ Folgende Erweiterungen/Änderungen wurden implementiert:
 ## 1.3.2
 Folgende Fehler wurden behoben:
 - Die Beziehungen zwischen den einzelnen Computerspielern wurden nicht gespeichert.
-	- Dieser Umstand führte dazu das nach dem Laden eines Speicherstandes viele
-		Feindschaften entstanden wo früher keine waren und umgekehrt. Dies hatte sehr
-		viele umsinnige Neuwahlen zur Folge, welche auf dem Spieler zur Last fallen konnten
+  - Dieser Umstand führte dazu das nach dem Laden eines Speicherstandes viele Feindschaften entstanden wo früher keine waren und umgekehrt. Dies hatte sehr viele umsinnige Neuwahlen zur Folge, welche auf dem Spieler zur Last fallen konnten
 - Conspiratio konnte nur gestartet werden, wenn der Benutzer ein Office-Paktet installiert hat
 - Die Funktion Geldleiher in der Schreibstube konnte unter gewissen Umständen nicht verwendet werden
 - Bei einem Spieler alleine wurde im Buch mit den Kontrahenten häufig eine letzte leere Seite angezeigt
-- Sobald der letzte Spieler verstarb und keinen Erben hinterlies, öffnete sich automatisch ein
-		neues Spiel mit einem namenlosen Spieler
-- Unter seltenen Umständen konnte der Spieler seine Gesundheit über das Maximum hinaus erhöhen und 
-		dadurch seinen Todeszeitpunkt massiv hinauszögern
+- Sobald der letzte Spieler verstarb und keinen Erben hinterlies, öffnete sich automatisch ein neues Spiel mit einem namenlosen Spieler
+- Unter seltenen Umständen konnte der Spieler seine Gesundheit über das Maximum hinaus erhöhen und dadurch seinen Todeszeitpunkt massiv hinauszögern
 - Beim Exportieren wurden die Karavanenkosten irrtümlicherweise auch bei einem "Export" von 0 Waren eingehoben
 - Die Bezahlung der Kupplerin wurde nicht sofort durchgeführt
 
@@ -137,6 +135,7 @@ Balancings:
 - Preisuntergrenze der Startrohstoffe von 6 auf 7 erhöht
 - Grundpreis der Werkstätten um 20% reduziert
 - Die "Maklergebühr" für die Kupplerin wurde um 50% reduziert
+
 Sound:
 - Der Musikwechsel beim Betreten des Hinterzimmers wurde vorerst deaktiviert
 
@@ -605,10 +604,8 @@ Balancings:
 - Rohstoffproduktion etwas erhöht
 - Produktionskosten abhängig von der Wertigkeit des Rohstoffes erhöht
 - Neuen Spieler Hinzufügen: 
-	-Die Kosten für die Wahl der Stadt wurden auf 150 Golddukaten 
-			reduziert.
-	-Die Kosten für die Wahl des Rohstoffes wurden auf 100 Golddukaten
-			gesetzt
+  - Die Kosten für die Wahl der Stadt wurden auf 150 Golddukaten reduziert.
+  - Die Kosten für die Wahl des Rohstoffes wurden auf 100 Golddukaten gesetzt
 
 Graphische Änderungen:
 - Schuldturm/Kerker (Bild) wurde ausgetauscht
