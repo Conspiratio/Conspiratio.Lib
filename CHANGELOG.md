@@ -1,9 +1,23 @@
 # Changelog Conspiratio
 
-## Unreleased
+## 1.4.2 - 24.12.2019
 
 ### Erweiterungen
-- Spezielle Ereignisse hinzugefügt
+- Neues Privileg "Ein Fest veranstalten" in einer ersten Version hinzugefügt (es sind noch Änderungen und Erweiterungen geplant)
+- 'Geld zum Fenster rauswerfen' Button im Kontor hinzugefügt, um als aktiver Spieler aus dem Spiel auszuscheiden
+- Button zum Beenden der Runde im Kontor hinzugefügt (das dürfte für viele Spieler intuitiver sein als der Rechtsklick in einem freien Bereich, der aber natürlich nach wie vor funktioniert)
+- Spezielle Ereignisse hinzugefügt (welche genau, werdet ihr selbst herausfinden müssen ...)
+
+### Korrekturen
+- "Schmilzt Kupfer" in "Schmelzt Kupfer" geändert (Danke an sknortsch für den Hinweis)
+- Anzeigefehler: Verlorene Waren aufgrund von Überfällen werden im Buch bei Rundenbeginn nun nur noch einmal angezeigt und nicht mehr jede Runde ab dem Überfall (Danke an sknortsch für den Hinweis)
+- Im Setup wird nun wieder die aktuelle Datei "Produktion.pdf" ausgeliefert.
+- Doppelte Klicksounds an einigen Stellen korrigiert (z.B. beim Kirchgang)
+- Wenn ein Spieler aus dem Spiel ausscheidet (bei Tod keinen Erben oder Spieler hinauswerfen) und es gibt noch weitere Spieler, dann kommt es beim Beenden eines solches Spiels mit Anzeige der Statistik nicht mehr zu einer Fehlermeldung
+- Wenn ein Spieler durch 'Spieler hinauswerfen' oder 'Geld zum Fenster rauswerfen' aus dem Spiel ausscheidet, dann wird nun auch sein möglicherweise vorhandenes Amt freigegeben und eine eventuelle Wahlteilname gelöscht
+- Neues Spiel > Spieler hinzufügen: Der Wappen-Cursor wird nun nicht mehr nach dem ersten Spieler bei der Erstellung aller weiterer Spieler angezeigt
+- Neues Spiel > Spieler hinzufügen: Es wird nun nicht mehr das Eingabefeld für den Namen angezeigt, wenn der letzte Spieler bereits erstellt wurde und die Spielerstellung abgeschlossen ist und nur noch mit Rechtsklick bestätigt werden muss
+- Diverse Rechtschreib- und Tippfehler korrigiert
 
 ## 1.4.1 - 24.12.2018
 
