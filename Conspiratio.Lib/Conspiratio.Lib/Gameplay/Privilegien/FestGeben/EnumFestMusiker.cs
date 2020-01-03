@@ -3,7 +3,7 @@
     public enum EnumFestMusiker
     {
         schlechten,
-        mittelmäßigen,
+        mittelmäßigen,  // Umlaute sind wichtig, weil der Wert auch als String in der Oberfläche angezeigt wird
         guten,
     }
 }

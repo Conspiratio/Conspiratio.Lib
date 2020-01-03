@@ -4,7 +4,7 @@
     {
         kleines,
         normales,
-        großes,
+        großes,  // Umlaut ist wichtig, weil der Wert auch als String in der Oberfläche angezeigt wird
         riesiges
     }
 }
