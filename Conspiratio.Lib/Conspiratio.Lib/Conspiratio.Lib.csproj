@@ -85,6 +85,7 @@
     <Compile Include="Gameplay\Gebiete\Gebiet.cs" />
     <Compile Include="Gameplay\Hinterzimmer\AktiveSabotagen.cs" />
     <Compile Include="Gameplay\Hinterzimmer\AktiveSpionagen.cs" />
+    <Compile Include="Gameplay\Kampf\Einheiten\Einheit.cs" />
     <Compile Include="Gameplay\Kampf\EnumAktionsartRaeuberlager.cs" />
     <Compile Include="Gameplay\Kampf\EnumAktionsartZollburg.cs" />
     <Compile Include="Gameplay\Kampf\EnumKampfArt.cs" />
@@ -97,7 +98,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Allgemein\" />
-    <Folder Include="Gameplay\Kampf\Einheiten\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
