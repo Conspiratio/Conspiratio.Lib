@@ -2,52 +2,53 @@
 {
     public class Amt
     {
-        int AmtsID;
-        string Amtsname;
-        int BonusAnsehen;
-        int BonusBestechlich;
-        int BonusAggressiv;
-        int BonusEinfluss;
-        int BonusHinterhaeltig;
-        int Waehler1AmtID, Waehler2AmtID, Waehler3AmtID;
-        int Einkommen;
-        int AmtsStufe;
+        private int _amtsID;
+        private string _amtsname;
+        private int _bonusAnsehen;
+        private int _bonusBestechlich;
+        private int _bonusAggressiv;
+        private int _bonusEinfluss;
+        private int _bonusHinterhaeltig;
+        private int _waehler1AmtID;
+        private int _waehler2AmtID;
+        private int _waehler3AmtID;
+        private int _einkommen;
+        private int _amtsStufe;
 
         public Amt(int id, string nam, int bbest, int baggro, int beinf, int bhint, int w1, int w2, int w3, int stuf, int bonans, int eink)
         {
-            AmtsID = id;
-            Amtsname = nam;
-            BonusBestechlich = bbest; //Bosheit
-            BonusAggressiv = baggro;
-            BonusEinfluss = beinf;
-            BonusHinterhaeltig = bhint;
-            Waehler1AmtID = w1;
-            Waehler2AmtID = w2;
-            Waehler3AmtID = w3;
-            AmtsStufe = stuf;
-            BonusAnsehen = bonans;
-            Einkommen = eink;
+            _amtsID = id;
+            _amtsname = nam;
+            _bonusBestechlich = bbest;  // Bosheit [Anm. SirTobyB: Keine Ahnung, was mit diesem Kommentar gemeint war]
+            _bonusAggressiv = baggro;
+            _bonusEinfluss = beinf;
+            _bonusHinterhaeltig = bhint;
+            _waehler1AmtID = w1;
+            _waehler2AmtID = w2;
+            _waehler3AmtID = w3;
+            _amtsStufe = stuf;
+            _bonusAnsehen = bonans;
+            _einkommen = eink;
         }
 
-        public int getAmtsID()        { return AmtsID; }
-        public int getEinkommen()     { return Einkommen; }
-        public int getAmtsStufe()     { return AmtsStufe; }
-        public int getBonusBest()     { return BonusBestechlich; }
-        public int getBonusAggr()     { return BonusAggressiv; }
-        public int getBonusEinf()     { return BonusEinfluss; }
-        public int getBonusHint()     { return BonusHinterhaeltig; }
-        public int getWaehler1AmtID() { return Waehler1AmtID; }
-        public int getWaehler2AmtID() { return Waehler2AmtID; }
-        public int getWaehler3AmtID() { return Waehler3AmtID; }
-        public int getBonusAnsehen()  { return BonusAnsehen; }
+        public int GetAmtsID()        { return _amtsID; }
+        public int GetEinkommen()     { return _einkommen; }
+        public int GetAmtsStufe()     { return _amtsStufe; }
+        public int GetBonusBest()     { return _bonusBestechlich; }
+        public int GetBonusAggr()     { return _bonusAggressiv; }
+        public int GetBonusEinf()     { return _bonusEinfluss; }
+        public int GetBonusHint()     { return _bonusHinterhaeltig; }
+        public int GetWaehler1AmtID() { return _waehler1AmtID; }
+        public int GetWaehler2AmtID() { return _waehler2AmtID; }
+        public int GetWaehler3AmtID() { return _waehler3AmtID; }
+        public int GetBonusAnsehen()  { return _bonusAnsehen; }
 
-        public string getAmtsname(bool maennlich)
+        public string GetAmtsname(bool maennlich)
         {
             if (maennlich)
-            {
-                return Amtsname.Substring(0, Amtsname.IndexOf(";"));
-            }
-            return Amtsname.Substring(Amtsname.IndexOf(";") + 1);
+                return _amtsname.Substring(0, _amtsname.IndexOf(";"));
+            
+            return _amtsname.Substring(_amtsname.IndexOf(";") + 1);
         }
     }
 }
