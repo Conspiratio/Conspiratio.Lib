@@ -82,6 +82,8 @@
     <Compile Include="Gameplay\Aemter\AmtWachkommandant.cs" />
     <Compile Include="Gameplay\Aemter\AmtZoellner.cs" />
     <Compile Include="Gameplay\Aemter\AmtZollmeister.cs" />
+    <Compile Include="Gameplay\Hinterzimmer\AktiveSabotagen.cs" />
+    <Compile Include="Gameplay\Hinterzimmer\AktiveSpionagen.cs" />
     <Compile Include="Gameplay\Kampf\EnumAktionsartRaeuberlager.cs" />
     <Compile Include="Gameplay\Kampf\EnumAktionsartZollburg.cs" />
     <Compile Include="Gameplay\Kampf\EnumKampfArt.cs" />

@@ -29,7 +29,6 @@
             Einkommen = eink;
         }
 
-        #region Getter
         public int getAmtsID()        { return AmtsID; }
         public int getEinkommen()     { return Einkommen; }
         public int getAmtsStufe()     { return AmtsStufe; }
@@ -41,7 +40,6 @@
         public int getWaehler2AmtID() { return Waehler2AmtID; }
         public int getWaehler3AmtID() { return Waehler3AmtID; }
         public int getBonusAnsehen()  { return BonusAnsehen; }
-        #endregion
 
         public string getAmtsname(bool maennlich)
         {
