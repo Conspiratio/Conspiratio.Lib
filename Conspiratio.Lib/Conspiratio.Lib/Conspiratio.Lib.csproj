@@ -1,15 +1,100 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.9.0</Version>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{98ACB1BC-6708-4119-A1DC-23E3DEF08007}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Conspiratio.Lib</RootNamespace>
+    <AssemblyName>Conspiratio.Lib</AssemblyName>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
-
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
   <ItemGroup>
-    <Folder Include="Extensions\" />
-    <Folder Include="Gameplay\Kampf\Einheiten\" />
-    <Folder Include="Gameplay\Privilegien\" />
-    <Folder Include="Allgemein\" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
-
+  <ItemGroup>
+    <Compile Include="Extensions\IntExtension.cs" />
+    <Compile Include="Gameplay\Aemter\Amt.cs" />
+    <Compile Include="Gameplay\Aemter\AmtAbt.cs" />
+    <Compile Include="Gameplay\Aemter\AmtBaumeister.cs" />
+    <Compile Include="Gameplay\Aemter\AmtBefehlshaber.cs" />
+    <Compile Include="Gameplay\Aemter\AmtBischof.cs" />
+    <Compile Include="Gameplay\Aemter\AmtBuergermeister.cs" />
+    <Compile Include="Gameplay\Aemter\AmtDiakon.cs" />
+    <Compile Include="Gameplay\Aemter\AmtDomherr.cs" />
+    <Compile Include="Gameplay\Aemter\AmtErzbischof.cs" />
+    <Compile Include="Gameplay\Aemter\AmtErzdiakon.cs" />
+    <Compile Include="Gameplay\Aemter\AmtFeldmarschall.cs" />
+    <Compile Include="Gameplay\Aemter\AmtFinanzberater.cs" />
+    <Compile Include="Gameplay\Aemter\AmtFinanzminister.cs" />
+    <Compile Include="Gameplay\Aemter\AmtFolterknecht.cs" />
+    <Compile Include="Gameplay\Aemter\AmtGeheimrat.cs" />
+    <Compile Include="Gameplay\Aemter\AmtHauptmann.cs" />
+    <Compile Include="Gameplay\Aemter\AmtHenker.cs" />
+    <Compile Include="Gameplay\Aemter\AmtHofrat.cs" />
+    <Compile Include="Gameplay\Aemter\AmtInfantrist.cs" />
+    <Compile Include="Gameplay\Aemter\AmtInquisitor.cs" />
+    <Compile Include="Gameplay\Aemter\AmtJustizberater.cs" />
+    <Compile Include="Gameplay\Aemter\AmtJustizminister.cs" />
+    <Compile Include="Gameplay\Aemter\AmtKaemmerer.cs" />
+    <Compile Include="Gameplay\Aemter\AmtKavallarist.cs" />
+    <Compile Include="Gameplay\Aemter\AmtKellermeister.cs" />
+    <Compile Include="Gameplay\Aemter\AmtKerkermeister.cs" />
+    <Compile Include="Gameplay\Aemter\AmtMarschall.cs" />
+    <Compile Include="Gameplay\Aemter\AmtOffizier.cs" />
+    <Compile Include="Gameplay\Aemter\AmtPriester.cs" />
+    <Compile Include="Gameplay\Aemter\AmtRatsherr.cs" />
+    <Compile Include="Gameplay\Aemter\AmtRegent.cs" />
+    <Compile Include="Gameplay\Aemter\AmtRichter.cs" />
+    <Compile Include="Gameplay\Aemter\AmtSakristan.cs" />
+    <Compile Include="Gameplay\Aemter\AmtStadtkommandant.cs" />
+    <Compile Include="Gameplay\Aemter\AmtStadtwache.cs" />
+    <Compile Include="Gameplay\Aemter\AmtstvBefehlshaber.cs" />
+    <Compile Include="Gameplay\Aemter\AmtVogt.cs" />
+    <Compile Include="Gameplay\Aemter\AmtWachkommandant.cs" />
+    <Compile Include="Gameplay\Aemter\AmtZoellner.cs" />
+    <Compile Include="Gameplay\Aemter\AmtZollmeister.cs" />
+    <Compile Include="Gameplay\Kampf\EnumAktionsartRaeuberlager.cs" />
+    <Compile Include="Gameplay\Kampf\EnumAktionsartZollburg.cs" />
+    <Compile Include="Gameplay\Kampf\EnumKampfArt.cs" />
+    <Compile Include="Gameplay\Kampf\EnumStuetzpunktArt.cs" />
+    <Compile Include="Gameplay\Privilegien\FestGeben\EnumFestGroesse.cs" />
+    <Compile Include="Gameplay\Privilegien\FestGeben\EnumFestMusiker.cs" />
+    <Compile Include="Gameplay\Privilegien\FestGeben\Fest.cs" />
+    <Compile Include="Gameplay\Rohstoffe\Rohstoff.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Allgemein\" />
+    <Folder Include="Gameplay\Kampf\Einheiten\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
