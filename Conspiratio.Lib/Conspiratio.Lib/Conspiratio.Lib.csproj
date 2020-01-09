@@ -93,6 +93,7 @@
     <Compile Include="Gameplay\Kampf\Kampf.cs" />
     <Compile Include="Gameplay\Kampf\KampfErgebnis.cs" />
     <Compile Include="Gameplay\Kampf\KampfKarawane.cs" />
+    <Compile Include="Gameplay\Niederlassung\EnumProduktionsslotAktionsart.cs" />
     <Compile Include="Gameplay\Privilegien\FestGeben\EnumFestGroesse.cs" />
     <Compile Include="Gameplay\Privilegien\FestGeben\EnumFestMusiker.cs" />
     <Compile Include="Gameplay\Privilegien\FestGeben\Fest.cs" />
