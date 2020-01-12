@@ -85,6 +85,7 @@
     <Compile Include="Gameplay\Gebiete\Gebiet.cs" />
     <Compile Include="Gameplay\Hinterzimmer\AktiveSabotagen.cs" />
     <Compile Include="Gameplay\Hinterzimmer\AktiveSpionagen.cs" />
+    <Compile Include="Gameplay\Justiz\Strafen.cs" />
     <Compile Include="Gameplay\Kampf\Einheiten\Einheit.cs" />
     <Compile Include="Gameplay\Kampf\EnumAktionsartRaeuberlager.cs" />
     <Compile Include="Gameplay\Kampf\EnumAktionsartZollburg.cs" />
@@ -98,6 +99,17 @@
     <Compile Include="Gameplay\Privilegien\FestGeben\EnumFestMusiker.cs" />
     <Compile Include="Gameplay\Privilegien\FestGeben\Fest.cs" />
     <Compile Include="Gameplay\Rohstoffe\Rohstoff.cs" />
+    <Compile Include="Gameplay\Titel\Baron.cs" />
+    <Compile Include="Gameplay\Titel\Buerger.cs" />
+    <Compile Include="Gameplay\Titel\Edelmann.cs" />
+    <Compile Include="Gameplay\Titel\Freiherr.cs" />
+    <Compile Include="Gameplay\Titel\Fuerst.cs" />
+    <Compile Include="Gameplay\Titel\Graf.cs" />
+    <Compile Include="Gameplay\Titel\Herr.cs" />
+    <Compile Include="Gameplay\Titel\Herzog.cs" />
+    <Compile Include="Gameplay\Titel\Landherr.cs" />
+    <Compile Include="Gameplay\Titel\Ritter.cs" />
+    <Compile Include="Gameplay\Titel\Titel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
