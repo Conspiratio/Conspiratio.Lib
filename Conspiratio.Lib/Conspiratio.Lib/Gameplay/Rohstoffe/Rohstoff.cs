@@ -27,31 +27,31 @@ namespace Conspiratio.Lib.Gameplay.Rohstoffe
         /// <summary>
         /// Dient zur Initialisierung aller Werte für einen Rohstoff.
         /// </summary>
-        /// <param name="PreisMin">Mindestpreis</param>
-        /// <param name="PreisStd">Standardpreis</param>
-        /// <param name="PreisMax">Maximalpreis</param>
-        /// <param name="Name">Bezeichnung des Rohstoffs</param>
-        /// <param name="Produktionstext">Text, der in der Werkstatt zur Produktion angezeigt wird (Beispiel: Erntet Korn;auf:Feld.Feldern)</param>
-        /// <param name="WSverhaeltnisArbeiter">Faktor Arbeiter für das Verhältnis Arbeiter zu Werkstätten</param>
-        /// <param name="WSverhaeltnisWS">Faktor Werkstätten für das Verhältnis Arbeiter zu Werkstätten</param>
-        /// <param name="RohStufe">Rohstoffstufe (1 bis 3) zur Unterteilung auch für die Handelszertifikate und die Lagermenge</param>
-        /// <param name="TextQualitaetProduktion">Text, der im Buch auftaucht, wenn die Ware produziert wurde, z.B. Eure Getreideernte verlief {0}</param>
-        /// <param name="LagermengeProQMeter">OPTIONAL: Gibt an, wie viel auf einem Qudaratmeter Lagerplatz gelagert werden können 
+        /// <param name="preisMin">Mindestpreis</param>
+        /// <param name="preisStd">Standardpreis</param>
+        /// <param name="preisMax">Maximalpreis</param>
+        /// <param name="name">Bezeichnung des Rohstoffs</param>
+        /// <param name="produktionstext">Text, der in der Werkstatt zur Produktion angezeigt wird (Beispiel: Erntet Korn;auf:Feld.Feldern)</param>
+        /// <param name="werkstattVerhaeltnisArbeiter">Faktor Arbeiter für das Verhältnis Arbeiter zu Werkstätten</param>
+        /// <param name="wekstattVerhaeltnisWerkstatt">Faktor Werkstätten für das Verhältnis Arbeiter zu Werkstätten</param>
+        /// <param name="rohstoffStufe">Rohstoffstufe (1 bis 3) zur Unterteilung auch für die Handelszertifikate und die Lagermenge</param>
+        /// <param name="textQualitaetProduktion">Text, der im Buch auftaucht, wenn die Ware produziert wurde, z.B. Eure Getreideernte verlief {0}</param>
+        /// <param name="lagermengeProQMeter">OPTIONAL: Gibt an, wie viel auf einem Qudaratmeter Lagerplatz gelagert werden können 
         /// (standardmäßig abhängig von der Stufe: 1 = 10, 2 = 6, 3 = 3)</param>
-        public Rohstoff(int PreisMin, int PreisStd, int PreisMax, string Name, string Produktionstext, int WSverhaeltnisArbeiter,
-                        int WSverhaeltnisWS, int RohStufe, string TextQualitaetProduktion, int LagermengeProQMeter = 10)
+        public Rohstoff(int preisMin, int preisStd, int preisMax, string name, string produktionstext, int werkstattVerhaeltnisArbeiter,
+                        int wekstattVerhaeltnisWerkstatt, int rohstoffStufe, string textQualitaetProduktion, int lagermengeProQMeter = 10)
         {
-            _preisMin = PreisMin;
-            _preisStd = PreisStd;
-            _preisMax = PreisMax;
+            _preisMin = preisMin;
+            _preisStd = preisStd;
+            _preisMax = preisMax;
 
-            _name = Name;
-            _rohStufe = RohStufe;
+            _name = name;
+            _rohStufe = rohstoffStufe;
 
-            _produktionstext = Produktionstext;
+            _produktionstext = produktionstext;
 
-            _WSverhaeltnisArbeiter = WSverhaeltnisArbeiter;
-            _WSverhaeltnisWS = WSverhaeltnisWS;
+            _WSverhaeltnisArbeiter = werkstattVerhaeltnisArbeiter;
+            _WSverhaeltnisWS = wekstattVerhaeltnisWerkstatt;
 
             int wsgp = 40;
 
@@ -59,8 +59,8 @@ namespace Conspiratio.Lib.Gameplay.Rohstoffe
             _WSEinzelpreis = wsgp * _WSverhaeltnisArbeiter * _WSverhaeltnisWS;
             _WSArbeiterpreis = 50;
 
-            _textQualitaetProduktion = TextQualitaetProduktion;
-            _lagermengeProQMeter = LagermengeProQMeter;
+            _textQualitaetProduktion = textQualitaetProduktion;
+            _lagermengeProQMeter = lagermengeProQMeter;
 
             if (_rohStufe >= 3)
             {
