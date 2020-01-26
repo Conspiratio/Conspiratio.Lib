@@ -82,6 +82,12 @@
     <Compile Include="Gameplay\Aemter\AmtWachkommandant.cs" />
     <Compile Include="Gameplay\Aemter\AmtZoellner.cs" />
     <Compile Include="Gameplay\Aemter\AmtZollmeister.cs" />
+    <Compile Include="Gameplay\Ereignisse\Datumsereignis.cs" />
+    <Compile Include="Gameplay\Ereignisse\EnumGueltigkeitReligion.cs" />
+    <Compile Include="Gameplay\Ereignisse\Ereigniszeitpunkt.cs" />
+    <Compile Include="Gameplay\Ereignisse\IDatumsereignis.cs" />
+    <Compile Include="Gameplay\Ereignisse\IZufallsereignis.cs" />
+    <Compile Include="Gameplay\Ereignisse\Zufallsereignis.cs" />
     <Compile Include="Gameplay\Gebiete\Gebiet.cs" />
     <Compile Include="Gameplay\Hinterzimmer\AktiveSabotagen.cs" />
     <Compile Include="Gameplay\Hinterzimmer\AktiveSpionagen.cs" />
