@@ -89,8 +89,11 @@
     <Compile Include="Gameplay\Ereignisse\IZufallsereignis.cs" />
     <Compile Include="Gameplay\Ereignisse\Zufallsereignis.cs" />
     <Compile Include="Gameplay\Gebiete\Gebiet.cs" />
+    <Compile Include="Gameplay\Gebiete\Land.cs" />
+    <Compile Include="Gameplay\Gebiete\Reich.cs" />
     <Compile Include="Gameplay\Hinterzimmer\AktiveSabotagen.cs" />
     <Compile Include="Gameplay\Hinterzimmer\AktiveSpionagen.cs" />
+    <Compile Include="Gameplay\Justiz\Gerichtsverhandlung.cs" />
     <Compile Include="Gameplay\Justiz\IStrafe.cs" />
     <Compile Include="Gameplay\Justiz\Strafe.cs" />
     <Compile Include="Gameplay\Kampf\Einheiten\Einheit.cs" />
@@ -104,6 +107,9 @@
     <Compile Include="Gameplay\Kirche\Werbegeschenk.cs" />
     <Compile Include="Gameplay\Niederlassung\EnumProduktionsslotAktionsart.cs" />
     <Compile Include="Gameplay\Niederlassung\Karawane.cs" />
+    <Compile Include="Gameplay\Personen\Kind.cs" />
+    <Compile Include="Gameplay\Personen\SpielerStatistik.cs" />
+    <Compile Include="Gameplay\Privilegien\Amtsenthebung.cs" />
     <Compile Include="Gameplay\Privilegien\FestGeben\EnumFestGroesse.cs" />
     <Compile Include="Gameplay\Privilegien\FestGeben\EnumFestMusiker.cs" />
     <Compile Include="Gameplay\Privilegien\FestGeben\Fest.cs" />
