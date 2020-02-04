@@ -116,6 +116,8 @@
     <Compile Include="Gameplay\Privilegien\IPrivileg.cs" />
     <Compile Include="Gameplay\Privilegien\Privileg.cs" />
     <Compile Include="Gameplay\Rohstoffe\Rohstoff.cs" />
+    <Compile Include="Gameplay\Schreibstube\AmtsInfo.cs" />
+    <Compile Include="Gameplay\Schreibstube\Kredit.cs" />
     <Compile Include="Gameplay\Titel\Baron.cs" />
     <Compile Include="Gameplay\Titel\Buerger.cs" />
     <Compile Include="Gameplay\Titel\Edelmann.cs" />
