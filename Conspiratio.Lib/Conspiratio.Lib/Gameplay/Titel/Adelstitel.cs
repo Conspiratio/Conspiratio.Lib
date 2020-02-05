@@ -1,6 +1,6 @@
 ﻿namespace Conspiratio.Lib.Gameplay.Titel
 {
-    public class Titel
+    public class Adelstitel
     {
         /// <summary>
         /// Rang des Titels (Reihenfolge), startet bei 0 für den ersten Titel.
@@ -22,7 +22,7 @@
         /// </summary>
         public int BonusAnsehen { get; }
 
-        public Titel(int id, string nameMaennlich, string nameWeiblich, int bonusAnsehen)
+        public Adelstitel(int id, string nameMaennlich, string nameWeiblich, int bonusAnsehen)
         {
             ID = id;
             NameMaennlich = nameMaennlich;

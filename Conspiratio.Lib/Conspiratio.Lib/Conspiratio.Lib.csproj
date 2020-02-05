@@ -118,6 +118,8 @@
     <Compile Include="Gameplay\Rohstoffe\Rohstoff.cs" />
     <Compile Include="Gameplay\Schreibstube\AmtsInfo.cs" />
     <Compile Include="Gameplay\Schreibstube\Kredit.cs" />
+    <Compile Include="Gameplay\Spielwelt\SW.cs" />
+    <Compile Include="Gameplay\Spielwelt\StatischeSpieldaten.cs" />
     <Compile Include="Gameplay\Titel\Baron.cs" />
     <Compile Include="Gameplay\Titel\Buerger.cs" />
     <Compile Include="Gameplay\Titel\Edelmann.cs" />
@@ -128,7 +130,7 @@
     <Compile Include="Gameplay\Titel\Herzog.cs" />
     <Compile Include="Gameplay\Titel\Landherr.cs" />
     <Compile Include="Gameplay\Titel\Ritter.cs" />
-    <Compile Include="Gameplay\Titel\Titel.cs" />
+    <Compile Include="Gameplay\Titel\Adelstitel.cs" />
     <Compile Include="Gameplay\Wohnsitz\Haus.cs" />
     <Compile Include="Gameplay\Wohnsitz\HausErweiterung.cs" />
     <Compile Include="Gameplay\Wohnsitz\HausZustandsbezeichnung.cs" />
