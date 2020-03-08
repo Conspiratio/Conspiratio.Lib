@@ -118,6 +118,7 @@
     <Compile Include="Gameplay\Rohstoffe\Rohstoff.cs" />
     <Compile Include="Gameplay\Schreibstube\AmtsInfo.cs" />
     <Compile Include="Gameplay\Schreibstube\Kredit.cs" />
+    <Compile Include="Gameplay\Schreibstube\WahlAbhalten.cs" />
     <Compile Include="Gameplay\Spielwelt\SW.cs" />
     <Compile Include="Gameplay\Spielwelt\StatischeSpieldaten.cs" />
     <Compile Include="Gameplay\Titel\Baron.cs" />
