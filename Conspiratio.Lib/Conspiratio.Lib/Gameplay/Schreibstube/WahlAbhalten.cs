@@ -14,7 +14,7 @@ namespace Conspiratio.Lib.Gameplay.Schreibstube
         public int Waehler2 { get; set; }
         public int Waehler3 { get; set; }
 
-        public int[] Kandidaten { get; set; } = new int[SW.Statisch.GetMaxWahlKandidaten()];
+        public int[] Kandidaten { get; set; }
 
         public WahlAbhalten(int amtID, int gebietID, int stufe, int waehler1, int waehler2, int waehler3)
         {

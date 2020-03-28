@@ -135,7 +135,6 @@
     <Compile Include="Gameplay\Wohnsitz\Haus.cs" />
     <Compile Include="Gameplay\Wohnsitz\HausErweiterung.cs" />
     <Compile Include="Gameplay\Wohnsitz\HausZustandsbezeichnung.cs" />
-    <Compile Include="Gameplay\Wohnsitz\SpHatHaus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
