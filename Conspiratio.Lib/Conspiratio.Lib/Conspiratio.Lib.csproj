@@ -107,6 +107,7 @@
     <Compile Include="Gameplay\Kirche\Werbegeschenk.cs" />
     <Compile Include="Gameplay\Niederlassung\EnumProduktionsslotAktionsart.cs" />
     <Compile Include="Gameplay\Niederlassung\Karawane.cs" />
+    <Compile Include="Gameplay\Niederlassung\SpHatWerkstaetten.cs" />
     <Compile Include="Gameplay\Personen\Kind.cs" />
     <Compile Include="Gameplay\Personen\SpielerStatistik.cs" />
     <Compile Include="Gameplay\Privilegien\Amtsenthebung.cs" />
