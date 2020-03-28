@@ -82,10 +82,20 @@
     <Compile Include="Gameplay\Aemter\AmtWachkommandant.cs" />
     <Compile Include="Gameplay\Aemter\AmtZoellner.cs" />
     <Compile Include="Gameplay\Aemter\AmtZollmeister.cs" />
+    <Compile Include="Gameplay\Ereignisse\Datumsereignis.cs" />
+    <Compile Include="Gameplay\Ereignisse\EnumGueltigkeitReligion.cs" />
+    <Compile Include="Gameplay\Ereignisse\Ereigniszeitpunkt.cs" />
+    <Compile Include="Gameplay\Ereignisse\IDatumsereignis.cs" />
+    <Compile Include="Gameplay\Ereignisse\IZufallsereignis.cs" />
+    <Compile Include="Gameplay\Ereignisse\Zufallsereignis.cs" />
     <Compile Include="Gameplay\Gebiete\Gebiet.cs" />
+    <Compile Include="Gameplay\Gebiete\Land.cs" />
+    <Compile Include="Gameplay\Gebiete\Reich.cs" />
     <Compile Include="Gameplay\Hinterzimmer\AktiveSabotagen.cs" />
     <Compile Include="Gameplay\Hinterzimmer\AktiveSpionagen.cs" />
-    <Compile Include="Gameplay\Justiz\Strafen.cs" />
+    <Compile Include="Gameplay\Justiz\Gerichtsverhandlung.cs" />
+    <Compile Include="Gameplay\Justiz\IStrafe.cs" />
+    <Compile Include="Gameplay\Justiz\Strafe.cs" />
     <Compile Include="Gameplay\Kampf\Einheiten\Einheit.cs" />
     <Compile Include="Gameplay\Kampf\EnumAktionsartRaeuberlager.cs" />
     <Compile Include="Gameplay\Kampf\EnumAktionsartZollburg.cs" />
@@ -97,10 +107,20 @@
     <Compile Include="Gameplay\Kirche\Werbegeschenk.cs" />
     <Compile Include="Gameplay\Niederlassung\EnumProduktionsslotAktionsart.cs" />
     <Compile Include="Gameplay\Niederlassung\Karawane.cs" />
+    <Compile Include="Gameplay\Personen\Kind.cs" />
+    <Compile Include="Gameplay\Personen\SpielerStatistik.cs" />
+    <Compile Include="Gameplay\Privilegien\Amtsenthebung.cs" />
     <Compile Include="Gameplay\Privilegien\FestGeben\EnumFestGroesse.cs" />
     <Compile Include="Gameplay\Privilegien\FestGeben\EnumFestMusiker.cs" />
     <Compile Include="Gameplay\Privilegien\FestGeben\Fest.cs" />
+    <Compile Include="Gameplay\Privilegien\IPrivileg.cs" />
+    <Compile Include="Gameplay\Privilegien\Privileg.cs" />
     <Compile Include="Gameplay\Rohstoffe\Rohstoff.cs" />
+    <Compile Include="Gameplay\Schreibstube\AmtsInfo.cs" />
+    <Compile Include="Gameplay\Schreibstube\Kredit.cs" />
+    <Compile Include="Gameplay\Schreibstube\WahlAbhalten.cs" />
+    <Compile Include="Gameplay\Spielwelt\SW.cs" />
+    <Compile Include="Gameplay\Spielwelt\StatischeSpieldaten.cs" />
     <Compile Include="Gameplay\Titel\Baron.cs" />
     <Compile Include="Gameplay\Titel\Buerger.cs" />
     <Compile Include="Gameplay\Titel\Edelmann.cs" />
@@ -111,10 +131,11 @@
     <Compile Include="Gameplay\Titel\Herzog.cs" />
     <Compile Include="Gameplay\Titel\Landherr.cs" />
     <Compile Include="Gameplay\Titel\Ritter.cs" />
-    <Compile Include="Gameplay\Titel\Titel.cs" />
+    <Compile Include="Gameplay\Titel\Adelstitel.cs" />
     <Compile Include="Gameplay\Wohnsitz\Haus.cs" />
     <Compile Include="Gameplay\Wohnsitz\HausErweiterung.cs" />
     <Compile Include="Gameplay\Wohnsitz\HausZustandsbezeichnung.cs" />
+    <Compile Include="Gameplay\Wohnsitz\SpHatHaus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
