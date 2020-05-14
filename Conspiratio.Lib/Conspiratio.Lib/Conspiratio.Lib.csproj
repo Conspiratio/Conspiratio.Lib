@@ -33,6 +33,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -41,6 +42,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Allgemein\IJaNeinFrage.cs" />
+    <Compile Include="Allgemein\UIHelper.cs" />
     <Compile Include="Extensions\IntExtension.cs" />
     <Compile Include="Gameplay\Aemter\Amt.cs" />
     <Compile Include="Gameplay\Aemter\AmtAbt.cs" />
@@ -139,8 +142,6 @@
     <Compile Include="Gameplay\Wohnsitz\SpHatHaus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Allgemein\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
