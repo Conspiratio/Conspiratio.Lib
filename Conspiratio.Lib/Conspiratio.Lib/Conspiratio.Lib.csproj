@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Allgemein\IJaNeinFrage.cs" />
+    <Compile Include="Allgemein\ITextAnzeigen.cs" />
     <Compile Include="Allgemein\UIHelper.cs" />
     <Compile Include="Extensions\IntExtension.cs" />
     <Compile Include="Gameplay\Aemter\Amt.cs" />

@@ -4,9 +4,12 @@
     {
         public IJaNeinFrage JaNeinFrage { get; private set; }
 
-        public void Initialisieren(IJaNeinFrage jaNeinFrage)
+        public ITextAnzeigen TextAnzeigen { get; private set; }
+
+        public void Initialisieren(IJaNeinFrage jaNeinFrage, ITextAnzeigen textAnzeigen)
         {
             JaNeinFrage = jaNeinFrage;
+            TextAnzeigen = textAnzeigen;
         }
     }
 }
