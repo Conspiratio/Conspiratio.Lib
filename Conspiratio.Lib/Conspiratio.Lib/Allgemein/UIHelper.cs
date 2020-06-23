@@ -6,10 +6,13 @@
 
         public ITextAnzeigen TextAnzeigen { get; private set; }
 
-        public void Initialisieren(IJaNeinFrage jaNeinFrage, ITextAnzeigen textAnzeigen)
+        public IBeziehungPflegen BeziehungPflegen { get; private set; }
+
+        public void Initialisieren(IJaNeinFrage jaNeinFrage, ITextAnzeigen textAnzeigen, IBeziehungPflegen beziehungPflegen)
         {
             JaNeinFrage = jaNeinFrage;
             TextAnzeigen = textAnzeigen;
+            BeziehungPflegen = beziehungPflegen;
         }
     }
 }

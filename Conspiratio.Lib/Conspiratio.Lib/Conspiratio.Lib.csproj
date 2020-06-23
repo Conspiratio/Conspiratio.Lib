@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Allgemein\IBeziehungPflegen.cs" />
     <Compile Include="Allgemein\IJaNeinFrage.cs" />
     <Compile Include="Allgemein\ITextAnzeigen.cs" />
     <Compile Include="Allgemein\UIHelper.cs" />
