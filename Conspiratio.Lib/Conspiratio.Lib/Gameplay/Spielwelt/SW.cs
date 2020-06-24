@@ -8,6 +8,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
     public static class SW
     {
         private static StatischeSpieldaten _statisch = null;
+        private static DynamischeSpieldaten _dynamisch = null;
         private static UIHelper _uiHelper = null;
 
         public static StatischeSpieldaten Statisch
@@ -18,6 +19,17 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
                     _statisch = new StatischeSpieldaten();
 
                 return _statisch;
+            }
+        }
+
+        public static DynamischeSpieldaten Dynamisch
+        {
+            get
+            {
+                if (_dynamisch == null)
+                    _dynamisch = new DynamischeSpieldaten();
+
+                return _dynamisch;
             }
         }
 
