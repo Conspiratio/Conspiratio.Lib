@@ -102,12 +102,16 @@
     <Compile Include="Gameplay\Justiz\Gerichtsverhandlung.cs" />
     <Compile Include="Gameplay\Justiz\IStrafe.cs" />
     <Compile Include="Gameplay\Justiz\Strafe.cs" />
+    <Compile Include="Gameplay\Justiz\StrafeGeldstrafe.cs" />
+    <Compile Include="Gameplay\Justiz\StrafeKerker.cs" />
+    <Compile Include="Gameplay\Justiz\StrafePranger.cs" />
     <Compile Include="Gameplay\Kampf\Einheiten\Einheit.cs" />
     <Compile Include="Gameplay\Kampf\EnumAktionsartRaeuberlager.cs" />
     <Compile Include="Gameplay\Kampf\EnumAktionsartZollburg.cs" />
     <Compile Include="Gameplay\Kampf\EnumKampfArt.cs" />
     <Compile Include="Gameplay\Kampf\EnumStuetzpunktArt.cs" />
     <Compile Include="Gameplay\Kampf\Kampf.cs" />
+    <Compile Include="Gameplay\Kampf\Kampfberechnung.cs" />
     <Compile Include="Gameplay\Kampf\KampfErgebnis.cs" />
     <Compile Include="Gameplay\Kampf\KampfKarawane.cs" />
     <Compile Include="Gameplay\Kampf\Landsicherheit.cs" />
@@ -139,6 +143,7 @@
     <Compile Include="Gameplay\Privilegien\FestGeben\EnumFestGroesse.cs" />
     <Compile Include="Gameplay\Privilegien\FestGeben\EnumFestMusiker.cs" />
     <Compile Include="Gameplay\Privilegien\FestGeben\Fest.cs" />
+    <Compile Include="Gameplay\Privilegien\FestGeben\FestManager.cs" />
     <Compile Include="Gameplay\Privilegien\IPrivileg.cs" />
     <Compile Include="Gameplay\Privilegien\Privileg.cs" />
     <Compile Include="Gameplay\Rohstoffe\Rohstoff.cs" />
@@ -146,6 +151,7 @@
     <Compile Include="Gameplay\Schreibstube\Kredit.cs" />
     <Compile Include="Gameplay\Schreibstube\WahlAbhalten.cs" />
     <Compile Include="Gameplay\Spielwelt\DynamischeSpieldaten.cs" />
+    <Compile Include="Gameplay\Spielwelt\EnumProzentwertArt.cs" />
     <Compile Include="Gameplay\Spielwelt\Spielstand.cs" />
     <Compile Include="Gameplay\Spielwelt\SW.cs" />
     <Compile Include="Gameplay\Spielwelt\StatischeSpieldaten.cs" />
