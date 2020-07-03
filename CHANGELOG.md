@@ -1,5 +1,13 @@
 # Changelog Conspiratio
 
+## Unreleased
+
+### Änderungen
+- .NET Framework 4.6.2 ist nun Voraussetzung für Conspiratio (vorher 4.5)
+
+### Korrekturen
+- Bei Zollburgen oder Räuberlagern, die im Besitz eines menschlichen Spielers sind, wird der Name des Besitzers nun immer korrekt im "Kaufen"-Fenster des Stützpunktes angezeigt. Vorher wurde hier immer der Spieler angezeigt, der gerade an der Reihe war.
+
 ## 1.4.2 - 24.12.2019
 
 ### Erweiterungen
