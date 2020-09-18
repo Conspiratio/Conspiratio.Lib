@@ -649,7 +649,7 @@ namespace Conspiratio.Lib.Gameplay.Personen
         #endregion
 
         #region HandelszertifikatVerleihen
-        private void HandelszertifikatVerleihen(int anzahlRohstoffrechte, int minRohID, int maxRohID)
+        public void HandelszertifikatVerleihen(int anzahlRohstoffrechte, int minRohID, int maxRohID)
         {
             int aktuelleAnzahlRohstoffrechte = 0;
             // Rohstoffrecht verleihen
@@ -675,6 +675,30 @@ namespace Conspiratio.Lib.Gameplay.Personen
                 SetRohstoffrechteXZuY(neuesRecht, true);
                 SetBekamHandelszertifikatX(neuesRecht);
             }
+        }
+        #endregion
+
+        #region DarfWaisenkindAdoptieren
+        public bool DarfWaisenkindAdoptieren()
+        {
+            // TODO
+            return false;
+        }
+        #endregion
+
+        #region WaisenkindAdoptieren
+        public void WaisenkindAdoptieren()
+        {
+            // TODO
+            
+        }
+        #endregion
+
+        #region ErmittlePreisWaisenkindAdoptieren
+        public int ErmittlePreisWaisenkindAdoptieren()
+        {
+            // TODO
+            return 0;
         }
         #endregion
     }
