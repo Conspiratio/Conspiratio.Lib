@@ -771,6 +771,26 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
 
             Wahlen[x].SetKandidaten(k);
         }
+
+        public void KIsVonWahlenAbmelden()
+        {
+            // Alle KIs sollen nicht mehr an Wahlen teilnehmen
+            for (int i = SW.Statisch.GetMinKIID(); i < SW.Statisch.GetMaxKIID(); i++)
+            {
+                GetKIwithID(i).SetNimmtAnWahlTeil(false);
+            }
+        }
+
+        public void KlagenAbgewickelt()
+        {
+            // Alle Klagen usw. sollen abgewickelt sein
+            for (int i = 1; i <= GetAktivSpielerAnzahl(); i++)
+            {
+                GetHumWithID(i).SetWirdBereitsVerklagt(false);
+                GetHumWithID(i).SetKlagtSpielerMitIDXAn(0);
+                GetHumWithID(i).SetHenkersHand(false);
+            }
+        }
         #endregion
 
         #region Public Getter (einzeilig)

@@ -610,5 +610,72 @@ namespace Conspiratio.Lib.Gameplay.Personen
             return firstStadtIDMitWohnsitz;
         }
         #endregion
+
+        #region VersuchHandelszertifikatVerleihen
+        public void VersuchHandelszertifikatVerleihen()
+        {
+            // Falls nicht schon eines diese Runde verliehen wird
+            if (GetBekamHandeslzertifikatX() == 0)
+            {
+                int handzert = 0;
+
+                // Handelszertifikate zählen
+                for (int i = 1; i < SW.Statisch.GetMaxRohID(); i++)
+                {
+                    if (GetRohstoffrechteX(i))
+                    {
+                        handzert++;
+                    }
+                }
+
+                // Falls er bereits 2 Rohstoffe besaß
+                if (handzert >= 2)
+                {
+                    if (GetTaler() >= 1000000)
+                    {
+                        HandelszertifikatVerleihen(5, 15, SW.Statisch.GetMaxRohID());
+                    }
+                    else if (GetTaler() >= 500000)
+                    {
+                        HandelszertifikatVerleihen(4, 8, 19);
+                    }
+                    else if (GetTaler() >= 100000)
+                    {
+                        HandelszertifikatVerleihen(3, 8, 15);
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region HandelszertifikatVerleihen
+        private void HandelszertifikatVerleihen(int anzahlRohstoffrechte, int minRohID, int maxRohID)
+        {
+            int aktuelleAnzahlRohstoffrechte = 0;
+            // Rohstoffrecht verleihen
+            for (int i = 1; i < SW.Statisch.GetMaxRohID(); i++)
+            {
+                if (GetRohstoffrechteX(i))
+                {
+                    aktuelleAnzahlRohstoffrechte++;
+                }
+            }
+
+            // Wenn der Spieler weniger als x Rechte besitzt, bekommt er ein neues verliehen
+            if (aktuelleAnzahlRohstoffrechte < anzahlRohstoffrechte)
+            {
+                int neuesRecht = SW.Statisch.Rnd.Next(minRohID, maxRohID);
+
+                // Solange der Spieler das neue Recht aber schon hat, soll ein anderes gewählt werden
+                while (GetRohstoffrechteX(neuesRecht) == true)
+                {
+                    neuesRecht = SW.Statisch.Rnd.Next(minRohID, maxRohID);
+                }
+
+                SetRohstoffrechteXZuY(neuesRecht, true);
+                SetBekamHandelszertifikatX(neuesRecht);
+            }
+        }
+        #endregion
     }
 }
