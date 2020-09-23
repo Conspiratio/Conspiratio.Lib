@@ -119,10 +119,10 @@ namespace Conspiratio.Lib.Gameplay.Personen
 
         public int SetStadtRohstoffAnzahl(int stadtID, int rohID, int anzahl)
         {
-            int anzahlMoeglich = 0;
             int belegterLagerplatz = SW.Dynamisch.GetRohstoffwithID(rohID).ErmittleBenoetigtenLagerplatz(_hatInStadtXMengeYRohstoffe[stadtID, rohID]);
             int verfuegbarerLagerplatz = ErmittleLagerplatzInStadt(stadtID, rohID);
             int benoetigterLagerplatz = SW.Dynamisch.GetRohstoffwithID(rohID).ErmittleBenoetigtenLagerplatz(anzahl);
+            int anzahlMoeglich;
 
             if (benoetigterLagerplatz > verfuegbarerLagerplatz)  // Kein ausreichender Lagerplatz?
             {
@@ -675,6 +675,39 @@ namespace Conspiratio.Lib.Gameplay.Personen
                 SetRohstoffrechteXZuY(neuesRecht, true);
                 SetBekamHandelszertifikatX(neuesRecht);
             }
+        }
+        #endregion
+
+        #region AnsehenAktualisieren
+        public void AnsehenAktualisieren()
+        {
+            int perm_ans = GetPermaAnsehen();
+            int ans_plus = 0;
+
+            // Geldansehen
+            ans_plus += Convert.ToInt32(GetTaler() / SW.Statisch.GetAnsehenProTaler());
+
+            // Amtansehen
+            int amt_id = GetAmtID();
+            if (amt_id != 0)
+            {
+                ans_plus += SW.Statisch.GetAmtwithID(amt_id).GetBonusAnsehen();
+            }
+
+            // Häuser Ansehen
+            for (int i = 1; i < SW.Statisch.GetMaxStadtID(); i++)
+            {
+                if (GetSpielerHatHausVonStadtAnArraystelle(i).GetHausID() != 0 &&
+                    GetSpielerHatHausVonStadtAnArraystelle(i).GetStadtID() != 0)   // Haus vorhanden?
+                {
+                    ans_plus += GetSpielerHatHausVonStadtAnArraystelle(i).GetAnsehensbonus();
+
+                    // Gesundheit berücksichtigen
+                    ErhoeheGesundheit(GetSpielerHatHausVonStadtAnArraystelle(i).GetGesundheitsbonus());
+                }
+            }
+
+            SetAnsehen(perm_ans + ans_plus);
         }
         #endregion
 
