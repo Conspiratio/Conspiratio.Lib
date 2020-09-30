@@ -100,7 +100,7 @@ namespace Conspiratio.Lib.Gameplay.Personen
 
             // Kinder anlegen
             for (int i = 1; i < SW.Statisch.GetMaxKinderAnzahl(); i++)
-                _kinder[i] = new Kind(false, ""); 
+                _kinder[i] = new Kind(false, "", 0); 
 
             // Werkstätten anlegen
             for (int i = 0; i < SW.Statisch.GetMaxStadtID(); i++)
@@ -419,6 +419,7 @@ namespace Conspiratio.Lib.Gameplay.Personen
             _kinder[x].SetName(name);
             _kinder[x].SetMaennlich(maennlich);
             _kinder[x].SetAlter(0);
+            _kinder[x].Geburtsjahr = SW.Dynamisch.GetAktuellesJahr();
         }
 
         public void KinderAltern()

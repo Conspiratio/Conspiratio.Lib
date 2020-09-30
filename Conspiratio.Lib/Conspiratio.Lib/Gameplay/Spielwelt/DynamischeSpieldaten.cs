@@ -1989,6 +1989,20 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         }
         #endregion
 
+        #region ProdVerhaeltnisAnzeigen
+        public void ProdVerhaeltnisAnzeigen(int stadtID, int slot)
+        {
+            if (GetHumWithID(GetAktiverSpieler()).GetProduktionsslot(stadtID, slot).GetTaetigkeit() == 1)
+            {
+                int rohid = GetHumWithID(GetAktiverSpieler()).GetProduktionsslot(stadtID, slot).GetProduktionRohstoff();
+                int arbeiter = GetRohstoffwithID(rohid).GetArbeiter();
+                int werkst = GetRohstoffwithID(rohid).GetWerkstaetten();
+
+                BelTextAnzeigen("Das Produktionsverhältnis zwischen Arbeitern und Werkstätten bei " + GetRohstoffwithID(rohid).GetRohName() + " ist " + arbeiter.ToString() + " zu " + werkst.ToString());
+            }
+        }
+        #endregion
+
         // Private Methoden
         #region GetLeereWahlID
         private int GetLeereWahlID()
