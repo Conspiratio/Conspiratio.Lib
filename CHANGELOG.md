@@ -7,6 +7,7 @@
 
 ### Änderungen
 - .NET Framework 4.6.2 ist nun Voraussetzung für Conspiratio (vorher 4.5)
+- Die Chance der Geburts eines Kindes wurde leicht erhöht
 
 ### Korrekturen
 - Bei Zollburgen oder Räuberlagern, die im Besitz eines menschlichen Spielers sind, wird der Name des Besitzers nun immer korrekt im "Kaufen"-Fenster des Stützpunktes angezeigt. Vorher wurde hier immer der Spieler angezeigt, der gerade an der Reihe war.
