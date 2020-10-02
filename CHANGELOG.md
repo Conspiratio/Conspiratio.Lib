@@ -2,8 +2,12 @@
 
 ## Unreleased
 
+### Erweiterungen
+- Neue Aktion in der Kirche für "Waisenkind adoptieren" hinzugefügt. Damit kann mithilfe einer großzügigen Spende ein Mündel adoptiert werden, sofern man selbst noch kein Kind hat. Damit soll das frustrierende und unvermeidliche Spielende bei plötzlichem Kindstod und anschließendem Tod des Spielercharakters verhindert werden.
+
 ### Änderungen
 - .NET Framework 4.6.2 ist nun Voraussetzung für Conspiratio (vorher 4.5)
+- Die Chance der Geburts eines Kindes wurde leicht erhöht
 
 ### Korrekturen
 - Bei Zollburgen oder Räuberlagern, die im Besitz eines menschlichen Spielers sind, wird der Name des Besitzers nun immer korrekt im "Kaufen"-Fenster des Stützpunktes angezeigt. Vorher wurde hier immer der Spieler angezeigt, der gerade an der Reihe war.

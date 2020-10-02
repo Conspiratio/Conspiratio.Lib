@@ -7,14 +7,15 @@ namespace Conspiratio.Lib.Gameplay.Personen
     {
         private bool _maennlich;
         private int _alter;
-        private string _name;
-        // Ob ein Kind an einem Slot auch existiert wird überprüft ob der name != "" ist
+        private string _name;  // Ob ein Kind an einem Slot auch existiert wird überprüft ob der name != "" ist
+        public int Geburtsjahr { get; set; }
 
-        public Kind(bool maennlich, string name)
+        public Kind(bool maennlich, string name, int geburtsjahr)
         {
             _alter = 0;
             _maennlich = maennlich;
             _name = name;
+            Geburtsjahr = geburtsjahr;
         }
 
         public string GetKindName()

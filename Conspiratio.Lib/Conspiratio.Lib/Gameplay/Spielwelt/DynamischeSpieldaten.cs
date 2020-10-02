@@ -771,6 +771,26 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
 
             Wahlen[x].SetKandidaten(k);
         }
+
+        public void KIsVonWahlenAbmelden()
+        {
+            // Alle KIs sollen nicht mehr an Wahlen teilnehmen
+            for (int i = SW.Statisch.GetMinKIID(); i < SW.Statisch.GetMaxKIID(); i++)
+            {
+                GetKIwithID(i).SetNimmtAnWahlTeil(false);
+            }
+        }
+
+        public void KlagenAbgewickelt()
+        {
+            // Alle Klagen usw. sollen abgewickelt sein
+            for (int i = 1; i <= GetAktivSpielerAnzahl(); i++)
+            {
+                GetHumWithID(i).SetWirdBereitsVerklagt(false);
+                GetHumWithID(i).SetKlagtSpielerMitIDXAn(0);
+                GetHumWithID(i).SetHenkersHand(false);
+            }
+        }
         #endregion
 
         #region Public Getter (einzeilig)
@@ -1687,38 +1707,334 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         }
         #endregion
 
-        // Private Methoden
-        #region GetLeereWahlID
-        private int GetLeereWahlID()
+        #region RundenBestechungenAbwickeln
+        public void RundenBestechungenAbwickeln()
         {
-            for (int i = 1; i < SW.Statisch.GetMaxAnzahlWahlen(); i++)
+            for (int i = 1; i <= GetAktivSpielerAnzahl(); i++)
             {
-                if (Wahlen[i].Waehler1 == 0 &&
-                    Wahlen[i].Waehler2 == 0 &&
-                    Wahlen[i].Waehler3 == 0 &&
-                    Wahlen[i].GetKandidaten()[0] == 0 &&
-                    Wahlen[i].GetKandidaten()[1] == 0 &&
-                    Wahlen[i].GetKandidaten()[2] == 0 &&
-                    Wahlen[i].GetKandidaten()[3] == 0 &&
-                    Wahlen[i].GetKandidaten()[4] == 0 &&
-                    Wahlen[i].GetKandidaten()[5] == 0 &&
-                    Wahlen[i].GetKandidaten()[6] == 0 &&
-                    Wahlen[i].GetKandidaten()[7] == 0 &&
-                    Wahlen[i].GetKandidaten()[8] == 0 &&
-                    Wahlen[i].GetKandidaten()[9] == 0 &&
-                    Wahlen[i].GetKandidaten()[10] == 0 &&
-                    Wahlen[i].AmtID == 0 &&
-                    Wahlen[i].GebietID == 0 &&
-                    Wahlen[i].Stufe == 0)
+                for (int j = 1; j < SW.Statisch.GetMaxKIID(); j++)
                 {
-                    return i;
+                    if (GetHumWithID(i).GetBestechungVonSpielerMitIDX(j) != 0)
+                    {
+                        int summe = GetHumWithID(i).GetBestechungVonSpielerMitIDX(j);
+
+                        if (j >= SW.Statisch.GetMinKIID())
+                        {
+                            // Wenn eine KI Geld bekommen sollte
+                            int oamtid = GetKIwithID(j).GetAmtID();
+                            int oamtstufe = 0;
+
+                            if (oamtid != 0)
+                            {
+                                oamtstufe = SW.Statisch.GetAmtwithID(oamtid).GetAmtsStufe();
+                            }
+
+                            int produkt;
+                            if (oamtstufe > 0)
+                            {
+                                produkt = summe / (oamtstufe * 2);
+                            }
+                            else
+                            {
+                                produkt = summe;
+                            }
+
+                            if (oamtstufe > 5)
+                            {
+                                produkt = produkt / 2;
+                            }
+
+                            if (oamtstufe > 10)
+                            {
+                                produkt = produkt / 2;
+                            }
+
+                            int verbesserung = Convert.ToInt32(produkt / 10);
+
+                            GetKIwithID(j).ErhoeheBeziehungZuX(i, verbesserung);
+                        }
+
+                        GetHumWithID(i).SetBestechungVonSpielerMitIDXAufY(i, 0);
+                        GetSpWithID(j).ErhoeheTaler(summe);
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region DeliktpunkteBerechnen
+        public void DeliktpunkteBerechnen()
+        {
+            for (int i = 1; i <= GetAktivSpielerAnzahl(); i++)
+            {
+                int value = 0;
+                var spieler = GetHumWithID(i);
+
+                value += spieler.GetBegingVerbrechenX(22) * 1;
+                value += spieler.GetBegingVerbrechenX(1) * 2;
+                value += spieler.GetBegingVerbrechenX(23) * 5;
+                value += spieler.GetBegingVerbrechenX(21) * 2;
+                value += spieler.GetBegingVerbrechenX(20) * 2;
+
+                spieler.SetDeliktpunkte(value);
+            }
+        }
+        #endregion
+
+        #region KIAktionenDurchfuehren
+        public void KIAktionenDurchfuehren()
+        {
+            // Jede KI
+            for (int i = SW.Statisch.GetMinKIID(); i < SW.Statisch.GetMaxKIID(); i++)
+            {
+                // Altern
+                GetSpWithID(i).AlterPlusEins();
+
+                // Gesundheit random etwas ändern
+                int rand_nr = SW.Statisch.Rnd.Next(-5, 6);
+                GetSpWithID(i).ErhoeheGesundheit(rand_nr);
+
+                // Neue Deliktpunkte
+                int boese = GetKIwithID(i).GetBosheit();
+                int rndneuerpunkt = SW.Statisch.Rnd.Next(0, 100);
+                int rndplus = SW.Statisch.Rnd.Next(1, 4);
+                if (rndneuerpunkt < boese)
+                {
+                    GetKIwithID(i).SetDeliktpunkte(GetKIwithID(i).GetDeliktpunkte() + rndplus);
+                }
+                else
+                {
+                    GetKIwithID(i).SetDeliktpunkte(GetKIwithID(i).GetDeliktpunkte() - 1);
+                }
+
+                // Verfall
+                int rndverfall = SW.Statisch.Rnd.Next(0, 10); // Damit kann eine KI nie mehr als 20 Deliktpunkte haben
+                if (GetKIwithID(i).GetDeliktpunkte() > rndverfall)
+                {
+                    GetKIwithID(i).SetDeliktpunkte(Convert.ToInt32((GetKIwithID(i).GetDeliktpunkte() * 2) / 2));
+                }
+
+                #region Amtsentehungen
+                // Wenn sie zu einem Untergebenen eine schlechte Beziehung hat
+                int[] untergebene = GetUntergebene(i);
+                int u_len = 0;
+
+                int z = 0;
+                while (z < untergebene.Length)
+                {
+                    if (untergebene[z] != 0)
+                    {
+                        u_len++;
+                    }
+                    z++;
+                }
+
+                for (int j = 1; j < u_len; j++)
+                {
+                    if (GetKIwithID(i).GetBeziehungZuKIX(untergebene[j]) < SW.Statisch.GetMaxAbsetzSympathie())
+                    {
+                        // KI fordert Absetzung
+                        SetAmtsenthebungVonID(untergebene[j]);
+                    }
+                }
+                #endregion
+
+                #region Beziehungen schwanken
+                // Bei Spieler soll es abhängig sein vom grad, den sie einen mögen
+                for (int k = 1; k <= GetAktivSpielerAnzahl(); k++)
+                {
+                    int rand;
+                    if (GetKIwithID(i).GetBeziehungZuKIX(k) > 80)
+                    {
+                        rand = SW.Statisch.Rnd.Next(-10, -5);
+                    }
+                    else if (GetKIwithID(i).GetBeziehungZuKIX(k) > 60)
+                    {
+                        rand = SW.Statisch.Rnd.Next(-5, 0);
+                    }
+                    else
+                    {
+                        rand = SW.Statisch.Rnd.Next(-5, 5);
+                    }
+
+                    int jackpot = SW.Statisch.Rnd.Next(0, 400);
+                    if (jackpot == 100)
+                    {
+                        rand += 30;
+                    }
+                    if (jackpot == 200)
+                    {
+                        rand -= 30;
+                    }
+                    if (jackpot == 150)
+                    {
+                        rand += 15;
+                    }
+                    if (jackpot == 250)
+                    {
+                        rand -= 15;
+                    }
+
+                    GetKIwithID(i).ErhoeheBeziehungZuX(k, rand);
+                }
+
+                // KIs unter sich
+                for (int k = SW.Statisch.GetMinKIID(); k < SW.Statisch.GetMaxKIID(); k++)
+                {
+                    int rand = SW.Statisch.Rnd.Next(-5, 6);
+                    int jackpot = SW.Statisch.Rnd.Next(0, 400);
+                    if (jackpot == 100)
+                    {
+                        rand += 30;
+                    }
+                    if (jackpot == 200)
+                    {
+                        rand -= 30;
+                    }
+                    if (jackpot == 150)
+                    {
+                        rand += 15;
+                    }
+                    if (jackpot == 250)
+                    {
+                        rand -= 15;
+                    }
+
+                    GetKIwithID(i).ErhoeheBeziehungZuX(k, rand);
+                }
+                #endregion
+            }
+        }
+        #endregion
+
+        #region KIVerheiraten
+        public void KIVerheiraten()
+        {
+            int[] unverhMaenner = new int[SW.Statisch.GetMaxKIID()];
+            int[] unverhFrauen = new int[SW.Statisch.GetMaxKIID()];
+            int mcounter = 0;
+            int fcounter = 0;
+
+            for (int i = SW.Statisch.GetMinKIID(); i < SW.Statisch.GetMaxKIID(); i++)
+            {
+                if (GetKIwithID(i).GetVerheiratet() == 0)
+                {
+                    if (i < SW.Statisch.GetMaennerFrauenGrenze())
+                    {
+                        unverhMaenner[mcounter] = i;
+                        mcounter++;
+                    }
+                    else
+                    {
+                        unverhFrauen[fcounter] = i;
+                        fcounter++;
+                    }
                 }
             }
 
-            BelTextAnzeigen("Diese Meldung sollte nicht erscheinen können. Bitte melde dich im Forum, am besten mit Savegame. Fehlercode 7");
-            return 700;
+            if (mcounter >= (SW.Statisch.GetMaennerFrauenGrenze() / 2) && fcounter >= ((SW.Statisch.GetMaennerFrauenGrenze() / 2) - 10))
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    VerheirateXundY(unverhMaenner[j], unverhFrauen[j]);
+                }
+            }
         }
         #endregion
+
+        #region BerechneProdKosten
+        public int BerechneProdKosten(int stadtid, int slot0oder1)
+        {
+            #region Produktion
+            if (GetHumWithID(GetAktiverSpieler()).GetProduktionsslot(stadtid, slot0oder1).GetTaetigkeit() == (int)EnumProduktionsslotAktionsart.Produzieren)
+            {
+                int rohid = GetHumWithID(GetAktiverSpieler()).GetProduktionsslot(stadtid, slot0oder1).GetProduktionRohstoff();
+                int arbeiterpreis = GetRohstoffwithID(rohid).GetWSArbeiterpreis();
+                int arbeiterkosten = GetHumWithID(GetAktiverSpieler()).GetProduktionsslot(stadtid, slot0oder1).GetProduktionArbeiter() * arbeiterpreis;  //VERMERK: getAnzahl1 könnte auch setAnzahl1 gewesen sein
+
+                int prodstaettepreis = GetRohstoffwithID(rohid).GetWSEinzelpreis();
+                int prodstaettenkosten = GetHumWithID(GetAktiverSpieler()).GetProduktionsslot(stadtid, slot0oder1).GetProduktionStaetten() * prodstaettepreis;
+
+                return arbeiterkosten + prodstaettenkosten;
+            }
+            #endregion
+
+            #region Verkauf
+            if (GetHumWithID(GetAktiverSpieler()).GetProduktionsslot(stadtid, slot0oder1).GetTaetigkeit() == (int)EnumProduktionsslotAktionsart.Verkaufen || GetHumWithID(GetAktiverSpieler()).GetProduktionsslot(stadtid, slot0oder1).GetTaetigkeit() == (int)EnumProduktionsslotAktionsart.PermanentVerkaufen)
+            {
+                int kara_id = GetHumWithID(GetAktiverSpieler()).GetKarawaneInStadtX(stadtid);
+                int karaPreisPro100Stueck = SW.Statisch.GetKarawane(kara_id).PreisProStueck;
+                int karaGrundPreis = SW.Statisch.GetKarawane(kara_id).Fixpreis;
+
+                int anz_exp = GetHumWithID(GetAktiverSpieler()).GetProduktionsslot(stadtid, slot0oder1).GetVerkaufAnzahl();
+
+                if (anz_exp == 0)
+                {
+                    return 0;
+                }
+
+                int anz_fuhren = 0;
+
+                while (anz_exp > 0)
+                {
+                    anz_fuhren++;
+                    anz_exp -= 100;
+                }
+
+                return Convert.ToInt32(karaGrundPreis + karaPreisPro100Stueck * anz_fuhren);
+            }
+            #endregion
+
+            return 0;
+        }
+        #endregion
+
+        #region ProdVerhaeltnisAnzeigen
+        public void ProdVerhaeltnisAnzeigen(int stadtID, int slot)
+        {
+            if (GetHumWithID(GetAktiverSpieler()).GetProduktionsslot(stadtID, slot).GetTaetigkeit() == 1)
+            {
+                int rohid = GetHumWithID(GetAktiverSpieler()).GetProduktionsslot(stadtID, slot).GetProduktionRohstoff();
+                int arbeiter = GetRohstoffwithID(rohid).GetArbeiter();
+                int werkst = GetRohstoffwithID(rohid).GetWerkstaetten();
+
+                BelTextAnzeigen("Das Produktionsverhältnis zwischen Arbeitern und Werkstätten bei " + GetRohstoffwithID(rohid).GetRohName() + " ist " + arbeiter.ToString() + " zu " + werkst.ToString());
+            }
+        }
+        #endregion
+
+        // Private Methoden
+        #region GetLeereWahlID
+        private int GetLeereWahlID()
+                {
+                    for (int i = 1; i < SW.Statisch.GetMaxAnzahlWahlen(); i++)
+                    {
+                        if (Wahlen[i].Waehler1 == 0 &&
+                            Wahlen[i].Waehler2 == 0 &&
+                            Wahlen[i].Waehler3 == 0 &&
+                            Wahlen[i].GetKandidaten()[0] == 0 &&
+                            Wahlen[i].GetKandidaten()[1] == 0 &&
+                            Wahlen[i].GetKandidaten()[2] == 0 &&
+                            Wahlen[i].GetKandidaten()[3] == 0 &&
+                            Wahlen[i].GetKandidaten()[4] == 0 &&
+                            Wahlen[i].GetKandidaten()[5] == 0 &&
+                            Wahlen[i].GetKandidaten()[6] == 0 &&
+                            Wahlen[i].GetKandidaten()[7] == 0 &&
+                            Wahlen[i].GetKandidaten()[8] == 0 &&
+                            Wahlen[i].GetKandidaten()[9] == 0 &&
+                            Wahlen[i].GetKandidaten()[10] == 0 &&
+                            Wahlen[i].AmtID == 0 &&
+                            Wahlen[i].GebietID == 0 &&
+                            Wahlen[i].Stufe == 0)
+                        {
+                            return i;
+                        }
+                    }
+
+                    BelTextAnzeigen("Diese Meldung sollte nicht erscheinen können. Bitte melde dich im Forum, am besten mit Savegame. Fehlercode 7");
+                    return 700;
+                }
+                #endregion
 
         #region GetLeereAmtsenthebungsID
         private int GetLeereAmtsenthebungsID()

@@ -594,7 +594,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             NeuerSpielerRohwahlkosten = 100;
             NeuerSpielerStadtwahlkosten = 150;
 
-            ChanceFuerKind = 4;
+            ChanceFuerKind = 3;
             ChanceFuerKindStirbt = 10;
 
             StartGold = 1000;

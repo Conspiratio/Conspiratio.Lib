@@ -100,7 +100,7 @@ namespace Conspiratio.Lib.Gameplay.Personen
 
             // Kinder anlegen
             for (int i = 1; i < SW.Statisch.GetMaxKinderAnzahl(); i++)
-                _kinder[i] = new Kind(false, ""); 
+                _kinder[i] = new Kind(false, "", 0); 
 
             // Werkstätten anlegen
             for (int i = 0; i < SW.Statisch.GetMaxStadtID(); i++)
@@ -119,10 +119,10 @@ namespace Conspiratio.Lib.Gameplay.Personen
 
         public int SetStadtRohstoffAnzahl(int stadtID, int rohID, int anzahl)
         {
-            int anzahlMoeglich = 0;
             int belegterLagerplatz = SW.Dynamisch.GetRohstoffwithID(rohID).ErmittleBenoetigtenLagerplatz(_hatInStadtXMengeYRohstoffe[stadtID, rohID]);
             int verfuegbarerLagerplatz = ErmittleLagerplatzInStadt(stadtID, rohID);
             int benoetigterLagerplatz = SW.Dynamisch.GetRohstoffwithID(rohID).ErmittleBenoetigtenLagerplatz(anzahl);
+            int anzahlMoeglich;
 
             if (benoetigterLagerplatz > verfuegbarerLagerplatz)  // Kein ausreichender Lagerplatz?
             {
@@ -414,11 +414,12 @@ namespace Conspiratio.Lib.Gameplay.Personen
             return SW.Statisch.GetMaxKinderAnzahl();
         }
 
-        public void SetKindX(int x, bool maennlich, string name)
+        public void SetKindX(int x, bool maennlich, string name, int alter = 0)
         {
             _kinder[x].SetName(name);
             _kinder[x].SetMaennlich(maennlich);
-            _kinder[x].SetAlter(0);
+            _kinder[x].SetAlter(alter);
+            _kinder[x].Geburtsjahr = SW.Dynamisch.GetAktuellesJahr() - alter;
         }
 
         public void KinderAltern()
@@ -608,6 +609,155 @@ namespace Conspiratio.Lib.Gameplay.Personen
             }
 
             return firstStadtIDMitWohnsitz;
+        }
+        #endregion
+
+        #region VersuchHandelszertifikatVerleihen
+        public void VersuchHandelszertifikatVerleihen()
+        {
+            // Falls nicht schon eines diese Runde verliehen wird
+            if (GetBekamHandeslzertifikatX() == 0)
+            {
+                int handzert = 0;
+
+                // Handelszertifikate zählen
+                for (int i = 1; i < SW.Statisch.GetMaxRohID(); i++)
+                {
+                    if (GetRohstoffrechteX(i))
+                    {
+                        handzert++;
+                    }
+                }
+
+                // Falls er bereits 2 Rohstoffe besaß
+                if (handzert >= 2)
+                {
+                    if (GetTaler() >= 1000000)
+                    {
+                        HandelszertifikatVerleihen(5, 15, SW.Statisch.GetMaxRohID());
+                    }
+                    else if (GetTaler() >= 500000)
+                    {
+                        HandelszertifikatVerleihen(4, 8, 19);
+                    }
+                    else if (GetTaler() >= 100000)
+                    {
+                        HandelszertifikatVerleihen(3, 8, 15);
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region HandelszertifikatVerleihen
+        public void HandelszertifikatVerleihen(int anzahlRohstoffrechte, int minRohID, int maxRohID)
+        {
+            int aktuelleAnzahlRohstoffrechte = 0;
+            // Rohstoffrecht verleihen
+            for (int i = 1; i < SW.Statisch.GetMaxRohID(); i++)
+            {
+                if (GetRohstoffrechteX(i))
+                {
+                    aktuelleAnzahlRohstoffrechte++;
+                }
+            }
+
+            // Wenn der Spieler weniger als x Rechte besitzt, bekommt er ein neues verliehen
+            if (aktuelleAnzahlRohstoffrechte < anzahlRohstoffrechte)
+            {
+                int neuesRecht = SW.Statisch.Rnd.Next(minRohID, maxRohID);
+
+                // Solange der Spieler das neue Recht aber schon hat, soll ein anderes gewählt werden
+                while (GetRohstoffrechteX(neuesRecht) == true)
+                {
+                    neuesRecht = SW.Statisch.Rnd.Next(minRohID, maxRohID);
+                }
+
+                SetRohstoffrechteXZuY(neuesRecht, true);
+                SetBekamHandelszertifikatX(neuesRecht);
+            }
+        }
+        #endregion
+
+        #region AnsehenAktualisieren
+        public void AnsehenAktualisieren()
+        {
+            int perm_ans = GetPermaAnsehen();
+            int ans_plus = 0;
+
+            // Geldansehen
+            ans_plus += Convert.ToInt32(GetTaler() / SW.Statisch.GetAnsehenProTaler());
+
+            // Amtansehen
+            int amt_id = GetAmtID();
+            if (amt_id != 0)
+            {
+                ans_plus += SW.Statisch.GetAmtwithID(amt_id).GetBonusAnsehen();
+            }
+
+            // Häuser Ansehen
+            for (int i = 1; i < SW.Statisch.GetMaxStadtID(); i++)
+            {
+                if (GetSpielerHatHausVonStadtAnArraystelle(i).GetHausID() != 0 &&
+                    GetSpielerHatHausVonStadtAnArraystelle(i).GetStadtID() != 0)   // Haus vorhanden?
+                {
+                    ans_plus += GetSpielerHatHausVonStadtAnArraystelle(i).GetAnsehensbonus();
+
+                    // Gesundheit berücksichtigen
+                    ErhoeheGesundheit(GetSpielerHatHausVonStadtAnArraystelle(i).GetGesundheitsbonus());
+                }
+            }
+
+            SetAnsehen(perm_ans + ans_plus);
+        }
+        #endregion
+
+        #region DarfWaisenkindAdoptieren
+        public bool DarfWaisenkindAdoptieren()
+        {
+            // Hat der Spieler noch kein eigenes Kind?
+            for (int j = 1; j < SW.Statisch.GetMaxKinderAnzahl(); j++)
+            {
+                if (!string.IsNullOrEmpty(GetKindX(j).GetKindName()))
+                    return false;
+            }
+            
+            return true;
+        }
+        #endregion
+
+        #region WaisenkindAdoptieren
+        public void WaisenkindAdoptieren(int preis)
+        {
+            if (!SW.Dynamisch.CheckIfenoughGold(preis))
+                return;
+
+            int random = SW.Statisch.Rnd.Next(0, 2);
+            bool maennlich = random == 0;
+
+            if (maennlich)
+                random = SW.Statisch.Rnd.Next(SW.Statisch.GetMinKIID(), SW.Statisch.GetMaennerFrauenGrenze());
+            else
+                random = SW.Statisch.Rnd.Next(SW.Statisch.GetMaennerFrauenGrenze(), SW.Statisch.GetMaxKIID());
+
+            string name = SW.Statisch.GetKINameX(random);
+
+            SetKindX(SW.Dynamisch.GetAktHum().GetEmptyKindSlot(), maennlich, name, 1);
+
+            SW.Dynamisch.BelTextAnzeigen($"Dank Eurer großzügigen Spende \nkonntet Ihr das Kind {name} \naus dem Waisenhaus adoptieren.");
+        }
+        #endregion
+
+        #region ErmittlePreisWaisenkindAdoptieren
+        public int ErmittlePreisWaisenkindAdoptieren(int spielerID)
+        {
+            int zufallswert = SW.Statisch.Rnd.Next(15, 25);
+            int gesamtvermoegen = GetGesamtVermoegen(spielerID);
+
+            if (gesamtvermoegen <= 0)
+                gesamtvermoegen = SW.Statisch.GetStartgold();  // falls kein Vermögen vorhanden ist (oder Schulden) wird vom Startkapital ausgegangen
+
+            return Convert.ToInt32((zufallswert * gesamtvermoegen) / 100);
         }
         #endregion
     }
