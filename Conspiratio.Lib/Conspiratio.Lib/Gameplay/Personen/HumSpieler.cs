@@ -414,12 +414,12 @@ namespace Conspiratio.Lib.Gameplay.Personen
             return SW.Statisch.GetMaxKinderAnzahl();
         }
 
-        public void SetKindX(int x, bool maennlich, string name)
+        public void SetKindX(int x, bool maennlich, string name, int alter = 0)
         {
             _kinder[x].SetName(name);
             _kinder[x].SetMaennlich(maennlich);
-            _kinder[x].SetAlter(0);
-            _kinder[x].Geburtsjahr = SW.Dynamisch.GetAktuellesJahr();
+            _kinder[x].SetAlter(alter);
+            _kinder[x].Geburtsjahr = SW.Dynamisch.GetAktuellesJahr() - alter;
         }
 
         public void KinderAltern()
@@ -715,24 +715,49 @@ namespace Conspiratio.Lib.Gameplay.Personen
         #region DarfWaisenkindAdoptieren
         public bool DarfWaisenkindAdoptieren()
         {
-            // TODO
-            return false;
+            // Hat der Spieler noch kein eigenes Kind?
+            for (int j = 1; j < SW.Statisch.GetMaxKinderAnzahl(); j++)
+            {
+                if (!string.IsNullOrEmpty(GetKindX(j).GetKindName()))
+                    return false;
+            }
+            
+            return true;
         }
         #endregion
 
         #region WaisenkindAdoptieren
-        public void WaisenkindAdoptieren()
+        public void WaisenkindAdoptieren(int preis)
         {
-            // TODO
-            
+            if (!SW.Dynamisch.CheckIfenoughGold(preis))
+                return;
+
+            int random = SW.Statisch.Rnd.Next(0, 2);
+            bool maennlich = random == 0;
+
+            if (maennlich)
+                random = SW.Statisch.Rnd.Next(SW.Statisch.GetMinKIID(), SW.Statisch.GetMaennerFrauenGrenze());
+            else
+                random = SW.Statisch.Rnd.Next(SW.Statisch.GetMaennerFrauenGrenze(), SW.Statisch.GetMaxKIID());
+
+            string name = SW.Statisch.GetKINameX(random);
+
+            SetKindX(SW.Dynamisch.GetAktHum().GetEmptyKindSlot(), maennlich, name, 1);
+
+            SW.Dynamisch.BelTextAnzeigen($"Dank Eurer großzügigen Spende \nkonntet Ihr das Kind {name} \naus dem Waisenhaus adoptieren.");
         }
         #endregion
 
         #region ErmittlePreisWaisenkindAdoptieren
-        public int ErmittlePreisWaisenkindAdoptieren()
+        public int ErmittlePreisWaisenkindAdoptieren(int spielerID)
         {
-            // TODO
-            return 0;
+            int zufallswert = SW.Statisch.Rnd.Next(15, 25);
+            int gesamtvermoegen = GetGesamtVermoegen(spielerID);
+
+            if (gesamtvermoegen <= 0)
+                gesamtvermoegen = SW.Statisch.GetStartgold();  // falls kein Vermögen vorhanden ist (oder Schulden) wird vom Startkapital ausgegangen
+
+            return Convert.ToInt32((zufallswert * gesamtvermoegen) / 100);
         }
         #endregion
     }

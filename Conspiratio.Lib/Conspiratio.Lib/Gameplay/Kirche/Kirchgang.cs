@@ -70,10 +70,19 @@ namespace Conspiratio.Lib.Gameplay.Kirche
 
         public void WaisenkindAdoptieren()
         {
-            // TODO: Waisenkind adoptieren aufrufen
-            // - Nur möglich, wenn man noch keine Kinder hat
-            // - Nur nach einer gewissen Anzahl von Jahren ohne eigenes Kind möglich (5?)
-            // - Anhand des Vermögens wird ein relativer Talerbetrag ermittelt, der die Adoption kostet
+            if (!SW.Dynamisch.GetAktHum().DarfWaisenkindAdoptieren())
+            {
+                string vaterMutter = SW.Dynamisch.GetAktHum().GetMaennlich() ? "glücklicher Vater" : "glückliche Mutter";
+                SW.Dynamisch.BelTextAnzeigen($"Ihr seid derzeit {vaterMutter} \neines Kindes und könnt daher\n kein Waisenkind adoptieren.");
+                return;
+            }
+
+            int preis = SW.Dynamisch.GetAktHum().ErmittlePreisWaisenkindAdoptieren(SW.Dynamisch.GetAktiverSpieler());
+
+            if (SW.UI.JaNeinFrage.ShowDialogText("Wollt Ihr ein Mündel für\n" + preis.ToStringGeld() + " aus dem \nkirchlichen Waisenhaus adoptieren?", "Ja", "Lieber nicht!") == DialogResult.Yes)
+            {
+                SW.Dynamisch.GetAktHum().WaisenkindAdoptieren(preis);
+            }
         }
     }
 }
