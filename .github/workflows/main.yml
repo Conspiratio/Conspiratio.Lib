@@ -1,0 +1,31 @@
+name: Build Lib
+ 
+on: 
+  push
+ 
+jobs:
+  build:
+ 
+    runs-on: windows-latest
+ 
+    steps:
+    - uses: actions/checkout@v1
+      name: Checkout Code
+     
+    - name: Setup MSBuild Path
+      uses: warrenbuckley/Setup-MSBuild@v1
+       
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.0.2
+     
+    - name: Restore NuGet Packages
+      run: nuget restore SimpleFrameworkApp.sln
+ 
+    - name: Build and Publish Web App
+      run: msbuild Conspiratio.Lib.sln /p:Configuration=Release
+ 
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: published_webapp
+        path: bin\Release
