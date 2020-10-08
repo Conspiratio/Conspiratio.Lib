@@ -21,11 +21,11 @@ jobs:
     - name: Restore NuGet Packages
       run: nuget restore Conspiratio.Lib.sln
  
-    - name: Build and Publish Web App
+    - name: Build and Publish
       run: msbuild Conspiratio.Lib.sln /p:Configuration=Release
  
-    - name: Upload Artifact
+    - name: Upload Artifacts
       uses: actions/upload-artifact@v1.0.0
       with:
-        name: published_webapp
+        name: Conspiratio.Lib
         path: Conspiratio.Lib\bin\Release
