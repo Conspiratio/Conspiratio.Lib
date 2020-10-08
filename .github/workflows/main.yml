@@ -2,7 +2,7 @@ name: Build Lib
  
 on: 
   push
-    branches: [ feature/github-ci ]
+    branches: [ master ]
 
 jobs:
   build:
