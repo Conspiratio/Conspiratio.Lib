@@ -2,7 +2,8 @@ name: Build Lib
  
 on: 
   push
-    branches: [ master ]
+    branches: 
+      - master
 
 jobs:
   build:
