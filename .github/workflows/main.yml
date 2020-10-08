@@ -2,7 +2,8 @@ name: Build Lib
  
 on: 
   push
- 
+    branches: [ feature/github-ci ]
+
 jobs:
   build:
  
@@ -29,3 +30,9 @@ jobs:
       with:
         name: Conspiratio.Lib
         path: Conspiratio.Lib\bin\Release
+
+    - name: Publish Conspiratio.Lib
+      uses: brandedoutcast/publish-nuget@v2.5.2
+      with:
+          PROJECT_FILE_PATH: Conspiratio.Lib\Conspiratio.Lib.csproj
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
