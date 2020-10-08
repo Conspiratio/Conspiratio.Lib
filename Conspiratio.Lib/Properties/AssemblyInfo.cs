@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 // Attribute gesteuert. Ändern Sie diese Attributwerte, um die Informationen zu ändern,
 // die einer Assembly zugeordnet sind.
 [assembly: AssemblyTitle("Conspiratio.Lib")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("A library with gameplay logic for the free and open-source game Conspiratio")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Conspiratio")]
 [assembly: AssemblyProduct("Conspiratio")]
 [assembly: AssemblyCopyright("Copyright © 2011-2020")]
 [assembly: AssemblyTrademark("")]

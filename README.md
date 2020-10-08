@@ -1,3 +1,16 @@
+# Conspiratio.Lib
+
+Dies ist der aktuelle Stand der C# .NET Framework 4.6.2 Klassenbibliothek mit der Gameplay Logik von Conspiratio, entnommen aus dem Conspiratio WinForms Client. Die Bibiliothek ist noch nicht vollständig, enthält aber bereits die wichtigsten Klassen und Methoden und kann als Grundbaustein für den Unity Client dienen.
+
+## Build
+
+Das Projekt wurde erstellt mit: Visual Studio 2019
+
+Für den Build einfach die Projektmappe `Conspiratio.Lib.sln` öffnen und kompilieren.
+
+## Systemvoraussetzungen / Abhängigkeiten
+- .NET Framework 4.6.2
+
 # Über das Spiel Conspiratio
 
 Das Fanprojekt namens "Conspiratio" ist eine freie Wirtschaftssimulation der Neuzeit, die sich stark am Kultspielt "Die Fugger 2" orientiert.
