@@ -35,5 +35,8 @@ jobs:
         name: Conspiratio.Lib
         path: Conspiratio.Lib\bin\Release
 
+    - name: nuget Pack
+      run: nuget pack Conspiratio.Lib\Conspiratio.Lib.nuspec
+
     - name: Publish the package to nuget.org
       run: nuget push Conspiratio.Lib\*.nupkg ${{secrets.NUGET_API_KEY}} -Source https://api.nuget.org/v3/index.json
