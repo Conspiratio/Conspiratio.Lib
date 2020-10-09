@@ -39,4 +39,4 @@ jobs:
       run: nuget pack Conspiratio.Lib\Conspiratio.Lib.csproj
 
     - name: Publish the package to nuget.org
-      run: nuget push Conspiratio.Lib\*.nupkg ${{secrets.NUGET_API_KEY}} -Source https://api.nuget.org/v3/index.json
+      run: nuget push Conspiratio.Lib\Conspiratio.Lib.1.0.0.nupkg ${{secrets.NUGET_API_KEY}} -Source https://api.nuget.org/v3/index.json
