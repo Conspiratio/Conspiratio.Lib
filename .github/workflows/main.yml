@@ -11,19 +11,22 @@ jobs:
     runs-on: windows-latest
  
     steps:
-    - uses: actions/checkout@v1
-      name: Checkout Code
+    - name: Checkout Code
+      uses: actions/checkout@v1
      
     - name: Setup MSBuild Path
       uses: warrenbuckley/Setup-MSBuild@v1
        
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v1.0.2
+      with:
+          nuget-api-key: ${{secrets.NUGET_API_KEY}}
+          nuget-version: 'latest'
      
     - name: Restore NuGet Packages
       run: nuget restore Conspiratio.Lib.sln
  
-    - name: Build and Publish
+    - name: Build
       run: msbuild Conspiratio.Lib.sln /p:Configuration=Release
  
     - name: Upload Artifacts
@@ -32,8 +35,5 @@ jobs:
         name: Conspiratio.Lib
         path: Conspiratio.Lib\bin\Release
 
-    - name: Publish Conspiratio.Lib
-      uses: brandedoutcast/publish-nuget@v2.5.2
-      with:
-          PROJECT_FILE_PATH: Conspiratio.Lib\Conspiratio.Lib.csproj
-          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+    - name: Publish the package to nuget.org
+      run: nuget push Conspiratio.Lib\bin\Release\*.nupkg ${{secrets.NUGET_API_KEY}} -Source https://api.nuget.org/v3/index.json
