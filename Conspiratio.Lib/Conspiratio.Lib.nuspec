@@ -9,7 +9,7 @@
     <license type="expression">GPL-3.0-only</license>
     <projectUrl>http://www.conspiratio.net</projectUrl>
     <description>$description$</description>
-    <releaseNotes>First automatically published version of the library.</releaseNotes>
+    <releaseNotes>https://github.com/Conspiratio/Conspiratio.Lib/blob/master/CHANGELOG.md</releaseNotes>
     <copyright>$copyright$</copyright>
     <tags>conspiratio game library</tags>
     <icon>icon.png</icon>
