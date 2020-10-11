@@ -38,11 +38,13 @@ jobs:
         name: Conspiratio.Lib DLL
         path: Conspiratio.Lib\bin\Release\Conspiratio.Lib.dll
 
-    - name: Upload Artifacts (nuget)
+        - name: Upload Artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: Conspiratio.Lib nuget package
-        path: Conspiratio.Lib\*.nupkg
+        name: Conspiratio.Lib
+        path: |
+          Conspiratio.Lib\bin\Release\*
+          *.nupkg
 
     - name: Publish the package to nuget.org
       run: nuget push *.nupkg ${{secrets.NUGET_API_KEY}} -Source https://api.nuget.org/v3/index.json -SkipDuplicate
