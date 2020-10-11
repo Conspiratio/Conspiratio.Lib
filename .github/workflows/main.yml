@@ -14,8 +14,8 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v1
      
-    - name: Setup MSBuild Path
-      uses: warrenbuckley/Setup-MSBuild@v1
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1
        
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v1.0.2
@@ -32,13 +32,7 @@ jobs:
     - name: nuget Pack
       run: nuget pack Conspiratio.Lib\Conspiratio.Lib.csproj
 
-    - name: Upload Artifacts (DLL)
-      uses: actions/upload-artifact@v2
-      with:
-        name: Conspiratio.Lib DLL
-        path: Conspiratio.Lib\bin\Release\Conspiratio.Lib.dll
-
-        - name: Upload Artifacts
+    - name: Upload Artifacts
       uses: actions/upload-artifact@v2
       with:
         name: Conspiratio.Lib
