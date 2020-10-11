@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">GPL-3.0-only</license>
+    <projectUrl>http://www.conspiratio.net</projectUrl>
+    <description>$description$</description>
+    <releaseNotes>https://github.com/Conspiratio/Conspiratio.Lib/blob/master/CHANGELOG.md</releaseNotes>
+    <copyright>$copyright$</copyright>
+    <tags>conspiratio game library</tags>
+    <icon>icon.png</icon>
+    <dependencies>
+      <group targetFramework=".NETFramework4.6.2" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="icon.png" target="" />
+  </files>
+</package>
