@@ -41,4 +41,4 @@ jobs:
         name: Conspiratio.Lib
         path: |
           Conspiratio.Lib\bin\Release\*
-          Conspiratio.Lib\*.nupkg
+          *.nupkg
