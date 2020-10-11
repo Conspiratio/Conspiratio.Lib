@@ -1,8 +1,8 @@
-name: Push - Build and publish Lib
+name: Pull-request - Build Lib
  
 on: 
-  push:
-    branches: 
+  pull_request:
+    branches-ignore:
       - master
 
 jobs:
@@ -43,6 +43,3 @@ jobs:
       with:
         name: Conspiratio.Lib nuget package
         path: Conspiratio.Lib\Conspiratio.Lib.nupkg
-
-    - name: Publish the package to nuget.org
-      run: nuget push *.nupkg ${{secrets.NUGET_API_KEY}} -Source https://api.nuget.org/v3/index.json -SkipDuplicate
