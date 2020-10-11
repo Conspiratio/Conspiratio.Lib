@@ -45,4 +45,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: Conspiratio.Lib nuget package
-        path: Conspiratio.Lib\Conspiratio.Lib.nupkg
+        path: Conspiratio.Lib\Conspiratio.Lib*.nupkg
