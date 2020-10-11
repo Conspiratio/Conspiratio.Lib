@@ -35,14 +35,10 @@ jobs:
     - name: nuget Pack
       run: nuget pack Conspiratio.Lib\Conspiratio.Lib.csproj
 
-    - name: Upload Artifacts (DLL)
+    - name: Upload Artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: Conspiratio.Lib DLL
-        path: Conspiratio.Lib\bin\Release\Conspiratio.Lib.dll
-
-    - name: Upload Artifacts (nuget)
-      uses: actions/upload-artifact@v2
-      with:
-        name: Conspiratio.Lib nuget package
-        path: Conspiratio.Lib\Conspiratio.Lib*.nupkg
+        name: Conspiratio.Lib
+        path: |
+          Conspiratio.Lib\bin\Release\*
+          Conspiratio.Lib\*.nupkg

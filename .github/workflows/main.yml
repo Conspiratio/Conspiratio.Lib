@@ -42,7 +42,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: Conspiratio.Lib nuget package
-        path: Conspiratio.Lib\Conspiratio.Lib*.nupkg
+        path: Conspiratio.Lib\*.nupkg
 
     - name: Publish the package to nuget.org
       run: nuget push *.nupkg ${{secrets.NUGET_API_KEY}} -Source https://api.nuget.org/v3/index.json -SkipDuplicate
