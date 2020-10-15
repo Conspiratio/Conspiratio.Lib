@@ -6,6 +6,14 @@
 
 **[DE]**
 
+## 1.1.0 - 09.10.2020
+
+**[EN]**
+- New privilege added: Visit lawyer
+
+**[DE]**
+- Neues Privileg hinzugefügt: Jurist aufsuchen
+
 ## 1.0.0 - 09.10.2020
 
 **[EN]**

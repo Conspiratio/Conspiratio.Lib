@@ -163,6 +163,7 @@
     <Compile Include="Gameplay\Privilegien\PrivHaendler.cs" />
     <Compile Include="Gameplay\Privilegien\PrivHenkersHand.cs" />
     <Compile Include="Gameplay\Privilegien\Privileg.cs" />
+    <Compile Include="Gameplay\Privilegien\PrivJurist.cs" />
     <Compile Include="Gameplay\Privilegien\PrivKaufmann.cs" />
     <Compile Include="Gameplay\Privilegien\PrivKeinKirchenzehnt.cs" />
     <Compile Include="Gameplay\Privilegien\PrivKerkerklatsch.cs" />
