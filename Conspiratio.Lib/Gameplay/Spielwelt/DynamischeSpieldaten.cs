@@ -2003,6 +2003,380 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         }
         #endregion
 
+        #region PrivilegienAktualisieren
+        public void PrivilegienAktualisieren()
+        {
+            #region 1 - Medikus
+            GetAktHum().SetPrivilegX(1, true);
+            #endregion
+
+            #region 2 - Amt niederlegen
+            if (GetAktHum().GetAmtID() == 0)
+            {
+                GetAktHum().SetPrivilegX(2, false);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(2, true);
+                GetAktHum().HandelszertifikatVerleihen(2, 1, 8);
+            }
+            #endregion
+
+            #region 3 - Testament machen
+            if (GetAktHum().GetVerheiratet() == 0)
+            {
+                GetAktHum().SetPrivilegX(3, false);
+                for (int i = SW.Statisch.GetMinKindSlotNr(); i < SW.Statisch.GetMaxKinderAnzahl(); i++)
+                {
+                    if (GetAktHum().GetKindX(i).GetKindName() != "")
+                    {
+                        GetAktHum().SetPrivilegX(3, true);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(3, true);
+            }
+            #endregion
+
+            #region 4 - Handelszertifikate
+            GetAktHum().SetPrivilegX(4, true);
+            #endregion
+
+            #region 5 - Einkommen
+            if (GetAktHum().GetAmtID() != 0)
+            {
+                GetAktHum().SetPrivilegX(5, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(5, false);
+            }
+            #endregion
+
+            #region 6 - Untergebene
+            if (GetAktHum().GetAmtID() != 0)
+            {
+                //Wenn auch noch Untergebene vorhanden sind...
+                int[] uid = SW.Dynamisch.GetUntergebene(SW.Dynamisch.GetAktiverSpieler());
+                if (uid[0] != 0)
+                {
+                    GetAktHum().SetPrivilegX(6, true);
+                }
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(6, false);
+            }
+            #endregion
+
+            #region 7 - Kerkerklatsch
+            if (GetAktHum().GetAmtID() == 15)
+            {
+                GetAktHum().SetPrivilegX(7, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(7, false);
+            }
+            #endregion
+
+            #region 8 - Confessio
+            if (GetAktHum().GetAmtID() == 8 || GetAktHum().GetAmtID() == 9)
+            {
+                GetAktHum().SetPrivilegX(8, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(8, false);
+            }
+            #endregion
+
+            #region 9 - Prozess initiieren
+            GetAktHum().SetPrivilegX(9, true);
+            #endregion
+
+            #region 10 - Bauwerk stiften
+            if (GetAktHum().GetAmtID() >= SW.Statisch.GetMaxAmtStadtID())
+            {
+                GetAktHum().SetPrivilegX(10, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(10, false);
+            }
+            #endregion
+
+            #region 11 - Händler (AUSKOMMENTIERT)
+            //if (GetAktHum().getAmtID() == 6)
+            //{
+            //    GetAktHum().setPrivX(11, true);
+            //}
+            //else
+            //{
+            //    GetAktHum().setPrivX(11, false);
+            //}
+            #endregion
+
+            #region 12 - Kaufmann (AUSKOMMENTIERT)
+            //if (GetAktHum().getAmtID() == 21)
+            //{
+            //    GetAktHum().setPrivX(12, true);
+            //}
+            //else
+            //{
+            //    GetAktHum().setPrivX(12, false);
+            //}
+            #endregion
+
+            #region 13 - Großkaufmann (AUSKOMMENTIERT)
+            //if (GetAktHum().getAmtID() == 38)
+            //{
+            //    GetAktHum().setPrivX(13, true);
+            //}
+            //else
+            //{
+            //    GetAktHum().setPrivX(13, false);
+            //}
+            #endregion
+
+            #region 14 - Umsatzsteuer festlegen
+            if (GetAktHum().GetAmtID() == 7)
+            {
+                GetAktHum().SetPrivilegX(14, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(14, false);
+            }
+            #endregion
+
+            #region 15 - Sparplan
+            if (GetAktHum().GetAmtID() == 4)
+            {
+                GetAktHum().SetPrivilegX(15, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(15, false);
+            }
+            #endregion
+
+            #region 16 - Kein Kirchenzehnt
+            if ((GetAktHum().GetAmtID() >= 10 && GetAktHum().GetAmtID() <= 10) || (GetAktHum().GetAmtID() >= 23 && GetAktHum().GetAmtID() <= 27) || (GetAktHum().GetAmtID() >= 40 && GetAktHum().GetAmtID() <= 42))
+            {
+                GetAktHum().SetPrivilegX(16, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(16, false);
+            }
+            #endregion
+
+            #region 17 - Vergifteter Wein
+            if (GetAktHum().GetAmtID() == 23)
+            {
+                GetAktHum().SetPrivilegX(17, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(17, false);
+            }
+            #endregion
+
+            #region 18 - Wachen
+            if (GetAktHum().GetAmtID() == 22 || GetAktHum().GetAmtID() == 27 || GetAktHum().GetAmtID() == 33 || GetAktHum().GetAmtID() >= 34)
+            {
+                GetAktHum().SetPrivilegX(18, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(18, false);
+            }
+            #endregion
+
+            #region 19 - Leibgarde
+            if (GetAktHum().GetAmtID() == 39 || GetAktHum().GetAmtID() == 42 || GetAktHum().GetAmtID() == 48)
+            {
+                GetAktHum().SetPrivilegX(19, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(19, false);
+            }
+            #endregion
+
+            #region 20 - HenkersHand
+            if (GetAktHum().GetAmtID() == 13)
+            {
+                GetAktHum().SetPrivilegX(20, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(20, false);
+            }
+            #endregion
+
+            #region 21 - Korruptionsgelder
+            if (GetAktHum().GetAmtID() == 11)
+            {
+                GetAktHum().SetPrivilegX(21, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(21, false);
+            }
+            #endregion
+
+            #region 22 - Schmuggel
+            if (GetAktHum().GetAmtID() == 29 || GetAktHum().GetAmtID() == 30 || GetAktHum().GetAmtID() == 32)
+            {
+                GetAktHum().SetPrivilegX(22, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(22, false);
+            }
+            #endregion
+
+            #region 23 - Zollkartell
+            if (GetAktHum().GetAmtID() == 32)
+            {
+                GetAktHum().SetPrivilegX(23, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(23, false);
+            }
+            #endregion
+
+            #region 24 - Kirchengesetze festlegen
+            if (GetAktHum().GetAmtID() == 42)
+            {
+                GetAktHum().SetPrivilegX(24, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(24, false);
+            }
+            #endregion
+
+            #region 25 - Finanzgesetze festlegen
+            if (GetAktHum().GetAmtID() == 38)
+            {
+                GetAktHum().SetPrivilegX(25, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(25, false);
+            }
+            #endregion
+
+            #region 26 - Justizgesetze festlegen
+            if (GetAktHum().GetAmtID() == 37)
+            {
+                GetAktHum().SetPrivilegX(26, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(26, false);
+            }
+            #endregion
+
+            #region 27 - Steuerhinterziehung A
+            if (GetAktHum().GetAmtID() == 1 || GetAktHum().GetAmtID() == 2 || GetAktHum().GetAmtID() == 3)
+            {
+                GetAktHum().SetPrivilegX(27, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(27, false);
+            }
+            #endregion
+
+            #region 28 - Steuerhinterziehung B
+            if (GetAktHum().GetAmtID() == 17 || GetAktHum().GetAmtID() == 18 || GetAktHum().GetAmtID() == 19)
+            {
+                GetAktHum().SetPrivilegX(28, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(28, false);
+            }
+            #endregion
+
+            #region 29 - Steuerhinterziehung C
+            if (GetAktHum().GetAmtID() == 34 || GetAktHum().GetAmtID() == 35 || GetAktHum().GetAmtID() == 36)
+            {
+                GetAktHum().SetPrivilegX(29, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(29, false);
+            }
+            #endregion
+
+            #region 30 - Günstige Kredite
+            if (GetAktHum().GetAmtID() == 22)
+            {
+                GetAktHum().SetPrivilegX(30, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(30, false);
+            }
+            #endregion
+
+            #region 31 - Zollfrei
+            if (GetAktHum().GetAmtID() == 29 || GetAktHum().GetAmtID() == 30)
+            {
+                GetAktHum().SetPrivilegX(31, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(31, false);
+            }
+            #endregion
+
+            #region 32 - Prediger
+            if (GetAktHum().GetAmtID() == 8 || GetAktHum().GetAmtID() == 9)
+            {
+                GetAktHum().SetPrivilegX(32, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(32, false);
+            }
+            #endregion
+
+            #region 33 - Ein Fest geben
+            // Der Spieler benötigt einen Wohnsitz und muss mind. Bürger sein
+            if (GetAktHum().GetAnzahlHaeuser() > 0 && GetAktHum().GetTitel() > 0)
+            {
+                GetAktHum().SetPrivilegX(33, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(33, false);
+            }
+            #endregion
+
+            #region 34 - Jurist aufsuchen
+            // Der Spieler muss mind. Bürger sein
+            if (GetAktHum().GetTitel() > 0)
+            {
+                GetAktHum().SetPrivilegX(34, true);
+            }
+            else
+            {
+                GetAktHum().SetPrivilegX(34, false);
+            }
+            #endregion
+        }
+        #endregion
+
         // Private Methoden
         #region GetLeereWahlID
         private int GetLeereWahlID()
