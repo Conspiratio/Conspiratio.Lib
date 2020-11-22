@@ -4,6 +4,6 @@
     {
         string Name { get; }
 
-        string StrafeExecute(int opferID);
+        string StrafeExecute(int opferID, int deliktpunkte);
     }
 }

@@ -215,4 +215,10 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>if $(ConfigurationName) == Debug (
+cd "$(ProjectDir)"
+nuget pack -Properties Configuration=Debug
+)</PostBuildEvent>
+  </PropertyGroup>
 </Project>
