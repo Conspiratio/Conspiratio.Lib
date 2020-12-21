@@ -65,7 +65,7 @@ jobs:
         $version = "${{ steps.get_version.outputs.ASSEMBLY_VERSION }}"
         $version = $version.Replace(".","")
         $text = "Changelog https://github.com/Conspiratio/Conspiratio.Lib/blob/master/CHANGELOG.md#"+$version
-        echo "version_text=$text" >> $GITHUB_ENV
+        echo "version_text={$text}" >> $GITHUB_ENV
 
     - name: Test
       run: echo "${{env.version_text}}"
