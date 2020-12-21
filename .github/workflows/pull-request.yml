@@ -62,11 +62,10 @@ jobs:
 
     - name: Create release text with changelog link 2
       run: |
-        $version="${{ steps.get_version.outputs.ASSEMBLY_VERSION }}"
-        Write-Host "going to replace old"
-        $version.Replace(".","")
-        $text= "Changelog https://github.com/Conspiratio/Conspiratio.Lib/blob/master/CHANGELOG.md#"+$version
-        echo "version_text=$text" >> $GITHUB_ENV
+        $version = "${{ steps.get_version.outputs.ASSEMBLY_VERSION }}"
+        $version = $version.Replace(".","")
+        $text = "Changelog https://github.com/Conspiratio/Conspiratio.Lib/blob/master/CHANGELOG.md#"+$version
+        Write-Host "version_text=$text" >> $GITHUB_ENV
 
     - name: Test
-      run: echo $version_text
+      run: echo "$version_text"
