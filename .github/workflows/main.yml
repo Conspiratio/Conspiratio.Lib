@@ -59,7 +59,7 @@ jobs:
     - name: Create GitHub Release
       uses: ncipollo/release-action@v1.7.3
       with:
-        artifacts: "Conspiratio.Lib\bin\Release\*,*.nupkg"
+        artifacts: 'Conspiratio.Lib\bin\Release\*,*.nupkg'
         body: ${{env.VERSION_TEXT}}
         token: ${{ secrets.GITHUB_TOKEN }}
         commit: master
