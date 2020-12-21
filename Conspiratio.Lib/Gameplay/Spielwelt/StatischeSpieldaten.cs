@@ -427,7 +427,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
 
             #region Gericht
             maxAnzahlGerichtsverhandlungen = 400;
-            ChanceVerklagtZuWerden = 15;
+            ChanceVerklagtZuWerden = 3;
             GerichtsKlagepunkte = 10;
 
             GerichtsGesetzesvorwurf = new string[maxGesetze];

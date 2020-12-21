@@ -9,6 +9,6 @@
             Name = name;
         }
 
-        public abstract string StrafeExecute(int opferID);
+        public abstract string StrafeExecute(int opferID, int deliktpunkte);
     }
 }
