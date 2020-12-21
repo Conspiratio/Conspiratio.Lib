@@ -47,7 +47,7 @@ jobs:
       id: get_version
       uses: jasondavis303/assembly-info-version@v1.0.1
       with:
-        AI_PATH: Conspiratio.Lib\Conspiratio.Lib\Properties\AssemblyInfo.cs  # Filepath of the AssemblyInfo, relative to root of repository
+        AI_PATH: Conspiratio.Lib\Properties\AssemblyInfo.cs  # Filepath of the AssemblyInfo, relative to root of repository
     
     - name: Display current Version
       run: echo "${{ steps.get_version.outputs.ASSEMBLY_VERSION }}"
