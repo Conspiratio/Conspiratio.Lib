@@ -18,7 +18,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1
        
     - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1.0.2
+      uses: NuGet/setup-nuget@v1.0.5
       with:
           nuget-api-key: ${{secrets.NUGET_API_KEY}}
           nuget-version: 'latest'
@@ -42,3 +42,12 @@ jobs:
 
     - name: Publish the package to nuget.org
       run: nuget push *.nupkg ${{secrets.NUGET_API_KEY}} -Source https://api.nuget.org/v3/index.json -SkipDuplicate
+
+    - name: Get Version from AssemblyInfo
+      id: get_version
+      uses: jasondavis303/assembly-info-version@v1.0.1
+      with:
+        AI_PATH: Conspiratio.Lib\Conspiratio.Lib\Properties\AssemblyInfo.cs  # Filepath of the AssemblyInfo, relative to root of repository
+    
+    - name: Display current Version
+      run: echo "${{ steps.get_version.outputs.ASSEMBLY_VERSION }}"
