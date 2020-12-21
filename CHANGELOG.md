@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 1.2.0
+
+_21.12.2020_
+
 **[EN]**
 - Increased chance of being charged by AI opponents
 - Adjusted the amount of the penalties for court defeat, they now partly depends on the severity of the guilt

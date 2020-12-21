@@ -42,30 +42,3 @@ jobs:
         path: |
           Conspiratio.Lib\bin\Release\*
           *.nupkg
-
-    - name: Get Version from AssemblyInfo
-      id: get_version
-      uses: jasondavis303/assembly-info-version@v1.0.1
-      with:
-        AI_PATH: Conspiratio.Lib\Properties\AssemblyInfo.cs  # Filepath of the AssemblyInfo, relative to root of repository
-    
-    - name: Display current Version
-      run: echo "${{ steps.get_version.outputs.ASSEMBLY_VERSION }}"
-
-    - name: Create release text with changelog link
-      run: |
-        set version=${{ steps.get_version.outputs.ASSEMBLY_VERSION }}
-        set version=%version:.=%
-        set text=Changelog https://github.com/Conspiratio/Conspiratio.Lib/blob/master/CHANGELOG.md#%version%
-        echo %text%
-        echo "version_text=%text%" >> $GITHUB_ENV
-
-    - name: Create release text with changelog link 2
-      run: |
-        $version = "${{ steps.get_version.outputs.ASSEMBLY_VERSION }}"
-        $version = $version.Replace(".","")
-        $text = "Changelog https://github.com/Conspiratio/Conspiratio.Lib/blob/master/CHANGELOG.md#"+$version
-        echo "VERSION_TEXT=${text}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-
-    - name: Test
-      run: echo "${{env.VERSION_TEXT}}"
