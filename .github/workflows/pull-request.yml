@@ -51,3 +51,14 @@ jobs:
     
     - name: Display current Version
       run: echo "${{ steps.get_version.outputs.ASSEMBLY_VERSION }}"
+
+    - name: Create release text with changelog link
+      run: |
+        set version="${{ steps.get_version.outputs.ASSEMBLY_VERSION }}"
+        set version=%version:.=%
+        set text=Changelog https://github.com/Conspiratio/Conspiratio.Lib/blob/master/CHANGELOG.md#%version%
+        echo %text%
+        echo "version_text=%text%" >> $GITHUB_ENV
+
+    - name: Test
+      run: echo $version_text
