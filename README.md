@@ -1,6 +1,17 @@
 # Conspiratio.Lib
 
+[![Actions Status](https://github.com/Conspiratio/Conspiratio.Lib/workflows/Push - Build and publish Lib/badge.svg)](https://github.com/Conspiratio/Conspiratio.Lib/actions) 
+[![Actions Status](https://github.com/Conspiratio/Conspiratio.Lib/workflows/Pull-request - Build Lib/badge.svg)](https://github.com/Conspiratio/Conspiratio.Lib/actions) 
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/Conspiratio/Conspiratio.Lib) 
+![Nuget](https://img.shields.io/nuget/v/Conspiratio.Lib)
+
+![GitHub](https://img.shields.io/github/license/Conspiratio/Conspiratio.Lib?color=green)
+
 Dies ist der aktuelle Stand der C# .NET Framework 4.6.2 Klassenbibliothek mit der Gameplay Logik von Conspiratio, entnommen aus dem Conspiratio WinForms Client. Die Bibiliothek ist noch nicht vollständig, enthält aber bereits die wichtigsten Klassen und Methoden und kann als Grundbaustein für den Unity Client dienen.
+
+## Package
+
+nuget: https://www.nuget.org/packages/Conspiratio.Lib/
 
 ## Build
 
@@ -78,3 +89,7 @@ Im Changelog nutzen wir folgende Gruppen zur Unterteilung der Änderungen:
 - Änderungen
 - Korrekturen
 - Balancing
+
+# Kontakt
+
+Discord: https://discord.gg/dxkC5DPgRY oder oldschool per <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;%6D%61%69%6C%40%63%6F%6E%73%70%69%72%61%74%69%6F%2E%6E%65%74">E-Mail</a>
