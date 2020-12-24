@@ -2,11 +2,19 @@
 
 Dies ist der aktuelle Stand der C# .NET Framework 4.6.2 Klassenbibliothek mit der Gameplay Logik von Conspiratio, entnommen aus dem Conspiratio WinForms Client. Die Bibiliothek ist noch nicht vollständig, enthält aber bereits die wichtigsten Klassen und Methoden und kann als Grundbaustein für den Unity Client dienen.
 
+## Package
+
+[![Nuget](https://img.shields.io/nuget/v/Conspiratio.Lib)](https://www.nuget.org/packages/Conspiratio.Lib/) [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/Conspiratio/Conspiratio.Lib)](https://github.com/Conspiratio/Conspiratio.Lib/releases) 
+
 ## Build
+
+[![Push - Build and publish Lib](https://github.com/Conspiratio/Conspiratio.Lib/workflows/Push%20-%20Build%20and%20publish%20Lib/badge.svg)](https://github.com/Conspiratio/Conspiratio.Lib/actions?query=workflow%3A%22Push+-+Build+and+publish+Lib%22)  
+[![Pull-request - Build Lib](https://github.com/Conspiratio/Conspiratio.Lib/workflows/Pull-request%20-%20Build%20Lib/badge.svg)](https://github.com/Conspiratio/Conspiratio.Lib/actions?query=workflow%3A%22Pull-request+-+Build+Lib%22)  
+[![CodeQL](https://github.com/Conspiratio/Conspiratio.Lib/workflows/CodeQL/badge.svg)](https://github.com/Conspiratio/Conspiratio.Lib/actions?query=workflow%3ACodeQL)
 
 Das Projekt wurde erstellt mit: Visual Studio 2019
 
-Für den Build einfach die Projektmappe `Conspiratio.Lib.sln` öffnen und kompilieren.
+Für den manuellen Build einfach die Projektmappe `Conspiratio.Lib.sln` öffnen und kompilieren.
 
 ## Systemvoraussetzungen / Abhängigkeiten
 - .NET Framework 4.6.2
@@ -78,3 +86,7 @@ Im Changelog nutzen wir folgende Gruppen zur Unterteilung der Änderungen:
 - Änderungen
 - Korrekturen
 - Balancing
+
+# Kontakt
+
+Über [Discord](https://discord.gg/dxkC5DPgRY) oder oldschool per <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;%6D%61%69%6C%40%63%6F%6E%73%70%69%72%61%74%69%6F%2E%6E%65%74">E-Mail</a>
