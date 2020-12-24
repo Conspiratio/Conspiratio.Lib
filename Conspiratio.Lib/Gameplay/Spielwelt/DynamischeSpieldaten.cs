@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 
 using Conspiratio.Lib.Extensions;
+using Conspiratio.Lib.Gameplay.Einstellungen;
 using Conspiratio.Lib.Gameplay.Gebiete;
 using Conspiratio.Lib.Gameplay.Justiz;
 using Conspiratio.Lib.Gameplay.Kampf;
@@ -1829,9 +1830,24 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
                     z++;
                 }
 
+                int maxAbsetzSympathie = SW.Statisch.GetMaxAbsetzSympathie();
+
+                switch (SW.Dynamisch.Spielstand.Einstellungen.AggressivitaetKISpieler)
+                {
+                    case EnumSchwierigkeitsgrad.Niedrig:
+                        maxAbsetzSympathie -= 2;
+                        break;
+                    case EnumSchwierigkeitsgrad.Mittel:
+                        maxAbsetzSympathie += 10;
+                        break;
+                    case EnumSchwierigkeitsgrad.Hoch:
+                        maxAbsetzSympathie += 20;
+                        break;
+                }
+
                 for (int j = 1; j < u_len; j++)
                 {
-                    if (GetKIwithID(i).GetBeziehungZuKIX(untergebene[j]) < SW.Statisch.GetMaxAbsetzSympathie())
+                    if (GetKIwithID(i).GetBeziehungZuKIX(untergebene[j]) < maxAbsetzSympathie)
                     {
                         // KI fordert Absetzung
                         SetAmtsenthebungVonID(untergebene[j]);
@@ -2374,6 +2390,94 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
                 GetAktHum().SetPrivilegX(34, false);
             }
             #endregion
+        }
+        #endregion
+
+        #region AnklagenVonKISpielernErstellen
+        /// <summary>
+        /// Anklagen von KI-Spielern für den aktiven menschlichen Spieler erstellen.
+        /// </summary>
+        public void AnklagenVonKISpielernErstellen()
+        {
+            DeliktpunkteBerechnen();
+
+            // Die Chance beruht auf den eigenen Deliktpunkten und auf der Einstellung "Aggressivität der KI-Spieler"
+            int deliktpunkte = GetHumWithID(GetAktiverSpieler()).GetDeliktpunkte();
+
+            if (deliktpunkte <= 0)  // Man wird nie ohne Deliktpunkte von KI-Spielern angeklagt
+                return;
+
+            int faktor = 10;
+
+            switch (SW.Dynamisch.Spielstand.Einstellungen.AggressivitaetKISpieler)
+            {
+                case EnumSchwierigkeitsgrad.Niedrig:
+                    faktor = 4;
+                    break;
+                case EnumSchwierigkeitsgrad.Mittel:
+                    faktor = 8;
+                    break;
+                case EnumSchwierigkeitsgrad.Hoch:
+                    faktor = 12;
+                    break;
+            }
+
+            int chanceAufAnklageInProzent = deliktpunkte * faktor;
+
+            if (chanceAufAnklageInProzent < 100)
+            {
+                if (chanceAufAnklageInProzent < SW.Statisch.Rnd.Next(0, 99))
+                    return;
+            }
+
+            int minamtID = GetMinGegnerAmtID(GetAktiverSpieler());
+            int maxamtID = GetMaxGegnerAmtID(GetAktiverSpieler());
+
+            int klaegerID = GetKIthatDislikesHumX(GetAktiverSpieler(), minamtID, maxamtID);
+            int klageID = GetEmptyGerichtsverhandlung();
+
+            List<int> validStaedteIDs = new List<int>();
+
+            // In Frage kommende Städte für das Gerichtsverfahren ermitteln
+            for (int currentStadtID = 1; currentStadtID < SW.Statisch.GetMaxStadtID(); currentStadtID++)
+            {
+                // Wenn der angeklagte Spieler selber Richter ist, fällt die Stadt, in der er Richter ist, weg
+                if (GetHumWithID(GetAktiverSpieler()).GetAmtID() == 5 &&
+                    GetHumWithID(GetAktiverSpieler()).GetAmtGebiet() == currentStadtID)
+                {
+                    continue;
+                }
+
+                // Es sind nur die Städte gültig, bei denen der Richterposten besetzt ist
+                if (GetStadtwithID(currentStadtID).GetRichter() == 0)
+                {
+                    continue;
+                }
+
+                validStaedteIDs.Add(currentStadtID);
+            }
+
+            // Es muss mind. 3 Städte mit Richtern geben, von denen niemand der Angeklagte ist
+            if (validStaedteIDs.Count < 3)
+            {
+                return;  // Es kann keine Klage stattfinden
+            }
+
+            int stadtID = validStaedteIDs[SW.Statisch.Rnd.Next(1, validStaedteIDs.Count) - 1];
+
+            // Richter ermitteln
+            int richter1 = GetStadtwithID(stadtID).GetRichter();
+            validStaedteIDs.Remove(stadtID);
+
+            int randomStadtID = validStaedteIDs[SW.Statisch.Rnd.Next(1, validStaedteIDs.Count) - 1];
+            int richter2 = GetStadtwithID(randomStadtID).GetRichter();
+            validStaedteIDs.Remove(randomStadtID);
+
+            randomStadtID = validStaedteIDs[SW.Statisch.Rnd.Next(1, validStaedteIDs.Count) - 1];
+            int richter3 = GetStadtwithID(randomStadtID).GetRichter();
+            validStaedteIDs.Remove(randomStadtID);
+
+            GetGerichtsverhandlungX(klageID).SetAll(richter1, richter2, richter3, stadtID, 0, GetAktiverSpieler(), klaegerID);
         }
         #endregion
 

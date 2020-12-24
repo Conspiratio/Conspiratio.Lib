@@ -87,6 +87,8 @@
     <Compile Include="Gameplay\Aemter\AmtWachkommandant.cs" />
     <Compile Include="Gameplay\Aemter\AmtZoellner.cs" />
     <Compile Include="Gameplay\Aemter\AmtZollmeister.cs" />
+    <Compile Include="Gameplay\Einstellungen\EnumSchwierigkeitsgrad.cs" />
+    <Compile Include="Gameplay\Einstellungen\Spieleinstellungen.cs" />
     <Compile Include="Gameplay\Ereignisse\Datumsereignis.cs" />
     <Compile Include="Gameplay\Ereignisse\EnumGueltigkeitReligion.cs" />
     <Compile Include="Gameplay\Ereignisse\Ereigniszeitpunkt.cs" />
@@ -102,6 +104,7 @@
     <Compile Include="Gameplay\Justiz\Gerichtsverhandlung.cs" />
     <Compile Include="Gameplay\Justiz\IStrafe.cs" />
     <Compile Include="Gameplay\Justiz\Strafe.cs" />
+    <Compile Include="Gameplay\Justiz\StrafeAmtsenthebung.cs" />
     <Compile Include="Gameplay\Justiz\StrafeGeldstrafe.cs" />
     <Compile Include="Gameplay\Justiz\StrafeKerker.cs" />
     <Compile Include="Gameplay\Justiz\StrafePranger.cs" />

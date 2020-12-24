@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## 1.3.0
+
+_24.12.2020_
+
+**[EN]**
+- Added new game settings class
+- Added new "Impeachment" penalty
+- Added new method for creating court hearings from AI players
+
+**[DE]**
+- Neue Klasse für Spieleinstellungen hinzugefügt
+- Neue Strafe "Amtsenthebung" hinzugefügt
+- Neue Methode für die Ermittlung von Anklagen von KI-Spielern hinzugefügt
+
 ## 1.2.0
 
 _21.12.2020_

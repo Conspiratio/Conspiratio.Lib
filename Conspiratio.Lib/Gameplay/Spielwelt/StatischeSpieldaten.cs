@@ -51,7 +51,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         private int KreditZinsMin;
         private int KreditZinsMax;
 
-        private int maxAnzahlStrafen = 3;
+        private int maxAnzahlStrafen = 4;
         private IStrafe[] Strafarten;
 
         private int[] GesetzDefUntergrenze;
@@ -78,7 +78,6 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         private int RelEvanID;
         private int maxAnzahlGerichtsverhandlungen;
 
-        private int ChanceVerklagtZuWerden;
         private int GerichtsKlagepunkte;
         #endregion
 
@@ -427,7 +426,6 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
 
             #region Gericht
             maxAnzahlGerichtsverhandlungen = 400;
-            ChanceVerklagtZuWerden = 3;
             GerichtsKlagepunkte = 10;
 
             GerichtsGesetzesvorwurf = new string[maxGesetze];
@@ -1493,7 +1491,6 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         public int GetMaxWahlKandidaten() { return MaxWahlKandidaten; }
         public int GetMaxAbsetzSympathie() { return MaxAbsetzSympathie; }
         public int GetGerichtsKlagepunkte() { return GerichtsKlagepunkte; }
-        public int GetChanceVerklagtZuWerden() { return ChanceVerklagtZuWerden; }
         public int GetMaxWahlWaehler() { return MaxWahlWaehler; }
         public string GetReligionsNamenX(int X) { return ReligionsNamen[X]; }
         public int GetmaxAnzahlGerichtsverhandlungen() { return maxAnzahlGerichtsverhandlungen; }

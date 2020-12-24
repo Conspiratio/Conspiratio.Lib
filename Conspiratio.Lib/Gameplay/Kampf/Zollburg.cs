@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
+
 using Conspiratio.Kampf;
-using Conspiratio.Lib.Gameplay.Kampf.Einheiten;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
 namespace Conspiratio.Lib.Gameplay.Kampf
@@ -82,54 +81,66 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         #region RundenendeKIAktionenDurchfuehren
         public string RundenendeKIAktionenDurchfuehren()
         {
-            string sText = "";
-            string sResult = "";
-            double KIAktivitaetsfaktor = 1d;  // 1.00 = normal (50 %), von 0.01 (1 %) bis 2.00 (100 %) möglich
-            int Wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
-            Type Truppeneinheit = null;
-            List<Einheit> lstTruppen = new List<Einheit>();
+            string text = "";
+            string result;
+            double kiAktivitaetsfaktor = 1d;  // 1.00 = normal (50 %), von 0.02 (1 %) bis 2.00 (100 %) möglich
+            int wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
+            Type truppeneinheit = null;
 
-            if (Wuerfel <= Convert.ToInt32(Math.Round(50 * KIAktivitaetsfaktor, 0)))  // Auswürfeln, ob generell in diesem Zug etwas passieren soll
+            switch (SW.Dynamisch.Spielstand.Einstellungen.AggressivitaetKISpieler)
+            {
+                case Einstellungen.EnumSchwierigkeitsgrad.Niedrig:
+                    kiAktivitaetsfaktor = 0.5d;  // 25 %
+                    break;
+                case Einstellungen.EnumSchwierigkeitsgrad.Mittel:
+                    kiAktivitaetsfaktor = 1d;  // 50 %
+                    break;
+                case Einstellungen.EnumSchwierigkeitsgrad.Hoch:
+                    kiAktivitaetsfaktor = 1.7d;  // 85 %
+                    break;
+            }
+
+            if (wuerfel <= Convert.ToInt32(Math.Round(50 * kiAktivitaetsfaktor, 0)))  // Auswürfeln, ob generell in diesem Zug etwas passieren soll
             {
                 // Kapazität erhöhen
-                Wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
+                wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
 
-                if (Wuerfel <= Convert.ToInt32(Math.Round(30 * KIAktivitaetsfaktor, 0)))  // Soll ausgebaut werden?
+                if (wuerfel <= Convert.ToInt32(Math.Round(30 * kiAktivitaetsfaktor, 0)))  // Soll ausgebaut werden?
                 {
-                    sResult = KapazitaetErhoehen(2);
+                    result = KapazitaetErhoehen(2);
 
-                    if (string.IsNullOrEmpty(sResult))
-                        sText += $"{Name} wird ausgebaut und um neue {KapazitaetBezeichnung} erweitert. ";
+                    if (string.IsNullOrEmpty(result))
+                        text += $"{Name} wird ausgebaut und um neue {KapazitaetBezeichnung} erweitert. ";
                 }
 
                 // Sicherheit erhöhen
-                Wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
+                wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
 
-                if (Wuerfel <= Convert.ToInt32(Math.Round(40 * KIAktivitaetsfaktor, 0)))  // Soll ausgebaut werden?
+                if (wuerfel <= Convert.ToInt32(Math.Round(40 * kiAktivitaetsfaktor, 0)))  // Soll ausgebaut werden?
                 {
                     if (SicherheitTarnungInProzent < 100)
                     {
                         SicherheitTarnungInProzent++;
-                        sText += $"Karren mit Baumaterial sind auf dem Weg nach {Name}, es wird die {SicherheitTarnungAlsString()} verbessert. ";
+                        text += $"Karren mit Baumaterial sind auf dem Weg nach {Name}, es wird die {SicherheitTarnungAlsString()} verbessert. ";
                     }
                 }
 
                 // Reparieren
-                Wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
+                wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
 
-                if (Wuerfel <= Convert.ToInt32(Math.Round(50 * KIAktivitaetsfaktor, 0)))  // Soll ausgebaut werden?
+                if (wuerfel <= Convert.ToInt32(Math.Round(50 * kiAktivitaetsfaktor, 0)))  // Soll ausgebaut werden?
                 {
                     if (ZustandInProzent < 100)
                     {
                         ZustandInProzent++;
-                        sText += $"Baumeister wurden nahe {Name} gesichtet, es werden kleinere Schäden repariert. ";
+                        text += $"Baumeister wurden nahe {Name} gesichtet, es werden kleinere Schäden repariert. ";
                     }
                 }
 
                 // Rekrutierung von neuen Truppen
-                Wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
+                wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
 
-                if (Wuerfel <= Convert.ToInt32(Math.Round(50 * KIAktivitaetsfaktor, 0)))  // Soll rekrutiert werden?
+                if (wuerfel <= Convert.ToInt32(Math.Round(50 * kiAktivitaetsfaktor, 0)))  // Soll rekrutiert werden?
                 {
                     /*
                     Verteilung in Prozent:
@@ -139,40 +150,40 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                     15 % = Offiziere
                     */
 
-                    if (Wuerfel <= 35)
-                        Truppeneinheit = typeof(ZollSoeldner);
-                    else if (Wuerfel <= 65)
-                        Truppeneinheit = typeof(ZollMusketier);
-                    else if (Wuerfel <= 85)
-                        Truppeneinheit = typeof(ZollKanonier);
-                    else if (Wuerfel <= 100)
-                        Truppeneinheit = typeof(ZollSoeldner);
+                    if (wuerfel <= 35)
+                        truppeneinheit = typeof(ZollSoeldner);
+                    else if (wuerfel <= 65)
+                        truppeneinheit = typeof(ZollMusketier);
+                    else if (wuerfel <= 85)
+                        truppeneinheit = typeof(ZollKanonier);
+                    else if (wuerfel <= 100)
+                        truppeneinheit = typeof(ZollSoeldner);
 
-                    sResult = ErhoeheTruppen(1, Truppeneinheit);
+                    result = ErhoeheTruppen(1, truppeneinheit);
 
-                    if (string.IsNullOrEmpty(sResult))
-                        sText += $"Für {Name} werden neue Rekruten angeheuert. ";
+                    if (string.IsNullOrEmpty(result))
+                        text += $"Für {Name} werden neue Rekruten angeheuert. ";
                 }
 
                 // Manöver durchführen
-                Wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
+                wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
 
-                if (Wuerfel <= Convert.ToInt32(Math.Round(40 * KIAktivitaetsfaktor, 0)))  // Soll Manöver durchgeführt werden?
+                if (wuerfel <= Convert.ToInt32(Math.Round(40 * kiAktivitaetsfaktor, 0)))  // Soll Manöver durchgeführt werden?
                 {
-                    sResult = ManoeverDurchfuehrenKISpieler();
+                    result = ManoeverDurchfuehrenKISpieler();
 
-                    if (string.IsNullOrEmpty(sResult))
-                        sText += sResult;
+                    if (string.IsNullOrEmpty(result))
+                        text += result;
                 }
 
                 if (Einheiten.Count > 4)  // Nur bei mehr als 4 Einheiten
                 {
                     if (Aktionen == null || Aktionen?.Length == 0)  // Müsste eine neue Aktion angelegt werden?
                     {
-                        Wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
+                        wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
 
                         // Neue Aktion: Überwachen
-                        if (Wuerfel <= Convert.ToInt32(Math.Round(90 * KIAktivitaetsfaktor, 0)))  // Soll eine neue Aktion Überwachen angelegt werden?
+                        if (wuerfel <= Convert.ToInt32(Math.Round(90 * kiAktivitaetsfaktor, 0)))  // Soll eine neue Aktion Überwachen angelegt werden?
                         {
                             AktionenInitialisieren();
 
@@ -187,10 +198,10 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                     }
                     else
                     {
-                        Wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
+                        wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
 
                         // Aktion aktualisieren (Art "Überwachen" und 50 % der Truppen)
-                        if (Wuerfel <= Convert.ToInt32(Math.Round(50 * KIAktivitaetsfaktor, 0)))  // Soll die erste Aktion aktualisiert werden?
+                        if (wuerfel <= Convert.ToInt32(Math.Round(50 * kiAktivitaetsfaktor, 0)))  // Soll die erste Aktion aktualisiert werden?
                         {
                             Aktionen[0] = new ZollburgAktion(EnumAktionsartZollburg.Überwachen, GetLandID(), 0, ID, 0);
                             Aktionen[0].ErhoeheTruppen(Convert.ToInt32(Math.Round(Convert.ToDouble(GetAnzahlTruppen(typeof(ZollSoeldner))) / 2d, 0)), typeof(ZollSoeldner));
@@ -204,7 +215,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 }
             }
 
-            return sText;
+            return text;
         }
         #endregion
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
+using Conspiratio.Lib.Gameplay.Einstellungen;
 using Conspiratio.Lib.Gameplay.Gebiete;
 using Conspiratio.Lib.Gameplay.Justiz;
 using Conspiratio.Lib.Gameplay.Kampf;
@@ -28,7 +29,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         public string SpielName;
         public bool Cheatmodus;
         public bool Testmodus;
-        public bool TodesfaelleAnzeigen;
+        public bool TodesfaelleAnzeigen;  // TODO: Auslagern in Clientstellungen
 
         public Gerichtsverhandlung[] Gerichtshandlungen { get; set; }
         public HumSpieler[] HSpieler { get; set; }
@@ -41,6 +42,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         public Amtsenthebung[] Amtsenthebungen { get; set; }
         public Rohstoff[] Rohstoffe { get; set; }
         public Landsicherheit[] Landsicherheiten { get; set; }
+        public Spieleinstellungen Einstellungen { get; set; } = new Spieleinstellungen();
 
         public List<Fest> Feste { get; set; } = new List<Fest>();
 
@@ -49,6 +51,9 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         {
             if (Feste == null)
                 Feste = new List<Fest>();
+
+            if (Einstellungen == null)
+                Einstellungen = new Spieleinstellungen();
         }
     }
 }
