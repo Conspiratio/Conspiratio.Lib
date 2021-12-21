@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+**[DE]**
+- Der Preis für die Adoption eines Waisenkindes wurde etwas erhöht und wird nun korrekt vom Vermögen des Spielers abgezogen
+
 ## 1.3.0
 
 _24.12.2020_

@@ -1815,7 +1815,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
                     GetKIwithID(i).SetDeliktpunkte(Convert.ToInt32((GetKIwithID(i).GetDeliktpunkte() * 2) / 2));
                 }
 
-                #region Amtsentehungen
+                #region Amtsenthebungen
                 // Wenn sie zu einem Untergebenen eine schlechte Beziehung hat
                 int[] untergebene = GetUntergebene(i);
                 int u_len = 0;
