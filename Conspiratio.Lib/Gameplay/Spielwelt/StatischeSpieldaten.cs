@@ -246,7 +246,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             GesetzDefUntergrenze[1] = 0;
             GesetzDefObergrenze[1] = 1;
             //Hoechstzahl Anwesen
-            GesetzDefUntergrenze[2] = 1;
+            GesetzDefUntergrenze[2] = 4;
             GesetzDefObergrenze[2] = 14;
             //Maxmimale Taler
             GesetzDefUntergrenze[3] = 5;

@@ -222,6 +222,8 @@
     <PostBuildEvent>if $(ConfigurationName) == Debug (
 cd "$(ProjectDir)"
 nuget pack -Properties Configuration=Debug
-)</PostBuildEvent>
+)
+rem Falls es hier einen Fehler gibt siehe: https://github.com/NuGet/Home/issues/9954
+rem Nuget.exe muss ab 5.7 offenbar explizit zugelassen werden (Dateieigenschaften)</PostBuildEvent>
   </PropertyGroup>
 </Project>

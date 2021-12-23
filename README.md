@@ -41,6 +41,9 @@ Zur Planung und Steuerung der Entwicklung sollen Github Issues dienen.
 
 # Mitmachen
 
+Ihr wollt Euch an diesem Projekt beteiligen? Großartig! Tretet einfach mit uns über [Discord](https://discord.gg/dxkC5DPgRY) oder oldschool per <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;%6D%61%69%6C%40%63%6F%6E%73%70%69%72%61%74%69%6F%2E%6E%65%74">E-Mail</a> in Kontakt und wir klären die Details.  
+_Jegliche Hilfe ist willkommen._
+
 ## Git Workflow
 
 **Wichtig: Wir committen und pushen nie direkt in den master Branch!**  
@@ -86,7 +89,3 @@ Im Changelog nutzen wir folgende Gruppen zur Unterteilung der Änderungen:
 - Änderungen
 - Korrekturen
 - Balancing
-
-# Kontakt
-
-Über [Discord](https://discord.gg/dxkC5DPgRY) oder oldschool per <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;%6D%61%69%6C%40%63%6F%6E%73%70%69%72%61%74%69%6F%2E%6E%65%74">E-Mail</a>

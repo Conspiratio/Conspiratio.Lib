@@ -25,9 +25,9 @@ namespace Conspiratio.Lib.Gameplay.Justiz
             double faktor = 2000;
             
             if (jahresMultiplikator < 10)
-                faktor = 200;
+                faktor = 180;
             else if (jahresMultiplikator < 15)
-                faktor = 1000;
+                faktor = 800;
 
             deliktMultiplikator = (Convert.ToDouble(deliktpunkte) * deliktMultiplikator / 100d) + 1d;
 

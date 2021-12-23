@@ -732,6 +732,9 @@ namespace Conspiratio.Lib.Gameplay.Personen
             if (!SW.Dynamisch.CheckIfenoughGold(preis))
                 return;
 
+            SW.Dynamisch.GetAktHum().ErhoeheTaler(-preis);
+            SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler()).ErhoehePermaAnsehen(-100);
+
             int random = SW.Statisch.Rnd.Next(0, 2);
             bool maennlich = random == 0;
 
@@ -743,21 +746,22 @@ namespace Conspiratio.Lib.Gameplay.Personen
             string name = SW.Statisch.GetKINameX(random);
 
             SetKindX(SW.Dynamisch.GetAktHum().GetEmptyKindSlot(), maennlich, name, 1);
+            SW.Dynamisch.PrivilegienAktualisieren();
 
-            SW.Dynamisch.BelTextAnzeigen($"Dank Eurer großzügigen Spende \nkonntet Ihr das Kind {name} \naus dem Waisenhaus adoptieren.");
+            SW.Dynamisch.BelTextAnzeigen($"Dank Eurer großzügigen Spende \nkonntet Ihr das Kind {name} \naus dem Waisenhaus adoptieren. Euer Ansehen hat gelitten.");
         }
         #endregion
 
         #region ErmittlePreisWaisenkindAdoptieren
         public int ErmittlePreisWaisenkindAdoptieren(int spielerID)
         {
-            int zufallswert = SW.Statisch.Rnd.Next(15, 25);
+            int prozentfaktor = 30;
             int gesamtvermoegen = GetGesamtVermoegen(spielerID);
 
-            if (gesamtvermoegen <= 0)
-                gesamtvermoegen = SW.Statisch.GetStartgold();  // falls kein Vermögen vorhanden ist (oder Schulden) wird vom Startkapital ausgegangen
+            if (gesamtvermoegen < SW.Statisch.GetStartgold())  // falls das Vermögen kleiner als das Startkapital ist, wird immer vom Startkapital ausgegangen
+                gesamtvermoegen = SW.Statisch.GetStartgold();  
 
-            return Convert.ToInt32((zufallswert * gesamtvermoegen) / 100);
+            return Convert.ToInt32(prozentfaktor * gesamtvermoegen / 100);
         }
         #endregion
     }
