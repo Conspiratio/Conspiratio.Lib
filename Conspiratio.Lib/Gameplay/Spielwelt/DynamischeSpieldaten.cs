@@ -381,9 +381,24 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         #endregion
 
         #region Verändern nur an VW etwas
-        public void SetHumX(int x, HumSpieler hs)
+        public void SetHumX(int x, HumSpieler hs, int vorherigerIndex)
         {
             HSpieler[x] = hs;
+
+            // Amt im Gebiet aktualisieren (falls vorhanden)
+            if (hs.GetAmtID() > 0)
+                GetGebietwithID(hs.GetAmtGebiet(), GetStufeVonAmtmitIDx(hs.GetAmtID())).SetAmtXtoY(hs.GetAmtID(), x);  // Aktualisiere die ID des Spielers im entsprechenden Gebiet für das entsprechende Amt
+
+            // Beziehungen zu KI-Spielern aktualisieren (in allen KI-Spielern die Beziehung zum Spieler von der alten auf die neue ID kopieren)
+            for (int i = SW.Statisch.GetMinKIID(); i < SW.Statisch.GetMaxKIID(); i++)
+                GetKIwithID(i).SetBeziehungZuX(x, GetKIwithID(i).GetBeziehungZuKIX(vorherigerIndex));
+
+            // Besitzer von militärischen Stützpunkten ebenfalls aktualisieren (falls vorhanden)
+            for (int i = 0; i < GetStuetzpunkte().Length; i++)
+            {
+                if (GetStuetzpunkte()[i].Besitzer == vorherigerIndex)
+                    GetStuetzpunkte()[i].Besitzer = x;
+            }
         }
 
         public void CreateSpielerX(int x, int goldd, string nam, bool maenl, int verh, int verblJahre)
@@ -1504,6 +1519,13 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
                 last = true;
             }
 
+            // Stützpunkte des verstorbenen Spielers wieder zufälligen KI-Spielern zuteilen
+            for (int i = 0; i < GetStuetzpunkte().Length; i++)
+            {
+                if (GetStuetzpunkte()[i].Besitzer == GetAktiverSpieler())
+                    GetStuetzpunkte()[i].BesitzerStuetzpunktZufaelligSetzen();
+            }
+
             // Amt freigeben
             AmtVonXfreigeben(GetAktiverSpieler());
 
@@ -1540,7 +1562,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
                 int i = GetAktiverSpieler();
                 while (i + 1 <= GetAktivSpielerAnzahl() + 1)
                 {
-                    SetHumX(i, GetHumWithID(i + 1));
+                    SetHumX(i, GetHumWithID(i + 1), i + 1);
                     i++;
                 }
             }
@@ -2407,15 +2429,15 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             if (deliktpunkte <= 0)  // Man wird nie ohne Deliktpunkte von KI-Spielern angeklagt
                 return;
 
-            int faktor = 10;
+            int faktor = 5;
 
             switch (SW.Dynamisch.Spielstand.Einstellungen.AggressivitaetKISpieler)
             {
                 case EnumSchwierigkeitsgrad.Niedrig:
-                    faktor = 4;
+                    faktor = 2;
                     break;
                 case EnumSchwierigkeitsgrad.Mittel:
-                    faktor = 8;
+                    faktor = 5;
                     break;
                 case EnumSchwierigkeitsgrad.Hoch:
                     faktor = 12;

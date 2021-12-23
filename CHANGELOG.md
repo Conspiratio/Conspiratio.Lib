@@ -1,9 +1,17 @@
 # Changelog Conspiratio.Lib
 
-## Unreleased
+## 2.0.0
+
+_23.12.2021_
 
 **[DE]**
-- Der Preis für die Adoption eines Waisenkindes wurde etwas erhöht und wird nun korrekt vom Vermögen des Spielers abgezogen
+- Der Preis für die Adoption eines Waisenkindes wurde etwas erhöht und wird nun korrekt vom Vermögen des Spielers abgezogen. Zusätzlich kostet eine Adoption nun Ansehen (Balancing).
+- Chance reduziert, von KI-Gegnern auf den Einstellungen niedrig und mittel angeklagt zu werden
+- Höhe der Geldstrafe vor Gericht reduziert
+- Wenn ein Spieler entfernt wird (egal ob durch Tod, Aufgabe oder manuelles Hinauswerfen):
+  - Dann werden nun seine Stützpunkte an zufällige KI-Spieler verteilt
+  - Dann behalten nachrückende Spieler nun ihre Stützpunkte, Beziehungen zu den KI-Spielern und Amtsinformationen im jeweiligen Gebiet
+- Das Minimum für maximale Anwesen (Finanzgesetz) wurde von 1 auf 4 erhöht
 
 ## 1.3.0
 

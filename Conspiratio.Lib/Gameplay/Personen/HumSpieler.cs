@@ -746,6 +746,7 @@ namespace Conspiratio.Lib.Gameplay.Personen
             string name = SW.Statisch.GetKINameX(random);
 
             SetKindX(SW.Dynamisch.GetAktHum().GetEmptyKindSlot(), maennlich, name, 1);
+            SW.Dynamisch.PrivilegienAktualisieren();
 
             SW.Dynamisch.BelTextAnzeigen($"Dank Eurer großzügigen Spende \nkonntet Ihr das Kind {name} \naus dem Waisenhaus adoptieren. Euer Ansehen hat gelitten.");
         }
