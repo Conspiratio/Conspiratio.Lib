@@ -45,7 +45,7 @@ jobs:
 
     - name: Get Version from AssemblyInfo
       id: get_version
-      uses: SirTobyB/assembly-info-version
+      uses: SirTobyB/assembly-info-version@latest
       with:
         AI_PATH: Conspiratio.Lib\Properties\AssemblyInfo.cs  # Filepath of the AssemblyInfo, relative to root of repository
 
