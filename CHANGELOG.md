@@ -6,6 +6,7 @@ _TODO Releasedate_
 
 **[DE]**
 - Bei der Berechnung des Gesamtvermögens eines Spielers werden Rohstoffe nun nicht anhand des Standardpreises sondern des aktuellen Preises in der Stadt, in der sie gelagert sind, berechnet
+- Neue Klasse für "Kupplerin" hinzugefügt
 
 ## 2.0.0
 
