@@ -51,5 +51,20 @@ namespace Conspiratio.Lib.Gameplay.Niederlassung
             if (!_enabled)
                 _skill[1] = 0;
         }
+
+        #region ToString (for debugging)
+        /// <summary>
+        /// Only for debugging purposes
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            string text = "";
+            text += $"{nameof(_enabled)}: {_enabled}\t";
+            text += $"{nameof(_rohstoffID)}: {_rohstoffID}\t";
+            text += $"{nameof(_skill)}: {_skill}";
+            return text;
+        }
+        #endregion
     }
 }

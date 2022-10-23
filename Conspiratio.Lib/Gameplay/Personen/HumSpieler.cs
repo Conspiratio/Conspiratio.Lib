@@ -292,7 +292,7 @@ namespace Conspiratio.Lib.Gameplay.Personen
         public override int GetGesamtVermoegen(int spielerID)
         {
             int gesamtVermoegen = 0;
-            double factor = 0.7;
+            double factorWertminderung = 0.7;  // Der Faktor stellt die Wertminderung einer Werkstatt dar (sofern sie verkauft werden würde)
 
             gesamtVermoegen += Taler;  // Bargeld
 
@@ -308,12 +308,12 @@ namespace Conspiratio.Lib.Gameplay.Personen
                     // Werkstätten
                     if (_spielerHatInStadtXWerkstaettenY[i, j].GetEnabled() == true)
                     {
-                        gesamtVermoegen += Convert.ToInt32(SW.Dynamisch.GetRohstoffwithID(SW.Dynamisch.GetStadtwithID(i).GetRohstoffe()[j]).GetWSKaufpreis() * factor);
+                        gesamtVermoegen += Convert.ToInt32(SW.Dynamisch.GetRohstoffwithID(SW.Dynamisch.GetStadtwithID(i).GetRohstoffe()[j]).GetWSKaufpreis() * factorWertminderung);
                     }
 
                     // Rohstoffe
                     int rohid = SW.Dynamisch.GetStadtwithID(i).GetRohstoffe()[j];
-                    gesamtVermoegen += SW.Dynamisch.GetRohstoffwithID(rohid).GetPreisStd() * _hatInStadtXMengeYRohstoffe[i, j];
+                    gesamtVermoegen += SW.Dynamisch.GetStadtwithID(i).GetRohstoffPreisVonIDX(rohid) * _hatInStadtXMengeYRohstoffe[i, j];
                 }
             }
 
@@ -762,6 +762,59 @@ namespace Conspiratio.Lib.Gameplay.Personen
                 gesamtvermoegen = SW.Statisch.GetStartgold();  
 
             return Convert.ToInt32(prozentfaktor * gesamtvermoegen / 100);
+        }
+        #endregion
+
+
+        #region ToString (for debugging)
+        /// <summary>
+        /// Only for debugging purposes
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            string text = "";
+            text += base.ToString() + Environment.NewLine;
+
+            string rohstoffrechte = "";
+
+            for (int i = 1; i < SW.Statisch.GetMaxRohID(); i++)
+            {
+                if (GetRohstoffrechteX(i))
+                    rohstoffrechte += SW.Dynamisch.GetRohstoffwithID(i).GetRohName() + ": Ja";
+            }
+
+            text += $"{nameof(_rohstoffrechte)}: {rohstoffrechte}{Environment.NewLine}";
+
+            string spielerHatHausVonStadtAnArraystelle = "";
+
+            for (int i = 1; i < SW.Statisch.GetMaxStadtID(); i++)
+            {
+                if (GetSpielerHatHausVonStadtAnArraystelle(i).GetHausID() != 0)
+                    spielerHatHausVonStadtAnArraystelle += $"Stadt {SW.Dynamisch.GetStadtwithID(i).GetGebietsName()} ({i}):\t\t{GetSpielerHatHausVonStadtAnArraystelle(i)}{Environment.NewLine}";
+            }
+
+            text += $"{nameof(_spielerHatHausVonStadtAnArraystelle)}:{Environment.NewLine}{spielerHatHausVonStadtAnArraystelle}";
+
+            string spielerHatInStadtXWerkstaettenY = "";
+
+            for (int i = 0; i < SW.Statisch.GetMaxStadtID(); i++)
+            {
+                for (int j = 0; j < SW.Statisch.GetMaxWerkstaettenProStadt(); j++)
+                {
+                    if (_spielerHatInStadtXWerkstaettenY[i, j].GetEnabled())
+                    {
+                        string stadtName = "Unbekannt";
+                        if (i > 0)
+                            stadtName = SW.Dynamisch.GetStadtwithID(i).GetGebietsName();
+
+                        spielerHatInStadtXWerkstaettenY += $"Stadt {stadtName} ({i}):\t\tPlatz: {j + 1} {_spielerHatInStadtXWerkstaettenY[i, j]}{Environment.NewLine}";
+                    }
+                }
+            }
+
+            text += $"{nameof(_spielerHatInStadtXWerkstaettenY)}:{Environment.NewLine}{spielerHatInStadtXWerkstaettenY}";
+            return text;
         }
         #endregion
     }

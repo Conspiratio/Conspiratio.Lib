@@ -133,6 +133,7 @@
     <Compile Include="Gameplay\Kampf\ZollOffizier.cs" />
     <Compile Include="Gameplay\Kampf\ZollSoeldner.cs" />
     <Compile Include="Gameplay\Kirche\Kirchgang.cs" />
+    <Compile Include="Gameplay\Kirche\Kupplerin.cs" />
     <Compile Include="Gameplay\Kirche\Werbegeschenk.cs" />
     <Compile Include="Gameplay\Niederlassung\EnumProduktionsslotAktionsart.cs" />
     <Compile Include="Gameplay\Niederlassung\Karawane.cs" />

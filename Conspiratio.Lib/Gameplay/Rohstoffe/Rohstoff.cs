@@ -36,7 +36,7 @@ namespace Conspiratio.Lib.Gameplay.Rohstoffe
         /// <param name="wekstattVerhaeltnisWerkstatt">Faktor Werkstätten für das Verhältnis Arbeiter zu Werkstätten</param>
         /// <param name="rohstoffStufe">Rohstoffstufe (1 bis 3) zur Unterteilung auch für die Handelszertifikate und die Lagermenge</param>
         /// <param name="textQualitaetProduktion">Text, der im Buch auftaucht, wenn die Ware produziert wurde, z.B. Eure Getreideernte verlief {0}</param>
-        /// <param name="lagermengeProQMeter">OPTIONAL: Gibt an, wie viel auf einem Qudaratmeter Lagerplatz gelagert werden können 
+        /// <param name="lagermengeProQMeter">OPTIONAL: Gibt an, wie viel auf einem Quadratmeter Lagerplatz gelagert werden können 
         /// (standardmäßig abhängig von der Stufe: 1 = 10, 2 = 6, 3 = 3)</param>
         public Rohstoff(int preisMin, int preisStd, int preisMax, string name, string produktionstext, int werkstattVerhaeltnisArbeiter,
                         int wekstattVerhaeltnisWerkstatt, int rohstoffStufe, string textQualitaetProduktion, int lagermengeProQMeter = 10)

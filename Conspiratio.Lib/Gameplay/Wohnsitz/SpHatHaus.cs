@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+
 using Conspiratio.Lib.Gameplay.Spielwelt;
-using Conspiratio.Lib.Gameplay.Wohnsitz;
 
 namespace Conspiratio.Lib.Gameplay.Wohnsitz
 {
@@ -246,6 +246,23 @@ namespace Conspiratio.Lib.Gameplay.Wohnsitz
         }
         #endregion
 
+        #region ToString (for debugging)
+        /// <summary>
+        /// Only for debugging purposes
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            string text = "";
+            text += $"{nameof(_hausID)}: {_hausID}\t";
+            text += $"{nameof(_stadtID)}: {_stadtID}\t";
+            text += $"{nameof(_restlicheBauzeit)}: {_restlicheBauzeit}\t";
+            text += $"{nameof(_zustandInProzent)}: {_zustandInProzent}\t";
+            text += $"{nameof(_wertverlustFaktor)}: {_wertverlustFaktor}";
+            return text;
+        }
+        #endregion
+        
 
         #region Properties
 
