@@ -1,8 +1,8 @@
 # Changelog Conspiratio.Lib
 
-## Unreleased
+## 2.1.0
 
-_TODO Releasedate_
+_23.10.2022_
 
 **[DE]**
 - Bei der Berechnung des Gesamtvermögens eines Spielers werden Rohstoffe nun nicht anhand des Standardpreises sondern des aktuellen Preises in der Stadt, in der sie gelagert sind, berechnet
