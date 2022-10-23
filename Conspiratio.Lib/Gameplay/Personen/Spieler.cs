@@ -379,8 +379,8 @@ namespace Conspiratio.Lib.Gameplay.Personen
             string text = "";
             text += $"{nameof(Name)}: {Name}\t";
             text += $"{nameof(Maennlich)}: {Maennlich}\t";
-            text += $"{nameof(Taler)}: {Taler}";
-            text += $"{nameof(Religion)}: {Religion}";
+            text += $"{nameof(Taler)}: {Taler}\t";
+            text += $"{nameof(Religion)}: {Religion}\t";
             text += $"{nameof(Alter)}: {Alter}";
             return text;
         }
