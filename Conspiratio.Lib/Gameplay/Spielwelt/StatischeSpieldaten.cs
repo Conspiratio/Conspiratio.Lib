@@ -1221,8 +1221,8 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             Tit[5] = new Freiherr(5, "Freiherr", "Freifrau", 55);
             Tit[6] = new Baron(6, "Baron", "Baronin", 75);
             Tit[7] = new Graf(7, "Graf", "Gräfin", 100);
-            Tit[8] = new Herzog(8, "Herzog", "Herzogin", 125);
-            Tit[9] = new Fuerst(9, "Fürst", "Fürstin", 150);
+            Tit[8] = new Fuerst(8, "Fürst", "Fürstin", 125);
+            Tit[9] = new Herzog(9, "Herzog", "Herzogin", 150);
             #endregion
 
             #region Werbegeschenke anlegen
