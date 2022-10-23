@@ -368,5 +368,22 @@ namespace Conspiratio.Lib.Gameplay.Personen
                 return "ihr";
         }
         #endregion
+
+        #region ToString (for debugging)
+        /// <summary>
+        /// Only for debugging purposes
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            string text = "";
+            text += $"{nameof(Name)}: {Name}\t";
+            text += $"{nameof(Maennlich)}: {Maennlich}\t";
+            text += $"{nameof(Taler)}: {Taler}";
+            text += $"{nameof(Religion)}: {Religion}";
+            text += $"{nameof(Alter)}: {Alter}";
+            return text;
+        }
+        #endregion
     }
 }
