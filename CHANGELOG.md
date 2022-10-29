@@ -1,5 +1,12 @@
 # Changelog Conspiratio.Lib
 
+## 2.1.1
+
+_Unreleased_
+
+**[DE]**
+- Beim Privileg "Jurist aufsuchen" wird nun ein Rechtsklick im Dialog nicht mehr als "Ja" sondern als Abbruch gewertet
+
 ## 2.1.0
 
 _23.10.2022_
