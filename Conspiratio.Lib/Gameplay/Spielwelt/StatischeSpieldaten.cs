@@ -113,7 +113,11 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         private int MinTitelLandEbene;
         private int MinTitelReichsEbene;
 
-        private Adelstitel[] Tit;
+        /// <summary>
+        /// Alle vorhandenen Adelstitel
+        /// </summary>
+        public Adelstitel[] Titel { get; private set; }
+        
         private int maxAnzahlWahlen;
         private int maxAnzahlAmtsenthebungen;
         #endregion
@@ -1211,18 +1215,18 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
 
             #region Titel
             MaxTitelID = 10;
-            Tit = new Adelstitel[MaxTitelID];
+            Titel = new Adelstitel[MaxTitelID];
 
-            Tit[0] = new Herr(0, "Herr", "Frau", 0);
-            Tit[1] = new Buerger(1, "Bürger", "Bürgerin", 5);
-            Tit[2] = new Edelmann(2, "Edelmann", "Edelfrau", 10);
-            Tit[3] = new Ritter(3, "Ritter", "Hofdame", 20);
-            Tit[4] = new Landherr(4, "Landherr", "Landfrau", 35);
-            Tit[5] = new Freiherr(5, "Freiherr", "Freifrau", 55);
-            Tit[6] = new Baron(6, "Baron", "Baronin", 75);
-            Tit[7] = new Graf(7, "Graf", "Gräfin", 100);
-            Tit[8] = new Fuerst(8, "Fürst", "Fürstin", 125);
-            Tit[9] = new Herzog(9, "Herzog", "Herzogin", 150);
+            Titel[0] = new Herr(0, "Herr", "Frau", 0, 0);
+            Titel[1] = new Buerger(1, "Bürger", "Bürgerin", 0, 5);
+            Titel[2] = new Edelmann(2, "Edelmann", "Edelfrau", 5000, 10);
+            Titel[3] = new Ritter(3, "Ritter", "Hofdame", 15000, 20);
+            Titel[4] = new Landherr(4, "Landherr", "Landfrau", 40000, 35);
+            Titel[5] = new Freiherr(5, "Freiherr", "Freifrau", 80000, 55);
+            Titel[6] = new Baron(6, "Baron", "Baronin", 150000, 75);
+            Titel[7] = new Graf(7, "Graf", "Gräfin", 250000, 100);
+            Titel[8] = new Fuerst(8, "Fürst", "Fürstin", 350000, 125);
+            Titel[9] = new Herzog(9, "Herzog", "Herzogin", 500000, 150);
             #endregion
 
             #region Werbegeschenke anlegen
@@ -1446,7 +1450,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         public int GetMinKindSlotNr() { return minKindSlotNr; }
         public int GetMaxPriv() { return maxPrivilegien; }
         public int GetMaxKredite() { return maxKrediteAnzahl; }
-        public Adelstitel GetTitelX(int x) { return Tit[x]; }
+        public Adelstitel GetTitelX(int x) { return Titel[x]; }
         public IPrivileg GetPrivX(int x) { return Privilegien[x]; }
         public Karawane GetKarawane(int x) { return Kara[x]; }
         public int GetDefaultKarawane() { return DefaultKarawane; }

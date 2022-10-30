@@ -2,8 +2,8 @@
 {
     public class Buerger : Adelstitel
     {
-        public Buerger(int i, string mn, string wn, int bona)
-            : base(i, mn, wn, bona)
+        public Buerger(int id, string nameMaennlich, string nameWeiblich, int abTaler, int bonusAnsehen)
+            : base(id, nameMaennlich, nameWeiblich, abTaler, bonusAnsehen)
         {
         }
     }

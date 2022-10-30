@@ -1,11 +1,13 @@
-﻿namespace Conspiratio.Lib.Gameplay.Titel
+﻿using Conspiratio.Lib.Gameplay.Spielwelt;
+
+namespace Conspiratio.Lib.Gameplay.Titel
 {
     public class Adelstitel
     {
         /// <summary>
         /// Rang des Titels (Reihenfolge), startet bei 0 für den ersten Titel.
         /// </summary>
-        public int ID { get; }
+        public int Id { get; }
 
         /// <summary>
         /// Männliche Bezeichnung des Titels
@@ -18,15 +20,21 @@
         public string NameWeiblich { get; }
 
         /// <summary>
+        /// Die Talermenge, die zur Verleihung dieses Titels mindestens notwendig ist.
+        /// </summary>
+        public int AbTaler { get; }
+
+        /// <summary>
         /// Hat aktuell noch keine Auswirkung. Ist wahrscheinlich für einen Ansehensbonus durch den Titel gedacht gewesen.
         /// </summary>
         public int BonusAnsehen { get; }
 
-        public Adelstitel(int id, string nameMaennlich, string nameWeiblich, int bonusAnsehen)
+        public Adelstitel(int id, string nameMaennlich, string nameWeiblich, int abTaler, int bonusAnsehen)
         {
-            ID = id;
+            Id = id;
             NameMaennlich = nameMaennlich;
             NameWeiblich = nameWeiblich;
+            AbTaler = abTaler;
             BonusAnsehen = bonusAnsehen;
         }
 
@@ -37,14 +45,18 @@
         /// <returns>Bezeichnung des Titels</returns>
         public string GetName(bool maennlich)
         {
-            if (maennlich)
-            {
-                return NameMaennlich;
-            }
-            else
-            {
-                return NameWeiblich;
-            }
+            return maennlich ? NameMaennlich : NameWeiblich;
+        }
+
+        /// <summary>
+        /// Gibt zurück, ob der übergebene Spieler berechtigt ist, den Titel zu tragen.
+        /// </summary>
+        /// <param name="dynamischeSpieldaten">Objekt mit den dynamischen Spieldaten</param>
+        /// <param name="spielerId">Id des Spielers</param>
+        /// <returns>Spieler ist berechtigt (true) oder nicht (false)</returns>
+        public virtual bool IstSpielerFuerTitelBerechtigt(DynamischeSpieldaten dynamischeSpieldaten, int spielerId)
+        {
+            return dynamischeSpieldaten.GetSpWithID(spielerId).GetTaler() >= AbTaler;
         }
     }
 }

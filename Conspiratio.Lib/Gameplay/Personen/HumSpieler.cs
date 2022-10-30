@@ -765,6 +765,50 @@ namespace Conspiratio.Lib.Gameplay.Personen
         }
         #endregion
 
+        #region BesitztSpielerFertigesHaus
+        /// <summary>
+        /// Gibt zurück, ob der aktuelle Spieler ein bestimmtes, fertiges Haus besitzt.
+        /// </summary>
+        /// <param name="hausname">Bezeichnung des gesuchten Hauses, z.B. Villa</param>
+        /// <returns>Besitzt der Spieler das fertige Haus (true) oder nicht (false)</returns>
+        public bool BesitztSpielerFertigesHaus(string hausname)
+        {
+            for (int i = 1; i < SW.Statisch.GetMaxStadtID(); i++)
+            {
+                var hausInStadt = _spielerHatHausVonStadtAnArraystelle[i];
+
+                if (hausInStadt.GetHausID() > 0 &&  // Existiert ein Haus?
+                    hausInStadt.GetRestlicheBauzeit() == 0 &&  // Ist es fertig gebaut?
+                    SW.Statisch.GetHaus(hausInStadt.GetHausID()).Name == hausname)  // Entspricht es dem gesuchten Haus?
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        #endregion
+
+        #region GetAnzahlStuetzpunkte
+        /// <summary>
+        /// Liefert die Anzahl der militärischen Stützpunkte, die der übergebene Spieler besitzt.
+        /// </summary>
+        /// <param name="spielerId">Id des Spielers</param>
+        /// <returns>Anzahl der Stützpunkte in seinem Besitz</returns>
+        public int GetAnzahlStuetzpunkte(int spielerId)
+        {
+            int anzahl = 0;
+
+            // Stützpunkte
+            for (int i = 0; i < SW.Dynamisch.GetStuetzpunkte().Length; i++)
+            {
+                if (SW.Dynamisch.GetStuetzpunkte()[i].Besitzer == spielerId)
+                    anzahl++;
+            }
+
+            return anzahl;
+        }
+        #endregion
 
         #region ToString (for debugging)
         /// <summary>

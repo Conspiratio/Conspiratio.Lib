@@ -2,8 +2,8 @@
 {
     public class Herr : Adelstitel
     {
-        public Herr(int i, string mn, string wn, int bona)
-            : base(i, mn, wn, bona)
+        public Herr(int id, string nameMaennlich, string nameWeiblich, int abTaler, int bonusAnsehen)
+            : base(id, nameMaennlich, nameWeiblich, abTaler, bonusAnsehen)
         {
         }
     }
