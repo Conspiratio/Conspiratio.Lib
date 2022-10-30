@@ -12,6 +12,7 @@ using Conspiratio.Lib.Gameplay.Personen;
 using Conspiratio.Lib.Gameplay.Privilegien;
 using Conspiratio.Lib.Gameplay.Rohstoffe;
 using Conspiratio.Lib.Gameplay.Schreibstube;
+using Conspiratio.Lib.Gameplay.Titel;
 
 namespace Conspiratio.Lib.Gameplay.Spielwelt
 {
@@ -2502,6 +2503,29 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             GetGerichtsverhandlungX(klageID).SetAll(richter1, richter2, richter3, stadtID, 0, GetAktiverSpieler(), klaegerID);
         }
         #endregion
+
+        #region VersuchTitelVerleihen
+        public void VersuchTitelVerleihen(int spielerId)
+        {
+            // Falls nicht schon einer diese Runde verliehen wird
+            if (GetHumWithID(spielerId).GetBekamTitelX() != 0)
+            {
+                return;
+            }
+
+            int aktuelleTitelId = GetHumWithID(spielerId).GetTitel();
+
+            foreach (Adelstitel titel in SW.Statisch.Titel)
+            {
+                if (titel.IstSpielerFuerTitelBerechtigt(this, spielerId) && titel.Id > aktuelleTitelId)
+                {
+                    GetHumWithID(spielerId).SetBekamTitelX(titel.Id);
+                    break;
+                }
+            }
+        }
+        #endregion
+
 
         // Private Methoden
         #region GetLeereWahlID

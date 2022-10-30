@@ -1,5 +1,13 @@
 # Changelog Conspiratio.Lib
 
+## 2.1.1
+
+_30.10.2022_
+
+**[DE]**
+- Beim Privileg "Jurist aufsuchen" wird nun ein Rechtsklick im Dialog nicht mehr als "Ja" sondern als Abbruch gewertet
+- Die Vergabe von Titeln wurde neu balanciert und ist nun u.a. auch vom Wohnsitz sowie vom Besitz militärischer Stützpunkte abhängig, zusätzlich wurde die Talergrenze der höheren Titel herabgesetzt. Dafür wurde die Vergabelogik in die einzelnen Titel-Klassen ausgelagert sowie etwas aufgeräumt und optimiert.
+
 ## 2.1.0
 
 _23.10.2022_
