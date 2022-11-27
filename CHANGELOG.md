@@ -5,7 +5,7 @@
 _Unreleased_
 
 **[DE]**
-- Die Strafe "Einen Monat Kerker" hat nun eine höhere Auswirkung auf die Gesundheit des verurteilten Spielers, die Auswirkung ist außerdem leicht abhängig von der Schwere der Schuld.
+- Die Strafe "Einen Monat Kerker" hat nun eine variable Länge, abhängig von der Schwere der Schuld. Die Auswirkung auf die Gesundheit des verurteilten Spielers ist dann entsprechend höher.
 
 ## 2.1.1
 
