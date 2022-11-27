@@ -25,7 +25,7 @@ namespace Conspiratio.Lib.Gameplay.Justiz
                 SW.Dynamisch.GetSpWithID(opferID).ErhoeheAnsehen(ansehensaenderung);
             }
 
-            return SW.Dynamisch.GetSpWithID(opferID).GetName() + " muss einen Tag am Pranger verbringen.\nDas Ansehen von " + SW.Dynamisch.GetSpWithID(opferID).GetName() + " hat deutlich gelitten";
+            return SW.Dynamisch.GetSpWithID(opferID).GetName() + " muss einen Tag am Pranger verbringen.\nDas Ansehen von " + SW.Dynamisch.GetSpWithID(opferID).GetName() + " hat deutlich gelitten.";
         }
     }
 }

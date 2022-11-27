@@ -1,5 +1,12 @@
 # Changelog Conspiratio.Lib
 
+## 2.2.0
+
+_Unreleased_
+
+**[DE]**
+- Die Strafe "Einen Monat Kerker" hat nun eine höhere Auswirkung auf die Gesundheit des verurteilten Spielers, die Auswirkung ist außerdem leicht abhängig von der Schwere der Schuld.
+
 ## 2.1.1
 
 _30.10.2022_
