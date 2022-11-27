@@ -615,7 +615,6 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
 
         public void RohPreiseRandomSchwanken()
         {
-            int value = 0;
             if (GetAktuellesJahr() > SW.Statisch.StartJahr + 1)
             {
                 //alle Staedte
@@ -624,7 +623,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
                     //alle Rohstoffe
                     for (int j = 1; j < SW.Statisch.GetMaxRohID(); j++)
                     {
-                        value = SW.Statisch.Rnd.Next(-1, 2);
+                        int value = SW.Statisch.Rnd.Next(-1, 2);
                         GetStadtwithID(i).ErhoeheRohstoffPreisVonIDXByY(j, value);
                     }
                 }
@@ -1765,12 +1764,12 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
 
                             if (oamtstufe > 5)
                             {
-                                produkt = produkt / 2;
+                                produkt /= 2;
                             }
 
                             if (oamtstufe > 10)
                             {
-                                produkt = produkt / 2;
+                                produkt /= 2;
                             }
 
                             int verbesserung = Convert.ToInt32(produkt / 10);
@@ -2526,6 +2525,120 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         }
         #endregion
 
+        #region TestamentVollstrecken
+        public void TestamentVollstrecken()
+        {
+            // Alle Attribute vom Erben werden nun übernommen
+            int fixerErbe = GetHumWithID(GetAktiverSpieler()).GetErbeSpielerID();
+
+            if (fixerErbe == 0)
+            {
+                // Spieler scheidet aus
+
+                // Die Frau soll nicht mehr verheiratet sein
+                if (GetHumWithID(GetAktiverSpieler()).GetVerheiratet() != 0)
+                    GetKIwithID(GetHumWithID(GetAktiverSpieler()).GetVerheiratet()).SetVerheiratet(0);
+
+                bool last = false;
+
+                if (GetAktiverSpieler() == GetAktivSpielerAnzahl() && GetAktiverSpieler() > 1)
+                    last = true;
+
+                // Stützpunkte des verstorbenen Spielers wieder zufälligen KI-Spielern zuteilen
+                for (int i = 0; i < GetStuetzpunkte().Length; i++)
+                {
+                    if (GetStuetzpunkte()[i].Besitzer == GetAktiverSpieler())
+                        GetStuetzpunkte()[i].BesitzerStuetzpunktZufaelligSetzen();
+                }
+
+                CreateSpielerX(GetAktiverSpieler(), 0, "", true, 0, 0);  // Aktuelles Spieler Objekt initialisieren (auf null setzen führt ansonsten z.B. in der Statistik zu Problemen beim Zugriff: NullReference Exception)
+                SetAktivSpielerAnzahl(GetAktivSpielerAnzahl() - 1);
+
+                // Ist der Spieler der letzte und nicht einzige in der Liste? Dann wird nicht geordnet und einfach ein neues Jahr gestartet
+                if (last)
+                {
+                    SetAktiverSpieler(1);
+                    ErhoehAktuellesJahrUmEins();
+                }
+                else
+                {
+                    // Ist der Spieler nicht der letzte, so muss die Liste neu geordnet werden (Spieler rücken nach)
+                    int i = GetAktiverSpieler();
+
+                    while (i + 1 <= GetAktivSpielerAnzahl() + 1)
+                    {
+                        SetHumX(i, GetHumWithID(i + 1), i + 1);
+                        i++;
+                    }
+                }
+            }
+            else
+            {
+                // Verschiedene Zustände des verstorbenen Charakters zurücksetzen, die nicht vererbt werden
+                GetHumWithID(GetAktiverSpieler()).SetSitztImKerker(false);  // Soll nicht im Schuldturm sitzen, wenn der verstorbene Charakter vorher verurteilt wurde
+                GetHumWithID(GetAktiverSpieler()).SetDeliktpunkte(0);
+                GetHumWithID(GetAktiverSpieler()).SetKindBekommen(false);
+                GetHumWithID(GetAktiverSpieler()).SetSpieltKartenGegenSpielerID(0);
+
+                for (int i = 0; i < SW.Statisch.GetMaxGesetze(); i++)
+                    GetHumWithID(GetAktiverSpieler()).SetBegingVerbrechenX(i, 0);  // Gesetzesbrüche zurücksetzen (werden nicht vererbt)
+
+                if (fixerErbe >= SW.Statisch.GetMinKIID())
+                {
+                    // Frau erbt
+                    int FrauKIID = GetHumWithID(GetAktiverSpieler()).GetVerheiratet();
+
+                    string nname = GetKIwithID(GetHumWithID(GetAktiverSpieler()).GetVerheiratet()).GetName();
+
+                    GetHumWithID(GetAktiverSpieler()).ErhoeheTaler(GetSpWithID(FrauKIID).GetTaler());
+                    GetHumWithID(GetAktiverSpieler()).SetName(nname);
+                    GetHumWithID(GetAktiverSpieler()).SetAlter(GetSpWithID(FrauKIID).GetAlter());
+                    GetHumWithID(GetAktiverSpieler()).SetMaennlich(GetSpWithID(FrauKIID).GetMaennlich());
+                    GetHumWithID(GetAktiverSpieler()).SetVerheiratet(0);
+                    GetHumWithID(GetAktiverSpieler()).SetErbeSpielerID(0);
+
+                    // +2 Damit die Frau nicht womöglich in derselben Runde stirbt
+                    GetHumWithID(GetAktiverSpieler()).SetVerbleibendeJahre(GetSpWithID(FrauKIID).GetVerbleibendeJahre() + 2);
+
+                    GetHumWithID(GetAktiverSpieler()).SetGesundheit(GetSpWithID(FrauKIID).GetGesundheit());
+
+                    // Kinder bleiben die gleichen
+
+                    // Amt wird uebernommen
+                    AmtAufStufeXGebietYidZanWvergeben(GetStufeVonAmtmitIDx(GetKIwithID(FrauKIID).GetAmtsInformationen().GetAmtsID()), GetKIwithID(FrauKIID).GetAmtsInformationen().GetGebietsID(), GetKIwithID(FrauKIID).GetAmtsInformationen().GetAmtsID(), GetAktiverSpieler());
+
+                    // KI neu anlegen da die Frau sonst doppelt existieren würde
+                    KIXneuAnlegen(FrauKIID);
+                }
+                else
+                {
+                    // Kind erbt
+                    GetHumWithID(GetAktiverSpieler()).SetErbeSpielerID(0);
+
+                    string nname = GetHumWithID(GetAktiverSpieler()).GetKindX(fixerErbe).GetKindName();
+                    GetHumWithID(GetAktiverSpieler()).SetName(nname);
+
+                    int nalter = GetHumWithID(GetAktiverSpieler()).GetKindX(fixerErbe).GetAlter();
+                    GetHumWithID(GetAktiverSpieler()).SetAlter(nalter);
+
+                    bool maennlich = GetHumWithID(GetAktiverSpieler()).GetKindX(fixerErbe).GetMaennlich();
+                    GetHumWithID(GetAktiverSpieler()).SetMaennlich(maennlich);
+
+                    GetHumWithID(GetAktiverSpieler()).SetGesundheit(SW.Statisch.GetMaxGesundheit());
+
+                    int verbleibendeJahre = SW.Statisch.Rnd.Next(SW.Statisch.GetHumminVerblJahre(), SW.Statisch.GetHummaxVerblJahre());
+                    GetHumWithID(GetAktiverSpieler()).SetVerbleibendeJahre(verbleibendeJahre);
+
+                    // Das Kind hat noch keine Kinder!!!
+                    for (int i = SW.Statisch.GetMinKindSlotNr(); i < SW.Statisch.GetMaxKinderAnzahl(); i++)
+                        GetHumWithID(GetAktiverSpieler()).GetKindX(i).SetName("");
+
+                    // Das Kind ist nicht verheiratet
+                    GetHumWithID(GetAktiverSpieler()).SetVerheiratet(0);
+                }
+            }
+        }
+        #endregion
 
         // Private Methoden
         #region GetLeereWahlID
