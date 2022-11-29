@@ -14,6 +14,8 @@ using Conspiratio.Lib.Gameplay.Rohstoffe;
 using Conspiratio.Lib.Gameplay.Schreibstube;
 using Conspiratio.Lib.Gameplay.Titel;
 
+using static System.Windows.Forms.AxHost;
+
 namespace Conspiratio.Lib.Gameplay.Spielwelt
 {
     /// <summary>
@@ -588,6 +590,21 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         public void AmtAufStufeXGebietYidZanWvergeben(int x, int y, int z, int w)
         {
             GetSpWithID(w).SetAmt(z, y);
+
+            if (w < SW.Statisch.GetMinKIID())  // Menschlicher Spieler?
+            {
+                // Rohstoffrecht vergeben, je nach Stufe des Amtes
+                int tierStufeRohstoff;
+                if (x == 0)
+                    tierStufeRohstoff = 1;
+                else if (x == 1)
+                    tierStufeRohstoff = 2;
+                else  // Reich
+                    tierStufeRohstoff = 3;
+
+                GetHumWithID(w).NeuesHandelszertifikatVerleihen(tierStufeRohstoff);
+            }
+
             if (y != 0)
             {
                 GetGebietwithID(y, x).SetAmtXtoY(z, w);
@@ -2049,15 +2066,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             #endregion
 
             #region 2 - Amt niederlegen
-            if (GetAktHum().GetAmtID() == 0)
-            {
-                GetAktHum().SetPrivilegX(2, false);
-            }
-            else
-            {
-                GetAktHum().SetPrivilegX(2, true);
-                GetAktHum().HandelszertifikatVerleihen(2, 1, 8);
-            }
+            GetAktHum().SetPrivilegX(2, GetAktHum().GetAmtID() == 0);  // Amt niederlegen nur möglich, wenn Amt vorhanden ist
             #endregion
 
             #region 3 - Testament machen

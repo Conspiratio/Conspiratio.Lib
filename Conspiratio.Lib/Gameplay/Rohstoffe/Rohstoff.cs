@@ -128,6 +128,11 @@ namespace Conspiratio.Lib.Gameplay.Rohstoffe
             return _name;
         }
 
+        public int GetRohStufe()
+        {
+            return _rohStufe;
+        }
+
         public string GetProdText()
         {
             return _produktionstext;

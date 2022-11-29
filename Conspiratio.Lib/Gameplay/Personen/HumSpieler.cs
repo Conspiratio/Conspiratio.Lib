@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Linq;
 
 using Conspiratio.Lib.Gameplay.Ereignisse;
 using Conspiratio.Lib.Gameplay.Hinterzimmer;
@@ -612,70 +614,62 @@ namespace Conspiratio.Lib.Gameplay.Personen
         }
         #endregion
 
-        #region VersuchHandelszertifikatVerleihen
-        public void VersuchHandelszertifikatVerleihen()
+        #region NeuesHandelszertifikatVerleihen
+        public void NeuesHandelszertifikatVerleihen(int tierStufeRohstoff)
         {
-            // Falls nicht schon eines diese Runde verliehen wird
-            if (GetBekamHandeslzertifikatX() == 0)
+            if (GetBekamHandeslzertifikatX() != 0)  // Pro Runde kann immer nur ein Handelszertifikat verliehen werden, der erste Aufruf gewinnt daher immer
+                return;
+
+            List<int> rohstoffOhneRecht = new List<int>();
+
+            // Liste aller RohstoffIDs zur Tier-Stufe ermitteln, für die der Spieler noch kein Rohstoff Recht besitzt.
+            while (tierStufeRohstoff > 0)
             {
-                int handzert = 0;
+                rohstoffOhneRecht = ErmittleRohstoffeOhneRohstoffrecht(tierStufeRohstoff);
 
-                // Handelszertifikate zählen
-                for (int i = 1; i < SW.Statisch.GetMaxRohID(); i++)
-                {
-                    if (GetRohstoffrechteX(i))
-                    {
-                        handzert++;
-                    }
-                }
+                if (rohstoffOhneRecht.Any())
+                    break;  // Es gibt auf der aktuellen Tier-Stufe Rohstoffe ohne Recht
 
-                // Falls er bereits 2 Rohstoffe besaß
-                if (handzert >= 2)
-                {
-                    if (GetTaler() >= 1000000)
-                    {
-                        HandelszertifikatVerleihen(5, 15, SW.Statisch.GetMaxRohID());
-                    }
-                    else if (GetTaler() >= 500000)
-                    {
-                        HandelszertifikatVerleihen(4, 8, 19);
-                    }
-                    else if (GetTaler() >= 100000)
-                    {
-                        HandelszertifikatVerleihen(3, 8, 15);
-                    }
-                }
+                if (tierStufeRohstoff == 1)
+                    break;  // Der Spieler bereits alle möglichen Rohstoffrechte auf dieser oder kleineren Tier-Stufen
+
+                // Der Spieler hat alle Rohstoffrechte der aktuellen Tier-Stufe bereits und es handelt sich nicht um Tier-Stufe 1.
+                // Dann ermitteln wir Liste aller RohstoffIDs zur nächst niedrigeren Tier-Stufe, für die der Spieler noch kein Rohstoff Recht besitzt.
+                tierStufeRohstoff--;
             }
+
+            if (!rohstoffOhneRecht.Any())  // Hat der Spieler bereits alle möglichen Rohstoffrechte?
+                return;
+
+            int neueRohstoffID;
+            if (rohstoffOhneRecht.Count() > 1)
+            {
+                // Zufälligen Rohstoff aus der Liste wählen
+                neueRohstoffID = rohstoffOhneRecht[SW.Statisch.Rnd.Next(0, rohstoffOhneRecht.Count())];
+            }
+            else
+                neueRohstoffID = rohstoffOhneRecht.First();
+
+            SetRohstoffrechteXZuY(neueRohstoffID, true);
+            SetBekamHandelszertifikatX(neueRohstoffID);
         }
         #endregion
 
-        #region HandelszertifikatVerleihen
-        public void HandelszertifikatVerleihen(int anzahlRohstoffrechte, int minRohID, int maxRohID)
+        #region ErmittleRohstoffeOhneRohstoffrecht
+        public List<int> ErmittleRohstoffeOhneRohstoffrecht(int tierStufeRohstoff)
         {
-            int aktuelleAnzahlRohstoffrechte = 0;
-            // Rohstoffrecht verleihen
+            List<int> rohstoffeOhneRecht = new List<int>();
+
             for (int i = 1; i < SW.Statisch.GetMaxRohID(); i++)
             {
-                if (GetRohstoffrechteX(i))
-                {
-                    aktuelleAnzahlRohstoffrechte++;
-                }
+                if (SW.Dynamisch.GetRohstoffwithID(i).GetRohStufe() != tierStufeRohstoff)
+                    continue;
+
+                if (!GetRohstoffrechteX(i))
+                    rohstoffeOhneRecht.Add(i);
             }
 
-            // Wenn der Spieler weniger als x Rechte besitzt, bekommt er ein neues verliehen
-            if (aktuelleAnzahlRohstoffrechte < anzahlRohstoffrechte)
-            {
-                int neuesRecht = SW.Statisch.Rnd.Next(minRohID, maxRohID);
-
-                // Solange der Spieler das neue Recht aber schon hat, soll ein anderes gewählt werden
-                while (GetRohstoffrechteX(neuesRecht) == true)
-                {
-                    neuesRecht = SW.Statisch.Rnd.Next(minRohID, maxRohID);
-                }
-
-                SetRohstoffrechteXZuY(neuesRecht, true);
-                SetBekamHandelszertifikatX(neuesRecht);
-            }
+            return rohstoffeOhneRecht;
         }
         #endregion
 

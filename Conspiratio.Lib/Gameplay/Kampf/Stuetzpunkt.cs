@@ -545,6 +545,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                         SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler()).ErhoeheTaler(-Preis);
                         SW.Dynamisch.GetKIwithID(Besitzer).SetTaler(SW.Dynamisch.GetKIwithID(Besitzer).GetTaler() + Preis);
                         Besitzer = SW.Dynamisch.GetAktiverSpieler();
+                        SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler()).NeuesHandelszertifikatVerleihen(3);  // Es gibt immer ein Handelszertifikat der Stufe 3 beim Kauf eines Stützpunktes
                         SW.Dynamisch.BelTextAnzeigen($"Euer Angebot wurde angenommen, Ihr seid nun stolzer Besitzer von {Name}.");
                         return true;
                     }
