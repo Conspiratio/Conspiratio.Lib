@@ -2,6 +2,7 @@
 using System.Linq;
 
 using Conspiratio.Lib.Extensions;
+using Conspiratio.Lib.Gameplay.Gebiete;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
 namespace Conspiratio.Lib.Gameplay.Privilegien.FestGeben
@@ -126,7 +127,7 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.FestGeben
 
             int anteilGesamtvermoegen = SW.Dynamisch.GetAktHum().GetGesamtVermoegen(SW.Dynamisch.GetAktiverSpieler()) / 200;  // 0,5 % des Gesamtvermögens
 
-            int grundpreis = 800;
+            int grundpreis = 1200;
             int geplanteKosten = Convert.ToInt32((grundpreis * faktorGroesse + (grundpreis * faktorMusiker)) * faktorVergangeneSpielzeit) + anteilGesamtvermoegen;
 
             if (geplanteKosten > 500000)  // Kosten deckeln bei sehr weit fortgeschrittenen Spielen
@@ -135,7 +136,7 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.FestGeben
             Fest fest = new Fest(spielerID, stadtID, groesse, musiker, jahr, geplanteKosten);
             SW.Dynamisch.Spielstand.Feste.Add(fest);
 
-            string message = $"Denkt daran, dass Eure Niederlassung in {GetStadtName(stadtID)} im Jahr {jahr} mit kulinarischen Köstlichkeiten gut gefüllt sein sollte ...{Environment.NewLine}" +
+            string message = $"Denkt daran, dass die Lager der Stadt {GetStadtName(stadtID)} im Jahr {jahr} mit kulinarischen Köstlichkeiten gut gefüllt sein sollten ...{Environment.NewLine}" +
                              $"Die Musiker werden Euch etwa {geplanteKosten.ToStringGeld()} kosten.";
 
             return message;
@@ -151,12 +152,14 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.FestGeben
             if (SW.Dynamisch.GetAktuellesJahr() != fest.Jahr)
                 throw new ArgumentOutOfRangeException(nameof(fest), "Das Jahr des Festes ist nicht das aktuelle Jahr.");
 
-            int lagerstandObst = SW.Dynamisch.GetAktHum().GetStadtRohstoffAnzahl(fest.StadtID, 3);
-            int lagerstandBier = SW.Dynamisch.GetAktHum().GetStadtRohstoffAnzahl(fest.StadtID, 4);
-            int lagerstandFisch = SW.Dynamisch.GetAktHum().GetStadtRohstoffAnzahl(fest.StadtID, 6);
-            int lagerstandWein = SW.Dynamisch.GetAktHum().GetStadtRohstoffAnzahl(fest.StadtID, 9);
-            int lagerstandRind = SW.Dynamisch.GetAktHum().GetStadtRohstoffAnzahl(fest.StadtID, 10);
-            int lagerstandRum = SW.Dynamisch.GetAktHum().GetStadtRohstoffAnzahl(fest.StadtID, 12);
+            Stadt stadtVomFest = SW.Dynamisch.GetStadtwithID(fest.StadtID);
+
+            int lagerstandObst = stadtVomFest.GetRohstoffIDXVorrat(3);
+            int lagerstandBier = stadtVomFest.GetRohstoffIDXVorrat(4);
+            int lagerstandFisch = stadtVomFest.GetRohstoffIDXVorrat(6);
+            int lagerstandWein = stadtVomFest.GetRohstoffIDXVorrat(9);
+            int lagerstandRind = stadtVomFest.GetRohstoffIDXVorrat(10);
+            int lagerstandRum = stadtVomFest.GetRohstoffIDXVorrat(12);
 
             int verbrauchProWareKlein = 100;
             int verbrauchProWareNormal = 200;
@@ -421,7 +424,7 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.FestGeben
 
                 // Ware verbrauchen
                 if (verbrauchBier > 0)
-                    SW.Dynamisch.GetAktHum().SetStadtRohstoffAnzahl(fest.StadtID, 4, SW.Dynamisch.GetAktHum().GetStadtRohstoffAnzahl(fest.StadtID, 4) - verbrauchBier);
+                    stadtVomFest.ErhoeheRohstoffVorratWithIDXByY(4, -verbrauchBier);
             }
 
             if ((verbrauchSollFisch > 0) && (erfolgWarenInProzent < 100))
@@ -458,7 +461,7 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.FestGeben
 
                 // Ware verbrauchen
                 if (verbrauchFisch > 0)
-                    SW.Dynamisch.GetAktHum().SetStadtRohstoffAnzahl(fest.StadtID, 6, SW.Dynamisch.GetAktHum().GetStadtRohstoffAnzahl(fest.StadtID, 6) - verbrauchFisch);
+                    stadtVomFest.ErhoeheRohstoffVorratWithIDXByY(6, -verbrauchFisch);
             }
 
             if ((verbrauchSollObst > 0) && (erfolgWarenInProzent < 100))
@@ -489,7 +492,7 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.FestGeben
 
                 // Ware verbrauchen
                 if (verbrauchObst > 0)
-                    SW.Dynamisch.GetAktHum().SetStadtRohstoffAnzahl(fest.StadtID, 3, SW.Dynamisch.GetAktHum().GetStadtRohstoffAnzahl(fest.StadtID, 3) - verbrauchObst);
+                    stadtVomFest.ErhoeheRohstoffVorratWithIDXByY(3, -verbrauchObst);
             }
 
             if ((verbrauchSollWein > 0) && (erfolgWarenInProzent < 100))
@@ -520,7 +523,7 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.FestGeben
 
                 // Ware verbrauchen
                 if (verbrauchWein > 0)
-                    SW.Dynamisch.GetAktHum().SetStadtRohstoffAnzahl(fest.StadtID, 9, SW.Dynamisch.GetAktHum().GetStadtRohstoffAnzahl(fest.StadtID, 9) - verbrauchWein);
+                    stadtVomFest.ErhoeheRohstoffVorratWithIDXByY(9, -verbrauchWein);
             }
 
             if ((verbrauchSollRum > 0) && (erfolgWarenInProzent < 100))
@@ -551,7 +554,7 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.FestGeben
 
                 // Ware verbrauchen
                 if (verbrauchRum > 0)
-                    SW.Dynamisch.GetAktHum().SetStadtRohstoffAnzahl(fest.StadtID, 12, SW.Dynamisch.GetAktHum().GetStadtRohstoffAnzahl(fest.StadtID, 12) - verbrauchRum);
+                    stadtVomFest.ErhoeheRohstoffVorratWithIDXByY(12, -verbrauchRum);
             }
 
             if ((verbrauchSollRind > 0) && (erfolgWarenInProzent < 100))
@@ -582,7 +585,7 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.FestGeben
 
                 // Ware verbrauchen
                 if (verbrauchRind > 0)
-                    SW.Dynamisch.GetAktHum().SetStadtRohstoffAnzahl(fest.StadtID, 10, SW.Dynamisch.GetAktHum().GetStadtRohstoffAnzahl(fest.StadtID, 10) - verbrauchRind);
+                    stadtVomFest.ErhoeheRohstoffVorratWithIDXByY(10, -verbrauchRind);
             }
 
             #endregion

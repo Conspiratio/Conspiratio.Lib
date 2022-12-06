@@ -618,14 +618,14 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             {
                 for (int k = 1; k < SW.Statisch.GetMaxRohID(); k++)
                 {
-                    for (int i = 1; i < GetAktivSpielerAnzahl(); i++)
+                    for (int i = 1; i <= GetAktivSpielerAnzahl(); i++)
                     {
                         int temp = GetHumWithID(i).GetEinVerkaeufeInStadtXVonRohstoffIDY(j, k);
                         GetStadtwithID(j).ErhoeheRohstoffVorratWithIDXByY(k, temp);
                         GetHumWithID(i).SetEinVerkaeufeInStadtXVonRohstoffIDYAufZ(j, k, 0);
                     }
                     //Und jene auch etwas verbrauchen
-                    GetStadtwithID(j).ErhoeheRohstoffVorratWithIDXByY(k, -GetStadtwithID(j).GetEinwohner() / 4);
+                    GetStadtwithID(j).ErhoeheRohstoffVorratWithIDXByY(k, -GetStadtwithID(j).GetEinwohner() / 10);
                 }
             }
         }
