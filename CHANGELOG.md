@@ -2,7 +2,7 @@
 
 ## 2.2.0
 
-_Unreleased_
+_06.12.2022_
 
 **[DE]**
 - Die Strafe "Einen Monat Kerker" hat nun eine variable Länge, abhängig von der Schwere der Schuld. Die Auswirkung auf die Gesundheit des verurteilten Spielers ist dann entsprechend höher.
