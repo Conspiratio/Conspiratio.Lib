@@ -2066,7 +2066,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             #endregion
 
             #region 2 - Amt niederlegen
-            GetAktHum().SetPrivilegX(2, GetAktHum().GetAmtID() == 0);  // Amt niederlegen nur möglich, wenn Amt vorhanden ist
+            GetAktHum().SetPrivilegX(2, GetAktHum().GetAmtID() != 0);  // Amt niederlegen nur möglich, wenn Amt vorhanden ist
             #endregion
 
             #region 3 - Testament machen

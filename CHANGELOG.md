@@ -1,5 +1,17 @@
 # Changelog Conspiratio.Lib
 
+## 2.3.0
+
+_23.12.2023_
+
+**[DE]**
+- Mit der Auslagerung der Kartenspiel Logik in neue Klasse "Kartenspiel" begonnen
+- Bugfix von "PrivilegienAktualisieren", es setzt "Amt niederlegen" nun wieder nur dann auf true, wenn der Spieler auch ein Amt bekleidet
+
+**[EN]**
+- Started with the outsourcing of the card game logic to the new class "Kartenspiel"
+- Bugfix for "PrivilegienAktualisieren", it sets "Amt niederlegen" now correct only to true, if the player has an office
+
 ## 2.2.0
 
 _06.12.2022_
