@@ -1,5 +1,17 @@
 # Changelog Conspiratio.Lib
 
+## 2.3.0
+
+_23.12.2023_
+
+**[DE]**
+- Mit der Auslagerung der Kartenspiel Logik in neue Klasse "Kartenspiel" begonnen
+- Bugfix von "PrivilegienAktualisieren", es setzt "Amt niederlegen" nun wieder nur dann auf true, wenn der Spieler auch ein Amt bekleidet
+
+**[EN]**
+- Started with the outsourcing of the card game logic to the new class "Kartenspiel"
+- Bugfix for "PrivilegienAktualisieren", it sets "Amt niederlegen" now correct only to true, if the player has an office
+
 ## 2.2.0
 
 _06.12.2022_
@@ -7,9 +19,9 @@ _06.12.2022_
 **[DE]**
 - Die Strafe "Einen Monat Kerker" hat nun eine variable Länge, abhängig von der Schwere der Schuld. Die Auswirkung auf die Gesundheit des verurteilten Spielers ist dann entsprechend höher.
 - Methode "TestamentVollstrecken" hinzugefügt (ausgelagert aus WinForms Client)
-- Rohstoffrechte (Handelszertifikate) werden nun bei jeder Amtsverleihung sowie Kauf einer Zollburg oder eines Räuberlagers gewährt und sind nicht mehr abhängig von Talergrenzen sowie nicht mehr beschränbkt auf maximal 5.
+- Rohstoffrechte (Handelszertifikate) werden nun bei jeder Amtsverleihung sowie Kauf einer Zollburg oder eines Räuberlagers gewährt und sind nicht mehr abhängig von Talergrenzen sowie nicht mehr beschränkt auf maximal 5.
 - Bei Spielen mit nur einem aktiven Spieler erhöhen Warenverkäufe des Spielers an die Stadt am Ende der Runde nun korrekt den Lagerstand der Stadt
-- Feste benötigen die Waren nun im Lager der Stadt anstelle im Lager der Niederlassung des Spielers. Somit ist es nun überhaupt erst möglich, alle Waren für die größeren Feste zu beschaffen (sofern die Handelszertifikat dafür vorhanden sind).
+- Feste benötigen die Waren nun im Lager der Stadt anstelle im Lager der Niederlassung des Spielers. Somit ist es nun überhaupt erst möglich, alle Waren für die größeren Feste zu beschaffen (sofern die Handelszertifikate dafür vorhanden sind).
 - Die von den Einwohnern einer Stadt verbrauchten Waren am Rundenende wurden reduziert
 - Kleinere Optimierungen
 

@@ -101,6 +101,7 @@
     <Compile Include="Gameplay\Gebiete\Stadt.cs" />
     <Compile Include="Gameplay\Hinterzimmer\AktiveSabotagen.cs" />
     <Compile Include="Gameplay\Hinterzimmer\AktiveSpionagen.cs" />
+    <Compile Include="Gameplay\Hinterzimmer\Kartenspiel.cs" />
     <Compile Include="Gameplay\Justiz\Gerichtsverhandlung.cs" />
     <Compile Include="Gameplay\Justiz\IStrafe.cs" />
     <Compile Include="Gameplay\Justiz\Strafe.cs" />
