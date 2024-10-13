@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 
+using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Einstellungen;
 using Conspiratio.Lib.Gameplay.Gebiete;
@@ -13,8 +13,6 @@ using Conspiratio.Lib.Gameplay.Privilegien;
 using Conspiratio.Lib.Gameplay.Rohstoffe;
 using Conspiratio.Lib.Gameplay.Schreibstube;
 using Conspiratio.Lib.Gameplay.Titel;
-
-using static System.Windows.Forms.AxHost;
 
 namespace Conspiratio.Lib.Gameplay.Spielwelt
 {
@@ -1517,7 +1515,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         #region AktivenSpielerEntfernen
         public bool? AktivenSpielerEntfernen()
         {
-            if (SW.UI.JaNeinFrage.ShowDialogText(textFrage: "Wollt Ihr wirklich all' Euer Geld aus dem Fenster\n werfen und das Spiel verlassen?", "Ja", "Lieber nicht") != DialogResult.Yes)
+            if (SW.UI.JaNeinFrage.ShowDialogText(textFrage: "Wollt Ihr wirklich all' Euer Geld aus dem Fenster\n werfen und das Spiel verlassen?", "Ja", "Lieber nicht") != DialogResultGame.Yes)
             {
                 return null;
             }
@@ -1607,7 +1605,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
                 {
                     int kosten = Convert.ToInt32(GetKIwithID(id).GetTaler() * SW.Statisch.GetErmordungProzentsatz());
 
-                    if (SW.UI.JaNeinFrage.ShowDialogText(textFrage: "Wollt Ihr wirklich die Ermordung von\n" + GetKIwithID(id).GetKompletterName() + " für " + kosten.ToStringGeld() + "\nin Auftrag geben?") == DialogResult.Yes)
+                    if (SW.UI.JaNeinFrage.ShowDialogText(textFrage: "Wollt Ihr wirklich die Ermordung von\n" + GetKIwithID(id).GetKompletterName() + " für " + kosten.ToStringGeld() + "\nin Auftrag geben?") == DialogResultGame.Yes)
                     {
                         if (CheckIfenoughGold(kosten))  // Wenn man auch genügend Taler besitzt
                         {
@@ -1694,7 +1692,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         public void ProzessInitiieren(int id)
         {
 
-            if (SW.UI.JaNeinFrage.ShowDialogText(textFrage: "Wollt Ihr wirklich gegen " + GetSpWithID(id).GetKompletterName() + "\neinen Prozess initiieren?") == DialogResult.Yes)
+            if (SW.UI.JaNeinFrage.ShowDialogText(textFrage: "Wollt Ihr wirklich gegen " + GetSpWithID(id).GetKompletterName() + "\neinen Prozess initiieren?") == DialogResultGame.Yes)
             {
                 GetHumWithID(GetAktiverSpieler()).SetKlagtSpielerMitIDXAn(id);
                 SpielerKlagtXAn(id);
@@ -1711,7 +1709,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             // Es ist noch keine Vergiftung in Vorbereitung
             if (GetHumWithID(GetAktiverSpieler()).GetVergiftetWeinVonKISpielerID() == 0)
             {
-                if (SW.UI.JaNeinFrage.ShowDialogText(textFrage: "Wollt Ihr wirklich für " + kosten.ToStringGeld() + "\n einen Trank von " + GetSpWithID(id).GetName() + " vergiften?") == DialogResult.Yes)
+                if (SW.UI.JaNeinFrage.ShowDialogText(textFrage: "Wollt Ihr wirklich für " + kosten.ToStringGeld() + "\n einen Trank von " + GetSpWithID(id).GetName() + " vergiften?") == DialogResultGame.Yes)
                 {
                     if (CheckIfenoughGold(kosten))
                     {

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
 
+using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Kampf.Einheiten;
 using Conspiratio.Lib.Gameplay.Spielwelt;
@@ -394,7 +394,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 return false;
             }
 
-            if (SW.UI.JaNeinFrage.ShowDialogText($"Aktuelle Moral: {MoralTruppeInProzent} %\nWollt Ihr mit Euren Truppen\n in {Name} wirklich ein Manöver\n für {KostenManoever.ToStringGeld()} durchführen lassen?", "Ja", "Lieber nicht!") != DialogResult.Yes)
+            if (SW.UI.JaNeinFrage.ShowDialogText($"Aktuelle Moral: {MoralTruppeInProzent} %\nWollt Ihr mit Euren Truppen\n in {Name} wirklich ein Manöver\n für {KostenManoever.ToStringGeld()} durchführen lassen?", "Ja", "Lieber nicht!") != DialogResultGame.Yes)
                 return false;
 
             if (!SW.Dynamisch.CheckIfenoughGold(KostenManoever))
@@ -516,7 +516,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 NameBesitzer = SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler()).GetName();
 
             if (SW.UI.JaNeinFrage.ShowDialogText("Wollt Ihr " + NameBesitzer + " wirklich ein Angebot\nüber " + Preis.ToStringGeld() +
-                                                 " unterbreiten?\nIhr könnt pro Jahr nur einmal ein Angebot abgeben.", "Ja", "Lieber nicht!") == DialogResult.Yes)
+                                                 " unterbreiten?\nIhr könnt pro Jahr nur einmal ein Angebot abgeben.", "Ja", "Lieber nicht!") == DialogResultGame.Yes)
             {
                 if (Besitzer >= SW.Statisch.GetMinKIID())
                 {
@@ -621,7 +621,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             if (Anzahl == 1)
                 NameEinheiten = Truppeneinheit.Name;
 
-            if (SW.UI.JaNeinFrage.ShowDialogText($"Wollt Ihr {Anzahl} {NameEinheiten}\n für {Kosten.ToStringGeld()} Handgeld anheuern?", "Ja", "Lieber nicht!") != DialogResult.Yes)
+            if (SW.UI.JaNeinFrage.ShowDialogText($"Wollt Ihr {Anzahl} {NameEinheiten}\n für {Kosten.ToStringGeld()} Handgeld anheuern?", "Ja", "Lieber nicht!") != DialogResultGame.Yes)
                 return false;
 
             if (!SW.Dynamisch.CheckIfenoughGold(Kosten))
@@ -656,7 +656,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             if (Anzahl == 1)
                 NameEinheiten = Truppeneinheit.Name;
 
-            if (SW.UI.JaNeinFrage.ShowDialogText($"Wollt Ihr wirklich\n{Anzahl} {NameEinheiten} entlassen?", "Ja", "Lieber nicht!") != DialogResult.Yes)
+            if (SW.UI.JaNeinFrage.ShowDialogText($"Wollt Ihr wirklich\n{Anzahl} {NameEinheiten} entlassen?", "Ja", "Lieber nicht!") != DialogResultGame.Yes)
                 return false;
 
             Meldung = VerringereTruppen(Anzahl, TypeEinheit);

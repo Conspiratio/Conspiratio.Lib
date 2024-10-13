@@ -1,231 +1,31 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{98ACB1BC-6708-4119-A1DC-23E3DEF08007}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Conspiratio.Lib</RootNamespace>
-    <AssemblyName>Conspiratio.Lib</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+    <None Update="icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Allgemein\IBeziehungPflegen.cs" />
-    <Compile Include="Allgemein\IJaNeinFrage.cs" />
-    <Compile Include="Allgemein\ITextAnzeigen.cs" />
-    <Compile Include="Allgemein\UIHelper.cs" />
-    <Compile Include="Extensions\IntExtension.cs" />
-    <Compile Include="Gameplay\Aemter\Amt.cs" />
-    <Compile Include="Gameplay\Aemter\AmtAbt.cs" />
-    <Compile Include="Gameplay\Aemter\AmtBaumeister.cs" />
-    <Compile Include="Gameplay\Aemter\AmtBefehlshaber.cs" />
-    <Compile Include="Gameplay\Aemter\AmtBischof.cs" />
-    <Compile Include="Gameplay\Aemter\AmtBuergermeister.cs" />
-    <Compile Include="Gameplay\Aemter\AmtDiakon.cs" />
-    <Compile Include="Gameplay\Aemter\AmtDomherr.cs" />
-    <Compile Include="Gameplay\Aemter\AmtErzbischof.cs" />
-    <Compile Include="Gameplay\Aemter\AmtErzdiakon.cs" />
-    <Compile Include="Gameplay\Aemter\AmtFeldmarschall.cs" />
-    <Compile Include="Gameplay\Aemter\AmtFinanzberater.cs" />
-    <Compile Include="Gameplay\Aemter\AmtFinanzminister.cs" />
-    <Compile Include="Gameplay\Aemter\AmtFolterknecht.cs" />
-    <Compile Include="Gameplay\Aemter\AmtGeheimrat.cs" />
-    <Compile Include="Gameplay\Aemter\AmtHauptmann.cs" />
-    <Compile Include="Gameplay\Aemter\AmtHenker.cs" />
-    <Compile Include="Gameplay\Aemter\AmtHofrat.cs" />
-    <Compile Include="Gameplay\Aemter\AmtInfantrist.cs" />
-    <Compile Include="Gameplay\Aemter\AmtInquisitor.cs" />
-    <Compile Include="Gameplay\Aemter\AmtJustizberater.cs" />
-    <Compile Include="Gameplay\Aemter\AmtJustizminister.cs" />
-    <Compile Include="Gameplay\Aemter\AmtKaemmerer.cs" />
-    <Compile Include="Gameplay\Aemter\AmtKavallarist.cs" />
-    <Compile Include="Gameplay\Aemter\AmtKellermeister.cs" />
-    <Compile Include="Gameplay\Aemter\AmtKerkermeister.cs" />
-    <Compile Include="Gameplay\Aemter\AmtMarschall.cs" />
-    <Compile Include="Gameplay\Aemter\AmtOffizier.cs" />
-    <Compile Include="Gameplay\Aemter\AmtPriester.cs" />
-    <Compile Include="Gameplay\Aemter\AmtRatsherr.cs" />
-    <Compile Include="Gameplay\Aemter\AmtRegent.cs" />
-    <Compile Include="Gameplay\Aemter\AmtRichter.cs" />
-    <Compile Include="Gameplay\Aemter\AmtSakristan.cs" />
-    <Compile Include="Gameplay\Aemter\AmtStadtkommandant.cs" />
-    <Compile Include="Gameplay\Aemter\AmtStadtwache.cs" />
-    <Compile Include="Gameplay\Aemter\AmtstvBefehlshaber.cs" />
-    <Compile Include="Gameplay\Aemter\AmtVogt.cs" />
-    <Compile Include="Gameplay\Aemter\AmtWachkommandant.cs" />
-    <Compile Include="Gameplay\Aemter\AmtZoellner.cs" />
-    <Compile Include="Gameplay\Aemter\AmtZollmeister.cs" />
-    <Compile Include="Gameplay\Einstellungen\EnumSchwierigkeitsgrad.cs" />
-    <Compile Include="Gameplay\Einstellungen\Spieleinstellungen.cs" />
-    <Compile Include="Gameplay\Ereignisse\Datumsereignis.cs" />
-    <Compile Include="Gameplay\Ereignisse\EnumGueltigkeitReligion.cs" />
-    <Compile Include="Gameplay\Ereignisse\Ereigniszeitpunkt.cs" />
-    <Compile Include="Gameplay\Ereignisse\IDatumsereignis.cs" />
-    <Compile Include="Gameplay\Ereignisse\IZufallsereignis.cs" />
-    <Compile Include="Gameplay\Ereignisse\Zufallsereignis.cs" />
-    <Compile Include="Gameplay\Gebiete\Gebiet.cs" />
-    <Compile Include="Gameplay\Gebiete\Land.cs" />
-    <Compile Include="Gameplay\Gebiete\Reich.cs" />
-    <Compile Include="Gameplay\Gebiete\Stadt.cs" />
-    <Compile Include="Gameplay\Hinterzimmer\AktiveSabotagen.cs" />
-    <Compile Include="Gameplay\Hinterzimmer\AktiveSpionagen.cs" />
-    <Compile Include="Gameplay\Hinterzimmer\Kartenspiel.cs" />
-    <Compile Include="Gameplay\Justiz\Gerichtsverhandlung.cs" />
-    <Compile Include="Gameplay\Justiz\IStrafe.cs" />
-    <Compile Include="Gameplay\Justiz\Strafe.cs" />
-    <Compile Include="Gameplay\Justiz\StrafeAmtsenthebung.cs" />
-    <Compile Include="Gameplay\Justiz\StrafeGeldstrafe.cs" />
-    <Compile Include="Gameplay\Justiz\StrafeKerker.cs" />
-    <Compile Include="Gameplay\Justiz\StrafePranger.cs" />
-    <Compile Include="Gameplay\Kampf\Einheiten\Einheit.cs" />
-    <Compile Include="Gameplay\Kampf\EnumAktionsartRaeuberlager.cs" />
-    <Compile Include="Gameplay\Kampf\EnumAktionsartZollburg.cs" />
-    <Compile Include="Gameplay\Kampf\EnumKampfArt.cs" />
-    <Compile Include="Gameplay\Kampf\EnumStuetzpunktArt.cs" />
-    <Compile Include="Gameplay\Kampf\Kampf.cs" />
-    <Compile Include="Gameplay\Kampf\Kampfberechnung.cs" />
-    <Compile Include="Gameplay\Kampf\KampfErgebnis.cs" />
-    <Compile Include="Gameplay\Kampf\KampfKarawane.cs" />
-    <Compile Include="Gameplay\Kampf\Landsicherheit.cs" />
-    <Compile Include="Gameplay\Kampf\Raeuberlager.cs" />
-    <Compile Include="Gameplay\Kampf\RaeuberlagerAktion.cs" />
-    <Compile Include="Gameplay\Kampf\RaubBombenleger.cs" />
-    <Compile Include="Gameplay\Kampf\RaubKanonier.cs" />
-    <Compile Include="Gameplay\Kampf\RaubRaeuber.cs" />
-    <Compile Include="Gameplay\Kampf\RaubSchuetze.cs" />
-    <Compile Include="Gameplay\Kampf\Stuetzpunkt.cs" />
-    <Compile Include="Gameplay\Kampf\StuetzpunktAktion.cs" />
-    <Compile Include="Gameplay\Kampf\Zollburg.cs" />
-    <Compile Include="Gameplay\Kampf\ZollburgAktion.cs" />
-    <Compile Include="Gameplay\Kampf\ZollKanonier.cs" />
-    <Compile Include="Gameplay\Kampf\ZollMusketier.cs" />
-    <Compile Include="Gameplay\Kampf\ZollOffizier.cs" />
-    <Compile Include="Gameplay\Kampf\ZollSoeldner.cs" />
-    <Compile Include="Gameplay\Kirche\Kirchgang.cs" />
-    <Compile Include="Gameplay\Kirche\Kupplerin.cs" />
-    <Compile Include="Gameplay\Kirche\Werbegeschenk.cs" />
-    <Compile Include="Gameplay\Niederlassung\EnumProduktionsslotAktionsart.cs" />
-    <Compile Include="Gameplay\Niederlassung\Karawane.cs" />
-    <Compile Include="Gameplay\Niederlassung\Produktionsslot.cs" />
-    <Compile Include="Gameplay\Niederlassung\SpHatWerkstaetten.cs" />
-    <Compile Include="Gameplay\Personen\HumSpieler.cs" />
-    <Compile Include="Gameplay\Personen\Kind.cs" />
-    <Compile Include="Gameplay\Personen\KISpieler.cs" />
-    <Compile Include="Gameplay\Personen\Spieler.cs" />
-    <Compile Include="Gameplay\Personen\SpielerStatistik.cs" />
-    <Compile Include="Gameplay\Privilegien\Amtsenthebung.cs" />
-    <Compile Include="Gameplay\Privilegien\FestGeben\EnumFestGroesse.cs" />
-    <Compile Include="Gameplay\Privilegien\FestGeben\EnumFestMusiker.cs" />
-    <Compile Include="Gameplay\Privilegien\FestGeben\Fest.cs" />
-    <Compile Include="Gameplay\Privilegien\FestGeben\FestManager.cs" />
-    <Compile Include="Gameplay\Privilegien\IBauwerkStiftenDialog.cs" />
-    <Compile Include="Gameplay\Privilegien\IFestGebenDialog.cs" />
-    <Compile Include="Gameplay\Privilegien\IPolitischeWeltkarteDialog.cs" />
-    <Compile Include="Gameplay\Privilegien\IPrivileg.cs" />
-    <Compile Include="Gameplay\Privilegien\IProzentwertFestlegenDialog.cs" />
-    <Compile Include="Gameplay\Privilegien\ITestamentAnzeigenDialog.cs" />
-    <Compile Include="Gameplay\Privilegien\IUntergebeneDialog.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivAmtNiederlegen.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivBauwerkStiften.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivConfessio.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivEinkommen.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivFestGeben.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivFinGesetzeAendern.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivGroßkaufmann.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivGuenstigeKredite.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivHaendler.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivHenkersHand.cs" />
-    <Compile Include="Gameplay\Privilegien\Privileg.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivJurist.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivKaufmann.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivKeinKirchenzehnt.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivKerkerklatsch.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivKirGesetzeAendern.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivKorruptionsgelder.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivLeibgarde.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivMedikus.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivPrediger.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivProzessInitiieren.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivRohstoffrecht.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivSchmuggel.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivSparplan.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivSteuerhinterziehungA.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivSteuerhinterziehungB.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivSteuerhinterziehungC.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivStrafGesetzeAendern.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivTestament.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivUmsatzsteuerFestlegen.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivUntergebene.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivVergifteterWein.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivWachen.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivZollfrei.cs" />
-    <Compile Include="Gameplay\Privilegien\PrivZollkartell.cs" />
-    <Compile Include="Gameplay\Rohstoffe\Rohstoff.cs" />
-    <Compile Include="Gameplay\Schreibstube\AmtsInfo.cs" />
-    <Compile Include="Gameplay\Schreibstube\Kredit.cs" />
-    <Compile Include="Gameplay\Schreibstube\WahlAbhalten.cs" />
-    <Compile Include="Gameplay\Spielwelt\DynamischeSpieldaten.cs" />
-    <Compile Include="Gameplay\Spielwelt\EnumProzentwertArt.cs" />
-    <Compile Include="Gameplay\Spielwelt\Spielstand.cs" />
-    <Compile Include="Gameplay\Spielwelt\SW.cs" />
-    <Compile Include="Gameplay\Spielwelt\StatischeSpieldaten.cs" />
-    <Compile Include="Gameplay\Titel\Baron.cs" />
-    <Compile Include="Gameplay\Titel\Buerger.cs" />
-    <Compile Include="Gameplay\Titel\Edelmann.cs" />
-    <Compile Include="Gameplay\Titel\Freiherr.cs" />
-    <Compile Include="Gameplay\Titel\Fuerst.cs" />
-    <Compile Include="Gameplay\Titel\Graf.cs" />
-    <Compile Include="Gameplay\Titel\Herr.cs" />
-    <Compile Include="Gameplay\Titel\Herzog.cs" />
-    <Compile Include="Gameplay\Titel\Landherr.cs" />
-    <Compile Include="Gameplay\Titel\Ritter.cs" />
-    <Compile Include="Gameplay\Titel\Adelstitel.cs" />
-    <Compile Include="Gameplay\Wohnsitz\Haus.cs" />
-    <Compile Include="Gameplay\Wohnsitz\HausErweiterung.cs" />
-    <Compile Include="Gameplay\Wohnsitz\HausZustandsbezeichnung.cs" />
-    <Compile Include="Gameplay\Wohnsitz\SpHatHaus.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if $(ConfigurationName) == Debug (
-cd "$(ProjectDir)"
-nuget pack -Properties Configuration=Debug
-)
-rem Falls es hier einen Fehler gibt siehe: https://github.com/NuGet/Home/issues/9954
-rem Nuget.exe muss ab 5.7 offenbar explizit zugelassen werden (Dateieigenschaften)</PostBuildEvent>
+    <AssemblyVersion>3.0.0</AssemblyVersion>
+    <FileVersion>3.0.0</FileVersion>
+    <Description>A library with gameplay logic for the free and open-source game Conspiratio</Description>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Version>$(AssemblyVersion)</Version>
+    <Title>$(AssemblyName)</Title>
+    <Authors>Conspiratio</Authors>
+    <Copyright>Copyright © 2011-2024</Copyright>
+    <PackageProjectUrl>https://www.conspiratio.net</PackageProjectUrl>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageTags>conspiratio;game;library</PackageTags>
+    <PackageReleaseNotes>https://github.com/Conspiratio/Conspiratio.Lib/blob/master/CHANGELOG.md</PackageReleaseNotes>
+    <RepositoryUrl>https://github.com/Conspiratio/Conspiratio.Lib</RepositoryUrl>
   </PropertyGroup>
 </Project>

@@ -1,9 +1,9 @@
-﻿using System.Windows.Forms;
+﻿using Conspiratio.Lib.Allgemein;
 
 namespace Conspiratio.Lib.Gameplay.Privilegien
 {
     public interface IBauwerkStiftenDialog
     {
-        DialogResult ShowDialog();
+        DialogResultGame ShowDialog();
     }
 }
