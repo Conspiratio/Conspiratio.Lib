@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 using Conspiratio.Lib.Gameplay.Aemter;
 using Conspiratio.Lib.Gameplay.Ereignisse;
@@ -22,6 +23,8 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
 
         #region Allgemein
 
+        public string SavegamePath { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Conspiratio");
+        
         /// <summary>
         /// Gibt die Jahreszahl zu Beginn eines neuen Spiels an.
         /// </summary>
@@ -30,6 +33,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         /// <summary>
         /// Enthält die Texte aller Tipps.
         /// </summary>
+        // ReSharper disable once CollectionNeverQueried.Global
         public string[] Tipps { get; private set; }
 
         private int TippsMaxIndex = 0;
@@ -1087,26 +1091,23 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             Haeuser = new Haus[MaxHausID];
 
             #region Zustandsbezeichnungen
-            HausZustandsbezeichnung[] aHauszustandBezeichnungenDer;
-            HausZustandsbezeichnung[] aHauszustandBezeichnungenDie;
-            HausZustandsbezeichnung[] aHauszustandBezeichnungenDas;
-            int iMaxZustandsbezeichnungen = 5;
+            int maxZustandsbezeichnungen = 5;
 
-            aHauszustandBezeichnungenDer = new HausZustandsbezeichnung[iMaxZustandsbezeichnungen];
+            var aHauszustandBezeichnungenDer = new HausZustandsbezeichnung[maxZustandsbezeichnungen];
             aHauszustandBezeichnungenDer[0] = new HausZustandsbezeichnung("prächtiger", 80, 100);
             aHauszustandBezeichnungenDer[1] = new HausZustandsbezeichnung("schöner", 60, 79);
             aHauszustandBezeichnungenDer[2] = new HausZustandsbezeichnung("gut erhaltener", 40, 59);
             aHauszustandBezeichnungenDer[3] = new HausZustandsbezeichnung("verwahrloster", 20, 39);
             aHauszustandBezeichnungenDer[4] = new HausZustandsbezeichnung("verfallener", 0, 19);
 
-            aHauszustandBezeichnungenDie = new HausZustandsbezeichnung[iMaxZustandsbezeichnungen];
+            var aHauszustandBezeichnungenDie = new HausZustandsbezeichnung[maxZustandsbezeichnungen];
             aHauszustandBezeichnungenDie[0] = new HausZustandsbezeichnung("prächtige", 80, 100);
             aHauszustandBezeichnungenDie[1] = new HausZustandsbezeichnung("schöne", 60, 79);
             aHauszustandBezeichnungenDie[2] = new HausZustandsbezeichnung("gut erhaltene", 40, 59);
             aHauszustandBezeichnungenDie[3] = new HausZustandsbezeichnung("verwahrloste", 20, 39);
             aHauszustandBezeichnungenDie[4] = new HausZustandsbezeichnung("verfallene", 0, 19);
 
-            aHauszustandBezeichnungenDas = new HausZustandsbezeichnung[iMaxZustandsbezeichnungen];
+            var aHauszustandBezeichnungenDas = new HausZustandsbezeichnung[maxZustandsbezeichnungen];
             aHauszustandBezeichnungenDas[0] = new HausZustandsbezeichnung("prächtiges", 80, 100);
             aHauszustandBezeichnungenDas[1] = new HausZustandsbezeichnung("schönes", 60, 79);
             aHauszustandBezeichnungenDas[2] = new HausZustandsbezeichnung("gut erhaltenes", 40, 59);
