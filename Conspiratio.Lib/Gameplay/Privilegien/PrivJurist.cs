@@ -14,8 +14,8 @@ namespace Conspiratio.Lib.Gameplay.Privilegien
         {
             int preis = 1000;
 
-            if (SW.UI.JaNeinFrage.ShowDialogText("Beim Jurist erhaltet Ihr Einblicke\nin Eure bisherigen Verbrechen und deren Bewertung.\n" +
-                                                $"Wollt Ihr diese Dienste für\n{preis.ToStringGeld()} in Anspruch nehmen?") != DialogResultGame.Yes)
+            if (SW.UI.YesNoQuestion.ShowDialogText("Beim Jurist erhaltet Ihr Einblicke\nin Eure bisherigen Verbrechen und deren Bewertung.\n" +
+                                                $"Wollt Ihr diese Dienste für\n{preis.ToStringGeld()} in Anspruch nehmen?").GetAwaiter().GetResult() != DialogResultGame.Yes)
             {
                 return;
             }

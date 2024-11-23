@@ -4,7 +4,7 @@ namespace Conspiratio.Lib.Allgemein
 {
     public class UIHelper
     {
-        public IJaNeinFrage JaNeinFrage { get; private set; }
+        public IYesNoQuestion YesNoQuestion { get; private set; }
 
         public ITextAnzeigen TextAnzeigen { get; private set; }
 
@@ -22,11 +22,11 @@ namespace Conspiratio.Lib.Allgemein
 
         public IUntergebeneDialog UntergebeneDialog { get; private set; }       
 
-        public void Initialisieren(IJaNeinFrage jaNeinFrage, ITextAnzeigen textAnzeigen, IBeziehungPflegen beziehungPflegen, IBauwerkStiftenDialog bauwerkStiftenDialog,
+        public void Initialisieren(IYesNoQuestion yesNoQuestion, ITextAnzeigen textAnzeigen, IBeziehungPflegen beziehungPflegen, IBauwerkStiftenDialog bauwerkStiftenDialog,
                                    IFestGebenDialog festGebenDialog, IPolitischeWeltkarteDialog politischeWeltkarteDialog, ITestamentAnzeigenDialog testamentAnzeigenDialog,
                                    IProzentwertFestlegenDialog prozentwertFestlegenDialog, IUntergebeneDialog untergebeneDialog)
         {
-            JaNeinFrage = jaNeinFrage;
+            YesNoQuestion = yesNoQuestion;
             TextAnzeigen = textAnzeigen;
             BeziehungPflegen = beziehungPflegen;
             BauwerkStiftenDialog = bauwerkStiftenDialog;
