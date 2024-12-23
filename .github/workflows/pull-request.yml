@@ -27,10 +27,10 @@ jobs:
           nuget-version: 'latest'
      
     - name: Restore NuGet Packages
-      run: nuget restore Conspiratio.Lib.sln
+      run: nuget restore Conspiratio.Lib\Conspiratio.Lib.csproj
  
     - name: Build
-      run: msbuild Conspiratio.Lib.sln /p:Configuration=Release -t:pack
+      run: msbuild Conspiratio.Lib\Conspiratio.Lib.csproj /p:Configuration=Release -t:pack
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
