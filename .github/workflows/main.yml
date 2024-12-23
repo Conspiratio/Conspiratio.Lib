@@ -57,10 +57,10 @@ jobs:
         echo "VERSION_TEXT=${text}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
     - name: Create GitHub Release
-      uses: ncipollo/release-action@v1.7.3
+      uses: ncipollo/release-action@v1.14.0
       with:
         artifacts: 'Conspiratio.Lib\bin\Release\*,Conspiratio.Lib\bin\Release\*.nupkg'
         body: ${{env.VERSION_TEXT}}
         token: ${{ secrets.GITHUB_TOKEN }}
         commit: master
-        tag: ${{ steps.get_version.outputs.ASSEMBLY_VERSION }}
+        tag: ${{ steps.get-version.outputs.package-version }}
