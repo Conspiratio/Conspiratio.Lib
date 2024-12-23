@@ -44,7 +44,7 @@ jobs:
       run: nuget push Conspiratio.Lib\bin\Release\*.nupkg ${{secrets.NUGET_API_KEY}} -Source https://api.nuget.org/v3/index.json -SkipDuplicate
 
     - name: Get Version from csproj file
-      id: get_version
+      id: get-version
       uses: kzrnm/get-net-sdk-project-versions-action@v2
       with:
         proj-path: Conspiratio.Lib\Conspiratio.Lib.csproj
