@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
+using System.Threading.Tasks;
 
+using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Einstellungen;
 using Conspiratio.Lib.Gameplay.Gebiete;
@@ -13,8 +14,6 @@ using Conspiratio.Lib.Gameplay.Privilegien;
 using Conspiratio.Lib.Gameplay.Rohstoffe;
 using Conspiratio.Lib.Gameplay.Schreibstube;
 using Conspiratio.Lib.Gameplay.Titel;
-
-using static System.Windows.Forms.AxHost;
 
 namespace Conspiratio.Lib.Gameplay.Spielwelt
 {
@@ -1515,26 +1514,17 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         #endregion
 
         #region AktivenSpielerEntfernen
-        public bool? AktivenSpielerEntfernen()
+        public async Task<bool?> AktivenSpielerEntfernen()
         {
-            if (SW.UI.JaNeinFrage.ShowDialogText(textFrage: "Wollt Ihr wirklich all' Euer Geld aus dem Fenster\n werfen und das Spiel verlassen?", "Ja", "Lieber nicht") != DialogResult.Yes)
-            {
+            if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr wirklich all' Euer Geld aus dem Fenster\n werfen und das Spiel verlassen?", "Ja", "Lieber nicht") != DialogResultGame.Yes)
                 return null;
-            }
 
             // Ein möglicher Ehepartner soll nicht mehr verheiratet sein
             if (GetHumWithID(GetAktiverSpieler()).GetVerheiratet() != 0)
-            {
                 GetKIwithID(GetHumWithID(GetAktiverSpieler()).GetVerheiratet()).SetVerheiratet(0);
-            }
 
             string name = GetHumWithID(GetAktiverSpieler()).GetName();
-
-            bool last = false;
-            if (GetAktiverSpieler() == GetAktivSpielerAnzahl())
-            {
-                last = true;
-            }
+            bool last = GetAktiverSpieler() == GetAktivSpielerAnzahl();
 
             // Stützpunkte des verstorbenen Spielers wieder zufälligen KI-Spielern zuteilen
             for (int i = 0; i < GetStuetzpunkte().Length; i++)
@@ -1598,38 +1588,35 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         #endregion
 
         #region Ermordung
-        public void Ermordung(int id)
+        public async Task<bool> Ermordung(int id)
         {
-            if (id >= SW.Statisch.GetMinKIID())
-            {
-                //Es ist noch keine Ermordung in Auftrag
-                if (GetHumWithID(GetAktiverSpieler()).GetErmordetKISpielerID() == 0)
-                {
-                    int kosten = Convert.ToInt32(GetKIwithID(id).GetTaler() * SW.Statisch.GetErmordungProzentsatz());
-
-                    if (SW.UI.JaNeinFrage.ShowDialogText(textFrage: "Wollt Ihr wirklich die Ermordung von\n" + GetKIwithID(id).GetKompletterName() + " für " + kosten.ToStringGeld() + "\nin Auftrag geben?") == DialogResult.Yes)
-                    {
-                        if (CheckIfenoughGold(kosten))  // Wenn man auch genügend Taler besitzt
-                        {
-                            if (GetGesetzX(23) != 0)  // Wenn es verboten ist
-                                GetHumWithID(GetAktiverSpieler()).ErhoeheGesetzXUmEins(23);
-
-                            GetHumWithID(GetAktiverSpieler()).GetSpielerStatistik().HiVersuchteErmordungen++;
-                            GetHumWithID(GetAktiverSpieler()).ErhoeheTaler(-kosten);
-                            GetHumWithID(GetAktiverSpieler()).SetErmordetKISpielerID(id);
-                        }
-                    }
-                }
-                //Es ist schon eine Ermordung in Auftrag
-                else
-                {
-                    BelTextAnzeigen("Ihr habt dieses Jahr bereits eine Ermordung in Auftrag gegeben...");
-                }
-            }
-            else
+            if (id < SW.Statisch.GetMinKIID())
             {
                 BelTextAnzeigen("Ihr könnt keinen menschlichen Mitspieler ermorden lassen");
+                return false;
             }
+            
+            if (GetHumWithID(GetAktiverSpieler()).GetErmordetKISpielerID() != 0)  // Ist schon eine Ermordung in Auftrag gegeben worden?
+            {
+                BelTextAnzeigen("Ihr habt dieses Jahr bereits eine Ermordung in Auftrag gegeben...");
+                return false;
+            }
+
+            int kosten = Convert.ToInt32(GetKIwithID(id).GetTaler() * SW.Statisch.GetErmordungProzentsatz());
+
+            if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr wirklich die Ermordung von\n" + GetKIwithID(id).GetKompletterName() + " für " + kosten.ToStringGeld() + "\nin Auftrag geben?") != DialogResultGame.Yes)
+                return false;
+
+            if (!CheckIfenoughGold(kosten))  // Wenn man auch genügend Taler besitzt
+                return false;
+            
+            if (GetGesetzX(23) != 0)  // Wenn es verboten ist
+                GetHumWithID(GetAktiverSpieler()).ErhoeheGesetzXUmEins(23);
+
+            GetHumWithID(GetAktiverSpieler()).GetSpielerStatistik().HiVersuchteErmordungen++;
+            GetHumWithID(GetAktiverSpieler()).ErhoeheTaler(-kosten);
+            GetHumWithID(GetAktiverSpieler()).SetErmordetKISpielerID(id);
+            return true;
         }
         #endregion
 
@@ -1691,32 +1678,33 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         #endregion
 
         #region ProzessInitiieren
-        public void ProzessInitiieren(int id)
+        public async Task<bool> ProzessInitiieren(int id)
         {
-
-            if (SW.UI.JaNeinFrage.ShowDialogText(textFrage: "Wollt Ihr wirklich gegen " + GetSpWithID(id).GetKompletterName() + "\neinen Prozess initiieren?") == DialogResult.Yes)
-            {
-                GetHumWithID(GetAktiverSpieler()).SetKlagtSpielerMitIDXAn(id);
-                SpielerKlagtXAn(id);
-                BelTextAnzeigen("Ihr leitet einen Prozess gegen " + GetSpWithID(id).GetName() + " in die Wege.");
-            }
+            if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr wirklich gegen " + GetSpWithID(id).GetKompletterName() + "\neinen Prozess initiieren?") != DialogResultGame.Yes)
+                return false;
+            
+            GetHumWithID(GetAktiverSpieler()).SetKlagtSpielerMitIDXAn(id);
+            SpielerKlagtXAn(id);
+            BelTextAnzeigen("Ihr leitet einen Prozess gegen " + GetSpWithID(id).GetName() + " in die Wege.");
+            return true;
         }
         #endregion
 
         #region WeinVergiften
-        public void WeinVergiften(int id)
+        public async Task<bool> WeinVergiften(int id)
         {
             int kosten = 5000;
 
             // Es ist noch keine Vergiftung in Vorbereitung
             if (GetHumWithID(GetAktiverSpieler()).GetVergiftetWeinVonKISpielerID() == 0)
             {
-                if (SW.UI.JaNeinFrage.ShowDialogText(textFrage: "Wollt Ihr wirklich für " + kosten.ToStringGeld() + "\n einen Trank von " + GetSpWithID(id).GetName() + " vergiften?") == DialogResult.Yes)
+                if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr wirklich für " + kosten.ToStringGeld() + "\n einen Trank von " + GetSpWithID(id).GetName() + " vergiften?") == DialogResultGame.Yes)
                 {
                     if (CheckIfenoughGold(kosten))
                     {
                         GetHumWithID(GetAktiverSpieler()).ErhoeheTaler(-kosten);
                         GetHumWithID(GetAktiverSpieler()).SetVergiftetWeinVonKISpielerID(id);
+                        return true;
                     }
                 }
             }
@@ -1725,6 +1713,8 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             {
                 BelTextAnzeigen("Ihr habt in diesem Jahr bereits Vorbereitungen für einen anderen Anschlag getroffen.");
             }
+            
+            return false;
         }
         #endregion
 

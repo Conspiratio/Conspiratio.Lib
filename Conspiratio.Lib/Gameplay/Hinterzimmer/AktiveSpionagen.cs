@@ -35,9 +35,9 @@ namespace Conspiratio.Lib.Gameplay.Hinterzimmer
             return _dauer;
         }
 
-        public void DauerPlusEins()
+        public void DauerReduzieren()
         {
-            _dauer++;
+            _dauer--;
         }
 
         public int GetDelikte()

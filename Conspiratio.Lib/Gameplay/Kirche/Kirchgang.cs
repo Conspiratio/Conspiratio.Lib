@@ -1,5 +1,6 @@
-﻿using System.Windows.Forms;
+﻿using System.Threading.Tasks;
 
+using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
@@ -7,7 +8,7 @@ namespace Conspiratio.Lib.Gameplay.Kirche
 {
     public class Kirchgang
     {
-        public void AblassKaufen()
+        public async Task<bool> AblassKaufen()
         {
             SW.Dynamisch.DeliktpunkteBerechnen();
 
@@ -20,7 +21,7 @@ namespace Conspiratio.Lib.Gameplay.Kirche
             {
                 if (kosten != 0)
                 {
-                    if (SW.UI.JaNeinFrage.ShowDialogText("Wollt Ihr den Ablass für\n" + kosten.ToStringGeld() + " kaufen?", "Ja", "Nein") == DialogResult.Yes)
+                    if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr den Ablass für\n" + kosten.ToStringGeld() + " kaufen?", "Ja", "Nein") == DialogResultGame.Yes)
                     {
                         SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler()).ErhoeheTaler(-kosten);
                         SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler()).GetSpielerStatistik().KgekaufteAblaesse++;
@@ -33,6 +34,7 @@ namespace Conspiratio.Lib.Gameplay.Kirche
 
                         //Sünden reduzieren
                         SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler()).HalbiereDelikte();
+                        return true;
                     }
                 }
                 else
@@ -40,6 +42,8 @@ namespace Conspiratio.Lib.Gameplay.Kirche
                     SW.Dynamisch.BelTextAnzeigen("Ihr habt keine Sünden begangen, die einen Ablasskauf bedürfen.");
                 }
             }
+
+            return false;
         }
 
         public void Beichten()
@@ -68,22 +72,25 @@ namespace Conspiratio.Lib.Gameplay.Kirche
             }
         }
 
-        public void WaisenkindAdoptieren()
+        public async Task<bool> WaisenkindAdoptieren()
         {
             if (!SW.Dynamisch.GetAktHum().DarfWaisenkindAdoptieren())
             {
                 string vaterMutter = SW.Dynamisch.GetAktHum().GetMaennlich() ? "glücklicher Vater" : "glückliche Mutter";
                 SW.Dynamisch.BelTextAnzeigen($"Ihr seid derzeit {vaterMutter} \neines Kindes und könnt daher\n kein Waisenkind adoptieren.");
-                return;
+                return false;
             }
 
             int preis = SW.Dynamisch.GetAktHum().ErmittlePreisWaisenkindAdoptieren(SW.Dynamisch.GetAktiverSpieler());
 
-            if (SW.UI.JaNeinFrage.ShowDialogText("Wollt Ihr ein Mündel für\n" + preis.ToStringGeld() + " aus dem \nkirchlichen Waisenhaus adoptieren? \nEuer Ansehen könnte darunter leiden ...", 
-                                                 "Ja", "Lieber nicht!") == DialogResult.Yes)
+            if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr ein Mündel für\n" + preis.ToStringGeld() + " aus dem \nkirchlichen Waisenhaus adoptieren? \nEuer Ansehen könnte darunter leiden ...",
+                                                          "Ja", "Lieber nicht!") != DialogResultGame.Yes)
             {
-                SW.Dynamisch.GetAktHum().WaisenkindAdoptieren(preis);
+                return false;
             }
+
+            SW.Dynamisch.GetAktHum().WaisenkindAdoptieren(preis);
+            return true;
         }
     }
 }

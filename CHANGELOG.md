@@ -1,5 +1,21 @@
 # Changelog Conspiratio.Lib
 
+## 3.0.0
+
+_23.12.2024_
+
+**[DE]**
+- Projekt auf .NET Standard 2.0 angehoben
+- Neue Überladung für Methode "Initialisieren" ohne Interface Parameter hinzugefügt
+- Neue Klasse "NewGameManager" hinzugefügt
+- Methode "DauerPlusEins" der Klasse "AktiveSpionagen" geändert in "DauerReduzieren"
+
+**[EN]**
+- Changed Project to .NET Standard 2.0
+- Added a new overload method for "Initialisieren" without interface parameters
+- Added new class "NewGameManager"
+- Changed method "DauerPlusEins" of class "AktiveSpionagen" in "DauerReduzieren"
+
 ## 2.3.0
 
 _23.12.2023_

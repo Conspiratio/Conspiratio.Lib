@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
+using System.Threading.Tasks;
 
+using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Kampf.Einheiten;
 using Conspiratio.Lib.Gameplay.Spielwelt;
@@ -383,7 +384,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         /// Dient zur Durchführung eines Manövers auf dem Stützpunkt des aktiven menschlichen Spielers.
         /// </summary>
         /// <returns>Manöver erfolgreich (wurde die Moral erhöht)?</returns>
-        public bool ManoeverDurchfuehrenSpieler()
+        public async Task<bool> ManoeverDurchfuehrenSpieler()
         {
             int Wuerfel = SW.Statisch.Rnd.Next(1, 21); // 1 - 20 würfeln
             int KostenManoever = BerechneKostenManoever();
@@ -394,7 +395,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 return false;
             }
 
-            if (SW.UI.JaNeinFrage.ShowDialogText($"Aktuelle Moral: {MoralTruppeInProzent} %\nWollt Ihr mit Euren Truppen\n in {Name} wirklich ein Manöver\n für {KostenManoever.ToStringGeld()} durchführen lassen?", "Ja", "Lieber nicht!") != DialogResult.Yes)
+            if (await SW.UI.YesNoQuestion.ShowDialogText($"Aktuelle Moral: {MoralTruppeInProzent} %\nWollt Ihr mit Euren Truppen\n in {Name} wirklich ein Manöver\n für {KostenManoever.ToStringGeld()} durchführen lassen?", "Ja", "Lieber nicht!") != DialogResultGame.Yes)
                 return false;
 
             if (!SW.Dynamisch.CheckIfenoughGold(KostenManoever))
@@ -491,7 +492,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         /// </summary>
         /// <param name="Preis">Gewünschte Preis des Angebots</param>
         /// <returns>Kauf erfolgreich?</returns>
-        public bool KaufangebotAbgeben(int Preis)
+        public async Task<bool> KaufangebotAbgeben(int Preis)
         {
             if (SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler()).HatAngebotFuerStuetzpunktAbgegeben)
             {
@@ -515,8 +516,8 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             else
                 NameBesitzer = SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler()).GetName();
 
-            if (SW.UI.JaNeinFrage.ShowDialogText("Wollt Ihr " + NameBesitzer + " wirklich ein Angebot\nüber " + Preis.ToStringGeld() +
-                                                 " unterbreiten?\nIhr könnt pro Jahr nur einmal ein Angebot abgeben.", "Ja", "Lieber nicht!") == DialogResult.Yes)
+            if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr " + NameBesitzer + " wirklich ein Angebot\nüber " + Preis.ToStringGeld() +
+                                                 " unterbreiten?\nIhr könnt pro Jahr nur einmal ein Angebot abgeben.", "Ja", "Lieber nicht!") == DialogResultGame.Yes)
             {
                 if (Besitzer >= SW.Statisch.GetMinKIID())
                 {
@@ -608,7 +609,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         /// <param name="Anzahl">Gewünschte Anzahl</param>
         /// <param name="TypeEinheit">Gewünschte Einheit (Klasse abgeleitet von Einheit)</param>
         /// <returns>Anheuern erfolgreich?</returns>
-        public bool TruppenAnheuern(int Anzahl, Type TypeEinheit)
+        public async Task<bool> TruppenAnheuern(int Anzahl, Type TypeEinheit)
         {
             Einheit Truppeneinheit = (Einheit)Activator.CreateInstance(TypeEinheit);
             int Kosten = Truppeneinheit.Basispreis * Anzahl;
@@ -621,7 +622,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             if (Anzahl == 1)
                 NameEinheiten = Truppeneinheit.Name;
 
-            if (SW.UI.JaNeinFrage.ShowDialogText($"Wollt Ihr {Anzahl} {NameEinheiten}\n für {Kosten.ToStringGeld()} Handgeld anheuern?", "Ja", "Lieber nicht!") != DialogResult.Yes)
+            if (await SW.UI.YesNoQuestion.ShowDialogText($"Wollt Ihr {Anzahl} {NameEinheiten}\n für {Kosten.ToStringGeld()} Handgeld anheuern?", "Ja", "Lieber nicht!") != DialogResultGame.Yes)
                 return false;
 
             if (!SW.Dynamisch.CheckIfenoughGold(Kosten))
@@ -647,7 +648,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         /// <param name="Anzahl">Gewünschte Anzahl</param>
         /// <param name="TypeEinheit">Gewünschte Einheit (Klasse abgeleitet von Einheit)</param>
         /// <returns>Entlassen erfolgreich?</returns>
-        public bool TruppenEntlassen(int Anzahl, Type TypeEinheit)
+        public async Task<bool> TruppenEntlassen(int Anzahl, Type TypeEinheit)
         {
             Einheit Truppeneinheit = (Einheit)Activator.CreateInstance(TypeEinheit);
             string Meldung;
@@ -656,7 +657,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             if (Anzahl == 1)
                 NameEinheiten = Truppeneinheit.Name;
 
-            if (SW.UI.JaNeinFrage.ShowDialogText($"Wollt Ihr wirklich\n{Anzahl} {NameEinheiten} entlassen?", "Ja", "Lieber nicht!") != DialogResult.Yes)
+            if (await SW.UI.YesNoQuestion.ShowDialogText($"Wollt Ihr wirklich\n{Anzahl} {NameEinheiten} entlassen?", "Ja", "Lieber nicht!") != DialogResultGame.Yes)
                 return false;
 
             Meldung = VerringereTruppen(Anzahl, TypeEinheit);

@@ -7,7 +7,7 @@
     <authors>$author$</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">GPL-3.0-only</license>
-    <projectUrl>http://www.conspiratio.net</projectUrl>
+    <projectUrl>https://www.conspiratio.net</projectUrl>
     <description>$description$</description>
     <releaseNotes>https://github.com/Conspiratio/Conspiratio.Lib/blob/master/CHANGELOG.md</releaseNotes>
     <copyright>$copyright$</copyright>

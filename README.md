@@ -1,6 +1,6 @@
 # Conspiratio.Lib
 
-Dies ist der aktuelle Stand der C# .NET Framework 4.6.2 Klassenbibliothek mit der Gameplay Logik von Conspiratio, entnommen aus dem Conspiratio WinForms Client. Die Bibiliothek ist noch nicht vollständig, enthält aber bereits die wichtigsten Klassen und Methoden und kann als Grundbaustein für den Unity Client dienen.
+Dies ist der aktuelle Stand der C# .NET Standard 2.0 Klassenbibliothek mit der Gameplay Logik von Conspiratio, entnommen aus dem [Conspiratio WinForms Client](https://github.com/Conspiratio/Conspiratio.WinForms). Die Bibiliothek ist noch nicht vollständig, enthält aber bereits die wichtigsten Klassen und Methoden und dient als Grundbaustein für den [Godot Client](https://github.com/Conspiratio/Conspiratio.Godot) dienen.
 
 ## Package
 
@@ -17,7 +17,7 @@ Das Projekt wurde erstellt mit: Visual Studio 2019
 Für den manuellen Build einfach die Projektmappe `Conspiratio.Lib.sln` öffnen und kompilieren.
 
 ## Systemvoraussetzungen / Abhängigkeiten
-- .NET Framework 4.6.2
+- .NET Standard 2.0 (keine Abhängigkeiten)
 
 # Über das Spiel Conspiratio
 
@@ -35,7 +35,7 @@ Doch Vorsicht! Auch manche Konkurrenten werden von niederträchtigen Maßnahmen 
 
 # Über dieses Repository
 
-Ziel ist ein Rewrite der Oberfläche und eine Portierung sowie Refaktorisierung der Gameplaylogiken und der gesamten Architektur von der aktuellen Windows Forms Version zu einem Unity Spiel, da wir hier viel mehr multimediale und vor allem grafische Möglichkeiten haben und es eine gewisse Plattformunabhängigkeit gibt. Dieser neue Unity Client wird vollständig Open-Source sein, wir möchten andere Menschen möglich einfach in die Mitarbeit und Mitentwicklung einbeziehen und aus dem Hobbyprojekt soll ein Communityprojekt, von Fans für Fans, werden.
+Ziel ist ein Rewrite der Oberfläche und eine Portierung sowie Refaktorisierung der Gameplaylogiken und der gesamten Architektur von der aktuellen Windows Forms Version zu einem Godot Spiel, da wir hier viel mehr multimediale und vor allem grafische Möglichkeiten haben und es eine gewisse Plattformunabhängigkeit gibt. Dieser neue [Godot Client](https://github.com/Conspiratio/Conspiratio.Godot) wird vollständig Open-Source sein, wir möchten andere Menschen möglich einfach in die Mitarbeit und Mitentwicklung einbeziehen und aus dem Hobbyprojekt soll ein Communityprojekt, von Fans für Fans, werden.
 
 Zur Planung und Steuerung der Entwicklung sollen Github Issues dienen.
 
