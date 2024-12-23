@@ -18,7 +18,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1
        
     - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1.0.5
+      uses: NuGet/setup-nuget@v2
       with:
           nuget-api-key: ${{secrets.NUGET_API_KEY}}
           nuget-version: 'latest'
@@ -29,19 +29,19 @@ jobs:
     - name: Build
       run: msbuild Conspiratio.Lib.sln /p:Configuration=Release
 
-    - name: nuget Pack
-      run: nuget pack Conspiratio.Lib\Conspiratio.Lib.csproj
+    - name: Pack
+      run: msbuild Conspiratio.Lib.sln /p:Configuration=Release -t:pack
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: Conspiratio.Lib
         path: |
-          Conspiratio.Lib\bin\Release\*
-          *.nupkg
+          Conspiratio.Lib\bin\Release\netstandard2.0\*
+          Conspiratio.Lib\bin\Release\*.nupkg
 
     - name: Publish the package to nuget.org
-      run: nuget push *.nupkg ${{secrets.NUGET_API_KEY}} -Source https://api.nuget.org/v3/index.json -SkipDuplicate
+      run: nuget push Conspiratio.Lib\bin\Release\*.nupkg ${{secrets.NUGET_API_KEY}} -Source https://api.nuget.org/v3/index.json -SkipDuplicate
 
     - name: Get Version from csproj file
       id: get_version
@@ -59,7 +59,7 @@ jobs:
     - name: Create GitHub Release
       uses: ncipollo/release-action@v1.7.3
       with:
-        artifacts: 'Conspiratio.Lib\bin\Release\*,*.nupkg'
+        artifacts: 'Conspiratio.Lib\bin\Release\*,Conspiratio.Lib\bin\Release\*.nupkg'
         body: ${{env.VERSION_TEXT}}
         token: ${{ secrets.GITHUB_TOKEN }}
         commit: master
