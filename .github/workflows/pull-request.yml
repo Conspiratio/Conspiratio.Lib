@@ -30,15 +30,12 @@ jobs:
       run: nuget restore Conspiratio.Lib.sln
  
     - name: Build
-      run: msbuild Conspiratio.Lib.sln /p:Configuration=Release
-
-    - name: nuget Pack
-      run: nuget pack Conspiratio.Lib\Conspiratio.Lib.csproj
+      run: msbuild Conspiratio.Lib.sln /p:Configuration=Release -t:pack
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: Conspiratio.Lib
         path: |
-          Conspiratio.Lib\bin\Release\*
-          *.nupkg
+          Conspiratio.Lib\bin\Release\netstandard2.0\*
+          Conspiratio.Lib\bin\Release\*.nupkg
