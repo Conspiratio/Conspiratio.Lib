@@ -21,7 +21,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1
 
     - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1.0.5
+      uses: NuGet/setup-nuget@v2
       with:
           nuget-api-key: ${{secrets.NUGET_API_KEY}}
           nuget-version: 'latest'
@@ -30,6 +30,9 @@ jobs:
       run: nuget restore Conspiratio.Lib\Conspiratio.Lib.csproj
  
     - name: Build
+      run: msbuild Conspiratio.Lib\Conspiratio.Lib.csproj /p:Configuration=Release
+
+    - name: Pack
       run: msbuild Conspiratio.Lib\Conspiratio.Lib.csproj /p:Configuration=Release -t:pack
 
     - name: Upload Artifacts
