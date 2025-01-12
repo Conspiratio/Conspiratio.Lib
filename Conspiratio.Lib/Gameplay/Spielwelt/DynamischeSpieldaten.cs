@@ -2791,7 +2791,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         #region BelTextAnzeigen
         public void BelTextAnzeigen(string text)
         {
-            SW.UI.TextAnzeigen.ShowDialog(text);
+            SW.UI.ShowText.ShowDialog(text);
         }
         #endregion
 
