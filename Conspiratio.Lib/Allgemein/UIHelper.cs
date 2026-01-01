@@ -6,7 +6,7 @@ namespace Conspiratio.Lib.Allgemein
     {
         public IYesNoQuestion YesNoQuestion { get; private set; }
 
-        public ITextAnzeigen TextAnzeigen { get; private set; }
+        public IShowText ShowText { get; private set; }
 
         public IBeziehungPflegen BeziehungPflegen { get; private set; }
 
@@ -22,12 +22,12 @@ namespace Conspiratio.Lib.Allgemein
 
         public IUntergebeneDialog UntergebeneDialog { get; private set; }       
 
-        public void Initialisieren(IYesNoQuestion yesNoQuestion, ITextAnzeigen textAnzeigen, IBeziehungPflegen beziehungPflegen, IBauwerkStiftenDialog bauwerkStiftenDialog,
+        public void Initialisieren(IYesNoQuestion yesNoQuestion, IShowText showText, IBeziehungPflegen beziehungPflegen, IBauwerkStiftenDialog bauwerkStiftenDialog,
                                    IFestGebenDialog festGebenDialog, IPolitischeWeltkarteDialog politischeWeltkarteDialog, ITestamentAnzeigenDialog testamentAnzeigenDialog,
                                    IProzentwertFestlegenDialog prozentwertFestlegenDialog, IUntergebeneDialog untergebeneDialog)
         {
             YesNoQuestion = yesNoQuestion;
-            TextAnzeigen = textAnzeigen;
+            ShowText = showText;
             BeziehungPflegen = beziehungPflegen;
             BauwerkStiftenDialog = bauwerkStiftenDialog;
             FestGebenDialog = festGebenDialog;

@@ -1,5 +1,19 @@
 # Changelog Conspiratio.Lib
 
+## 3.1.0
+
+_01.01.2026_
+
+**[DE]**
+- Kleinere Refaktorisierungen des `NewGameManagers`
+- Refaktorisierung: Benenne `ITextAnzeigen` um in `IShowText`
+- Füge Resource Datei für statische, übersetzbare Texte hinzu (bisher mit deutsch und englisch als Sprache)
+
+**[EN]**
+- Small refactorings of `NewGameManagers`
+- Refactoring: Rename `ITextAnzeigen` to `IShowText`
+- Added a resource file for static localizable text (until now with german and english as languages)
+
 ## 3.0.0
 
 _23.12.2024_
