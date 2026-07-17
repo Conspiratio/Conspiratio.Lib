@@ -1,5 +1,17 @@
 # Changelog Conspiratio.Lib
 
+## 3.8.0
+
+_17.07.2026_
+
+**[DE]**
+- Neue Klassen `SpeicherManager` und `SpielstandInfo` hinzugefügt: Speichern, Laden (inkl. Anreicherung alter Spielstände), Autosave mit Aufräumen des vorvorletzten Standes, Auflisten und Löschen von Spielständen — im selben *.dat-Format wie der WinForms-Client, Spielstände bleiben zwischen beiden Clients austauschbar
+- Neue Klasse `SpielstandDeserializationBinder` (aus dem WinForms-Client übernommen): bildet Typnamen alter Spielstände auf die in die Lib ausgelagerten Typen ab
+
+**[EN]**
+- Added new classes `SpeicherManager` and `SpielstandInfo`: saving, loading (including enrichment of old savegames), autosave with cleanup of the second to last save, listing and deleting savegames — in the same *.dat format as the WinForms client, savegames stay exchangeable between both clients
+- Added new class `SpielstandDeserializationBinder` (taken over from the WinForms client): maps type names of old savegames to the types moved into the Lib
+
 ## 3.7.0
 
 _17.07.2026_
