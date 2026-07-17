@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.4.0
+
+_16.07.2026_
+
+**[DE]**
+- Neue Klasse `RundenManager` hinzugefügt: kapselt die Hot-Seat-Rundenrotation (Zugbeginn mit Privilegien-/Ansehensaktualisierung, Zugende mit Altern und Zug-Flags, Spielerwechsel, Jahreswechsel nach dem letzten Spieler, Schuldturm-Behandlung) aus dem alten WinForms-Client
+
+**[EN]**
+- Added new class `RundenManager`: encapsulates the hot seat turn rotation (turn start with privilege/reputation update, turn end with aging and turn flags, player switch, year change after the last player, debtor's tower handling) from the old WinForms client
+
 ## 3.3.0
 
 _16.07.2026_
