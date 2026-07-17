@@ -1,5 +1,17 @@
 # Changelog Conspiratio.Lib
 
+## 3.6.0
+
+_17.07.2026_
+
+**[DE]**
+- Neue Klasse `HandelsManager` hinzugefügt: kapselt alle Stadt-Aktionen des aktiven Spielers aus der alten WinForms-Stadtansicht — Werkstätten kaufen/verkaufen, Rohstoffe direkt kaufen/verkaufen (inkl. Stadtvorrat-, Taler- und Lagerraum-Prüfung), Produktionsslots einstellen (Aktionsart, Produktions-/Verkaufsrohstoff, Arbeiter, Stätten, Verkaufsanzahl mit Lager-Reservierung, Zielstadt) sowie Karawanenwahl
+- Neue Klassen `BuchManager` und `BuchErgebnis` hinzugefügt: wickeln zu Jahresbeginn die Aufträge des Vorjahres ab (Exporte mit Erlösgutschrift und Diebstahl, Produktion mit Qualität und Lagerverlust, Reservierung für permanente Verkäufe)
+
+**[EN]**
+- Added new class `HandelsManager`: encapsulates all town actions of the active player from the old WinForms town view — buying/selling workshops, buying/selling resources directly (including town stock, Taler and storage checks), configuring production slots (action type, production/sale resource, workers, sites, sale amount with storage reservation, target town) as well as caravan selection
+- Added new classes `BuchManager` and `BuchErgebnis`: settle the previous year's orders at the start of the year (exports with revenue credit and theft, production with quality and storage loss, reservation for permanent sales)
+
 ## 3.5.0
 
 _16.07.2026_
