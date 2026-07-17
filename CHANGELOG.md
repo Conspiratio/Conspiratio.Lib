@@ -1,5 +1,19 @@
 # Changelog Conspiratio.Lib
 
+## 3.2.0
+
+_16.07.2026_
+
+**[DE]**
+- Neue Klasse `PlayerSetupManager` hinzugefügt: kapselt die Spielererstellung (Name-Validierung, Bannervergabe-Prüfung, transaktionales Erstellen mit Geschlecht, Banner, Religion, Heimatstadt und Rohstoff inkl. Zufalls- und Kostenlogik) aus dem alten WinForms-Dialog `SpielerHinzufuegen`
+- Neue Klasse `PlayerSetupErgebnis` mit den aufgelösten Stadt- und Rohstoff-IDs einer Spielererstellung
+- `NewGameManager.CreateNewGame` setzt die Spielwelt nun selbst über `NeuInitialisieren` zurück, bevor die Spieleinstellungen übernommen werden
+
+**[EN]**
+- Added new class `PlayerSetupManager`: encapsulates player creation (name validation, banner availability check, transactional creation with gender, banner, religion, home town and resource including random and cost logic) from the old WinForms dialog `SpielerHinzufuegen`
+- Added new class `PlayerSetupErgebnis` holding the resolved town and resource IDs of a player creation
+- `NewGameManager.CreateNewGame` now resets the game world itself via `NeuInitialisieren` before applying the game settings
+
 ## 3.1.0
 
 _01.01.2026_
