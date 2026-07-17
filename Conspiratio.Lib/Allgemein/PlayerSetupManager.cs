@@ -89,6 +89,15 @@ namespace Conspiratio.Lib.Allgemein
         }
 
         /// <summary>
+        /// Würfelt eine zufällige Stadt-ID aus, z. B. als kostenlose Vorauswahl der Heimatstadt.
+        /// </summary>
+        [PublicAPI]
+        public int WuerfleZufaelligeStadt()
+        {
+            return SW.Statisch.Rnd.Next(1, SW.Statisch.GetMaxStadtID());
+        }
+
+        /// <summary>
         /// Erstellt den aktuell aktiven Spieler vollständig und schaltet danach auf den nächsten
         /// Spieler weiter (sofern noch nicht alle angelegt sind).
         /// </summary>
@@ -96,10 +105,11 @@ namespace Conspiratio.Lib.Allgemein
         /// <param name="maennlich">Das Geschlecht des Spielers.</param>
         /// <param name="banner">Die Banner-Nummer (1 bis <see cref="AnzahlBanner"/>).</param>
         /// <param name="religionId">Die Religions-ID (katholisch oder evangelisch).</param>
-        /// <param name="stadtId">Die gewählte Heimatstadt (kostet Taler) oder 0 für eine zufällige Stadt (kostenlos).</param>
+        /// <param name="stadtId">Die Heimatstadt oder 0 für eine zufällige Stadt.</param>
+        /// <param name="stadtGewaehlt">True, wenn die Stadt bewusst gewählt wurde (kostet Taler); false bei einer zufällig bestimmten Stadt (kostenlos).</param>
         /// <param name="rohstoffPlatz">Der gewählte Rohstoffplatz 1 oder 2 der Heimatstadt (kostet Taler) oder 0 für einen zufälligen Platz (kostenlos).</param>
         [PublicAPI]
-        public PlayerSetupErgebnis ErstelleSpieler(string name, bool maennlich, int banner, int religionId, int stadtId, int rohstoffPlatz)
+        public PlayerSetupErgebnis ErstelleSpieler(string name, bool maennlich, int banner, int religionId, int stadtId, bool stadtGewaehlt, int rohstoffPlatz)
         {
             var spieler = SW.Dynamisch.GetAktHum();
 
@@ -111,8 +121,8 @@ namespace Conspiratio.Lib.Allgemein
             spieler.SetReligion(religionId);
 
             if (stadtId == 0)
-                stadtId = SW.Statisch.Rnd.Next(1, SW.Statisch.GetMaxStadtID());
-            else
+                stadtId = WuerfleZufaelligeStadt();
+            else if (stadtGewaehlt)
                 spieler.ErhoeheTaler(-SW.Statisch.GetNSPStadtwahlKosten());
 
             spieler.GetSpielerHatHausVonStadtAnArraystelle(stadtId).SetHausID(SW.Statisch.GetStartHausID());

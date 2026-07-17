@@ -1,5 +1,17 @@
 # Changelog Conspiratio.Lib
 
+## 3.3.0
+
+_16.07.2026_
+
+**[DE]**
+- `PlayerSetupManager.ErstelleSpieler` erwartet nun das Flag `stadtGewaehlt`, damit eine vom Client vorab zufällig bestimmte Heimatstadt kostenlos bleibt
+- Neue Methode `PlayerSetupManager.WuerfleZufaelligeStadt` zum Auswürfeln einer zufälligen Stadt-ID
+
+**[EN]**
+- `PlayerSetupManager.ErstelleSpieler` now expects the flag `stadtGewaehlt` so that a home town randomly pre-determined by the client stays free of charge
+- Added new method `PlayerSetupManager.WuerfleZufaelligeStadt` for rolling a random town ID
+
 ## 3.2.0
 
 _16.07.2026_
