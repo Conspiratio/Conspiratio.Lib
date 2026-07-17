@@ -1,5 +1,21 @@
 # Changelog Conspiratio.Lib
 
+## 3.9.0
+
+_17.07.2026_
+
+**[DE]**
+- Spielstände werden jetzt als offene, von Hand editierbare JSON-Dateien (*.json) gespeichert — der BinaryFormatter des alten Formats wurde unter .NET 9+ entfernt und funktioniert im Godot-Client nicht mehr
+- Die Serialisierung arbeitet feldbasiert wie zuvor der BinaryFormatter (alle Instanzfelder, Objekterzeugung ohne Konstruktor), dadurch war keine Änderung am Domänenmodell nötig; polymorphe Typen werden über ein abgesichertes $type-Feld aufgelöst, das nur Lib-Typen zulässt
+- Alte *.dat-Spielstände werden beim Laden automatisch in das JSON-Format konvertiert, sofern die Runtime den BinaryFormatter noch unterstützt (z. B. im WinForms-Client); andernfalls erscheint ein Hinweis
+- Neue Abhängigkeit: Newtonsoft.Json 13.0.4
+
+**[EN]**
+- Savegames are now stored as open, hand-editable JSON files (*.json) — the BinaryFormatter of the old format was removed in .NET 9+ and no longer works in the Godot client
+- The serialization works field based like the BinaryFormatter did before (all instance fields, object creation without constructors), so no change to the domain model was necessary; polymorphic types are resolved via a secured $type field that only allows Lib types
+- Old *.dat savegames are automatically converted to the JSON format when loading, provided the runtime still supports the BinaryFormatter (e.g. in the WinForms client); otherwise a hint is shown
+- New dependency: Newtonsoft.Json 13.0.4
+
 ## 3.8.0
 
 _17.07.2026_

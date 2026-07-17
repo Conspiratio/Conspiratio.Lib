@@ -9,13 +9,15 @@ using Conspiratio.Lib.Gameplay.Spielwelt;
 
 using JetBrains.Annotations;
 
+using Newtonsoft.Json;
+
 namespace Conspiratio.Lib.Allgemein
 {
     /// <summary>
-    /// Speichert und lädt Spielstände als serialisierte <see cref="Spielstand"/>-Dateien (*.dat),
-    /// im selben Format wie der alte WinForms-Client — Spielstände bleiben dadurch zwischen beiden
-    /// Clients austauschbar. Der Client muss dafür die BinaryFormatter-Serialisierung erlauben
-    /// (unter .NET ab Version 5: EnableUnsafeBinaryFormatterSerialization).
+    /// Speichert und lädt Spielstände als offene, von Hand editierbare JSON-Dateien (*.json).
+    /// Alte Spielstände des WinForms-Clients (*.dat, BinaryFormatter) werden beim Laden
+    /// konvertiert, sofern die Runtime den BinaryFormatter noch unterstützt (unter .NET 9+
+    /// wurde er entfernt — dort alte Spielstände zuerst mit dem WinForms-Client laden und neu speichern).
     /// </summary>
     public class SpeicherManager
     {
@@ -27,7 +29,7 @@ namespace Conspiratio.Lib.Allgemein
         }
 
         /// <summary>
-        /// Serialisiert den aktuellen Spielstand unter dem angegebenen Namen.
+        /// Speichert den aktuellen Spielstand als JSON-Datei unter dem angegebenen Namen.
         /// </summary>
         [PublicAPI]
         public bool Speichern(string name, out string fehler)
@@ -38,10 +40,8 @@ namespace Conspiratio.Lib.Allgemein
             {
                 Directory.CreateDirectory(_savegamePath);
 
-                IFormatter formatter = new BinaryFormatter();
-
-                using (Stream stream = new FileStream(GetDateiname(name), FileMode.Create, FileAccess.Write, FileShare.None))
-                    formatter.Serialize(stream, SW.Dynamisch.Spielstand);
+                string json = JsonConvert.SerializeObject(SW.Dynamisch.Spielstand, typeof(Spielstand), ErstelleJsonEinstellungen());
+                File.WriteAllText(GetJsonDateiname(name), json);
 
                 return true;
             }
@@ -70,7 +70,7 @@ namespace Conspiratio.Lib.Allgemein
             // Vorvorletzten Autosave löschen
             try
             {
-                File.Delete(GetDateiname(SW.Dynamisch.SpielName + "_" + (SW.Dynamisch.GetAktuellesJahr() - 2)));
+                File.Delete(GetJsonDateiname(SW.Dynamisch.SpielName + "_" + (SW.Dynamisch.GetAktuellesJahr() - 2)));
             }
             catch
             {
@@ -87,24 +87,25 @@ namespace Conspiratio.Lib.Allgemein
         public bool Laden(string name, out string fehler)
         {
             fehler = "";
-            string dateiname = GetDateiname(name);
 
-            // TODO: Spielstände im alten Textformat (*.cons) werden nicht unterstützt — dafür den WinForms-Client verwenden, der konvertiert sie beim Laden
-            if (!File.Exists(dateiname))
-            {
-                fehler = $"Es ist kein gültiger Spielstand mit diesem Namen vorhanden: {name}.dat";
-                return false;
-            }
+            if (File.Exists(GetJsonDateiname(name)))
+                return LadeJson(name, out fehler);
+
+            if (File.Exists(GetDatDateiname(name)))
+                return LadeAltesFormat(name, out fehler);
+
+            fehler = $"Es ist kein gültiger Spielstand mit diesem Namen vorhanden: {name}";
+            return false;
+        }
+
+        private bool LadeJson(string name, out string fehler)
+        {
+            fehler = "";
 
             try
             {
-                IFormatter formatter = new BinaryFormatter
-                {
-                    Binder = new SpielstandDeserializationBinder()
-                };
-
-                using (Stream stream = new FileStream(dateiname, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    SW.Dynamisch.Spielstand = (Spielstand)formatter.Deserialize(stream);
+                string json = File.ReadAllText(GetJsonDateiname(name));
+                SW.Dynamisch.Spielstand = JsonConvert.DeserializeObject<Spielstand>(json, ErstelleJsonEinstellungen());
 
                 AlteObjekteNachLadenAnreichern();
                 return true;
@@ -117,7 +118,57 @@ namespace Conspiratio.Lib.Allgemein
         }
 
         /// <summary>
-        /// Liefert alle vorhandenen Spielstände, der zuletzt gespeicherte zuerst.
+        /// Lädt einen alten BinaryFormatter-Spielstand des WinForms-Clients und speichert ihn
+        /// direkt im neuen JSON-Format (funktioniert nur auf Runtimes mit BinaryFormatter).
+        /// </summary>
+        private bool LadeAltesFormat(string name, out string fehler)
+        {
+            fehler = "";
+
+            try
+            {
+#pragma warning disable SYSLIB0011
+                IFormatter formatter = new BinaryFormatter
+                {
+                    Binder = new SpielstandDeserializationBinder()
+                };
+
+                using (Stream stream = new FileStream(GetDatDateiname(name), FileMode.Open, FileAccess.Read, FileShare.Read))
+                    SW.Dynamisch.Spielstand = (Spielstand)formatter.Deserialize(stream);
+#pragma warning restore SYSLIB0011
+
+                AlteObjekteNachLadenAnreichern();
+
+                // In das neue Format konvertieren und die alte Datei entfernen
+                if (Speichern(name, out fehler))
+                {
+                    try
+                    {
+                        File.Delete(GetDatDateiname(name));
+                    }
+                    catch
+                    {
+                        // Ein fehlgeschlagenes Aufräumen ist unkritisch
+                    }
+                }
+
+                return true;
+            }
+            catch (NotSupportedException)
+            {
+                fehler = "Dieser Spielstand liegt im alten Format des WinForms-Clients vor und kann hier nicht geladen werden.\n" +
+                         "Ladet und speichert ihn einmal im WinForms-Client, um ihn in das neue Format zu übernehmen.";
+                return false;
+            }
+            catch (Exception ex)
+            {
+                fehler = $"Der Spielstand konnte nicht geladen werden, er scheint beschädigt zu sein. Fehler: {ex.Message}";
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Liefert alle vorhandenen Spielstände (neues und altes Format), der zuletzt gespeicherte zuerst.
         /// </summary>
         [PublicAPI]
         public List<SpielstandInfo> GetSpielstaende()
@@ -127,7 +178,9 @@ namespace Conspiratio.Lib.Allgemein
             if (!Directory.Exists(_savegamePath))
                 return spielstaende;
 
-            foreach (var datei in new DirectoryInfo(_savegamePath).GetFiles("*.dat").OrderByDescending(f => f.LastWriteTime))
+            var verzeichnis = new DirectoryInfo(_savegamePath);
+
+            foreach (var datei in verzeichnis.GetFiles("*.json").Concat(verzeichnis.GetFiles("*.dat")).OrderByDescending(f => f.LastWriteTime))
                 spielstaende.Add(new SpielstandInfo(Path.GetFileNameWithoutExtension(datei.Name), datei.LastWriteTime));
 
             return spielstaende;
@@ -138,7 +191,8 @@ namespace Conspiratio.Lib.Allgemein
         {
             try
             {
-                File.Delete(GetDateiname(name));
+                File.Delete(GetJsonDateiname(name));
+                File.Delete(GetDatDateiname(name));
                 return true;
             }
             catch
@@ -147,9 +201,26 @@ namespace Conspiratio.Lib.Allgemein
             }
         }
 
-        private string GetDateiname(string name)
+        private string GetJsonDateiname(string name)
+        {
+            return Path.Combine(_savegamePath, name + ".json");
+        }
+
+        private string GetDatDateiname(string name)
         {
             return Path.Combine(_savegamePath, name + ".dat");
+        }
+
+        private static JsonSerializerSettings ErstelleJsonEinstellungen()
+        {
+            return new JsonSerializerSettings
+            {
+                ContractResolver = new SpielstandContractResolver(),
+                TypeNameHandling = TypeNameHandling.Auto,
+                SerializationBinder = new SpielstandJsonTypBinder(),
+                Formatting = Formatting.Indented,
+                ObjectCreationHandling = ObjectCreationHandling.Replace
+            };
         }
 
         /// <summary>
