@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.5.0
+
+_16.07.2026_
+
+**[DE]**
+- Neue Klassen `AbrechnungsManager` und `AbrechnungsErgebnis` hinzugefügt: berechnen und verbuchen die Jahresabrechnung des aktiven Spielers (Arbeiter-, Betriebs- und Transportkosten, Verkaufssteuern inkl. Steuerhinterziehungs-Privilegien, Informanten, Saboteure, Kreditzinsen, Kirchenzehnt, Zölle inkl. Auszahlung an die Zollburg-Besitzer und Zollfreiheits-Privilegien sowie Sold) aus dem alten WinForms-Dialog "Abrechnung"
+
+**[EN]**
+- Added new classes `AbrechnungsManager` and `AbrechnungsErgebnis`: calculate and book the yearly settlement of the active player (worker, operating and transport costs, sales taxes including tax evasion privileges, informants, saboteurs, loan interest, church tithe, customs including payout to the toll castle owners and toll exemption privileges as well as military pay) from the old WinForms dialog "Abrechnung"
+
 ## 3.4.0
 
 _16.07.2026_
