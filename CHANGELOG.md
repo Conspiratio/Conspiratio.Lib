@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.9.1
+
+_17.07.2026_
+
+**[DE]**
+- Spielstände werden jetzt als kompaktes JSON ohne Einrückung gespeichert (deutlich kleinere Dateien; zum Anschauen einfach in einem Editor mit JSON-Formatierung öffnen)
+
+**[EN]**
+- Savegames are now stored as compact JSON without indentation (much smaller files; to inspect them simply open them in an editor with JSON formatting)
+
 ## 3.9.0
 
 _17.07.2026_

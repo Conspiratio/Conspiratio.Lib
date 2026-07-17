@@ -218,7 +218,7 @@ namespace Conspiratio.Lib.Allgemein
                 ContractResolver = new SpielstandContractResolver(),
                 TypeNameHandling = TypeNameHandling.Auto,
                 SerializationBinder = new SpielstandJsonTypBinder(),
-                Formatting = Formatting.Indented,
+                Formatting = Formatting.None,  // Kompakt; zum Anschauen/Editieren einfach in einem Editor mit JSON-Formatierung öffnen
                 ObjectCreationHandling = ObjectCreationHandling.Replace
             };
         }
