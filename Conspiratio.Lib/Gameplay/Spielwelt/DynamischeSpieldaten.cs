@@ -1519,11 +1519,34 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr wirklich all' Euer Geld aus dem Fenster\n werfen und das Spiel verlassen?", "Ja", "Lieber nicht") != DialogResultGame.Yes)
                 return null;
 
+            string name = GetHumWithID(GetAktiverSpieler()).GetName();
+
+            bool keineSpielerMehr = EntferneAktivenSpielerAusDemSpiel();
+
+            if (keineSpielerMehr == false)
+            {
+                BelTextAnzeigen($"Der Spieler {name} wurde aus dem Spiel entfernt.");
+                return false;
+            }
+            else
+            {
+                BelTextAnzeigen($"Der Spieler {name} wurde aus dem Spiel entfernt.\n Es befinden sich keine weiteren Mitstreiter in diesem Spiel.\n Das Spiel wird daher beendet.");
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Entfernt den aktiven Spieler ohne Rückfrage aus dem Spiel (z. B. bei seinem Tod):
+        /// löst die Ehe, verteilt seine Stützpunkte neu, gibt sein Amt frei, meldet ihn von Wahlen
+        /// ab und ordnet die Spielerliste neu. War er der letzte Spieler der Runde, beginnt ein neues Jahr.
+        /// </summary>
+        /// <returns>True, wenn kein menschlicher Spieler mehr im Spiel ist (das Spiel ist vorbei).</returns>
+        public bool EntferneAktivenSpielerAusDemSpiel()
+        {
             // Ein möglicher Ehepartner soll nicht mehr verheiratet sein
             if (GetHumWithID(GetAktiverSpieler()).GetVerheiratet() != 0)
                 GetKIwithID(GetHumWithID(GetAktiverSpieler()).GetVerheiratet()).SetVerheiratet(0);
 
-            string name = GetHumWithID(GetAktiverSpieler()).GetName();
             bool last = GetAktiverSpieler() == GetAktivSpielerAnzahl();
 
             // Stützpunkte des verstorbenen Spielers wieder zufälligen KI-Spielern zuteilen
@@ -1574,16 +1597,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
                 }
             }
 
-            if (GetAktivSpielerAnzahl() != 0)
-            {
-                BelTextAnzeigen($"Der Spieler {name} wurde aus dem Spiel entfernt.");
-                return false;
-            }
-            else
-            {
-                BelTextAnzeigen($"Der Spieler {name} wurde aus dem Spiel entfernt.\n Es befinden sich keine weiteren Mitstreiter in diesem Spiel.\n Das Spiel wird daher beendet.");
-                return true;
-            }
+            return GetAktivSpielerAnzahl() == 0;
         }
         #endregion
 

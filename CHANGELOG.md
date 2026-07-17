@@ -1,5 +1,19 @@
 # Changelog Conspiratio.Lib
 
+## 3.7.0
+
+_17.07.2026_
+
+**[DE]**
+- Neue Klassen `ZugNachrichtenManager` und `SchuldenProzessErgebnis` hinzugefügt: kapseln die Zugnachrichten-Ereignisse aus dem alten WinForms-Client — Gesetzesverstöße mit Strafen (Höchstzahl Anwesen, maximale Taler, Schlösserverbot), Statistik, Amtseinkommen, Anwesen-Aktualisierung (Bauzeit, Zustand, Renovierung), Sterbeprüfung mit Todesursachen-Text sowie den Schuldenprozess mit 11 Geschworenen und Schuldturm-Konsequenzen
+- Neue Methode `DynamischeSpieldaten.EntferneAktivenSpielerAusDemSpiel`: entfernt den aktiven Spieler ohne Rückfrage aus dem Spiel (aus `AktivenSpielerEntfernen` extrahiert und dort wiederverwendet)
+- Neue Methode `RundenManager.SchliesseZugAb`: Altern und Zug-Flags getrennt vom Spielerwechsel, damit die Zugnachrichten wie im Original mit dem neuen Alter rechnen
+
+**[EN]**
+- Added new classes `ZugNachrichtenManager` and `SchuldenProzessErgebnis`: encapsulate the turn message events from the old WinForms client — law violations with fines (maximum estates, maximum Taler, castle ban), statistics, office income, estate updates (construction time, condition, renovation), death check with cause of death text as well as the debt trial with 11 jurors and debtor's tower consequences
+- Added new method `DynamischeSpieldaten.EntferneAktivenSpielerAusDemSpiel`: removes the active player from the game without confirmation (extracted from `AktivenSpielerEntfernen` and reused there)
+- Added new method `RundenManager.SchliesseZugAb`: aging and turn flags separated from the player switch so the turn messages calculate with the new age like in the original
+
 ## 3.6.0
 
 _17.07.2026_

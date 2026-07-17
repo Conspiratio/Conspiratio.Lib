@@ -40,13 +40,12 @@ namespace Conspiratio.Lib.Allgemein
         }
 
         /// <summary>
-        /// Beendet den Zug des aktiven Spielers: lässt ihn und seine Kinder altern, setzt die
-        /// Zug-Flags zurück und schaltet auf den nächsten Spieler weiter. Hat der letzte aktive
-        /// Spieler seinen Zug beendet, beginnt ein neues Jahr mit Spieler 1.
+        /// Schließt den Zug des aktiven Spielers ab, ohne weiterzuschalten: Er und seine Kinder
+        /// altern und die Zug-Flags werden zurückgesetzt. Muss vor den Zugnachrichten aufgerufen
+        /// werden, damit z. B. die Sterbeprüfung mit dem neuen Alter rechnet (wie im WinForms-Client).
         /// </summary>
-        /// <returns>True, wenn mit dem Zugende ein neues Jahr begonnen hat.</returns>
         [PublicAPI]
-        public bool BeendeZug()
+        public void SchliesseZugAb()
         {
             var spieler = SW.Dynamisch.GetAktHum();
 
@@ -56,7 +55,18 @@ namespace Conspiratio.Lib.Allgemein
             spieler.SetPrivilegKaufmannBenutzt(false);
             spieler.SetGebeichtet(false);
             spieler.HatAngebotFuerStuetzpunktAbgegeben = false;
+        }
 
+        /// <summary>
+        /// Beendet den Zug des aktiven Spielers: lässt ihn und seine Kinder altern, setzt die
+        /// Zug-Flags zurück und schaltet auf den nächsten Spieler weiter. Hat der letzte aktive
+        /// Spieler seinen Zug beendet, beginnt ein neues Jahr mit Spieler 1.
+        /// </summary>
+        /// <returns>True, wenn mit dem Zugende ein neues Jahr begonnen hat.</returns>
+        [PublicAPI]
+        public bool BeendeZug()
+        {
+            SchliesseZugAb();
             return SchalteZumNaechstenSpieler();
         }
 
