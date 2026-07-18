@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.13.0
+
+_18.07.2026_
+
+**[DE]**
+- Neue Klasse `RundenEndeManager` hinzugefügt: die Todesfälle unter den KI-Spielern am Jahresende (feststehende Tode und Zufallstode nach der Sterbeformel) aus dem alten WinForms-Client; jeder Todesfall gibt über `KIstirbt` das Amt des Verstorbenen frei, wodurch neue Wahlen entstehen, und liefert eine Meldung "Name (Alter†)"
+
+**[EN]**
+- Added new class `RundenEndeManager`: the deaths among the AI players at the end of the year (fixed deaths and chance deaths by the death formula) from the old WinForms client; each death frees the deceased's office via `KIstirbt` (creating new elections) and returns a message "name (age†)"
+
 ## 3.12.0
 
 _18.07.2026_
