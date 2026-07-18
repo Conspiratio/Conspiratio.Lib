@@ -382,7 +382,8 @@ namespace Conspiratio.Lib.Allgemein
         /// <summary>
         /// Vollstreckt das Testament beim Tod des Spielers. Ohne Erben (Erzbistum) scheidet der Spieler aus
         /// (sein Amt und seine Wahlteilnahme werden freigegeben); mit Erben übernimmt dieser die Identität und
-        /// führt die Dynastie fort.
+        /// führt die Dynastie fort. Das Amt wird dabei nicht vererbt: Es wird – wie bei jedem Todesfall –
+        /// freigegeben und steht damit im nächsten Jahr zur Wahl.
         /// </summary>
         [PublicAPI]
         public TestamentErgebnis FuehreTestamentAus()
@@ -396,7 +397,17 @@ namespace Conspiratio.Lib.Allgemein
                 return new TestamentErgebnis(false, spielVorbei, bezeichnung);
             }
 
+            // Das Amt des Verstorbenen wird nicht vererbt: vor der Erbübernahme freigeben (erzeugt eine Wahl).
+            if (AktHum.GetAmtID() != 0)
+                SW.Dynamisch.AmtVonXfreigeben(SW.Dynamisch.GetAktiverSpieler());
+
             SW.Dynamisch.TestamentVollstrecken();
+
+            // Erbt der Ehepartner, übernimmt der Erbe in TestamentVollstrecken dessen Amt – auch dieses wird
+            // freigegeben, damit der Erbe ohne geerbtes Amt in die Dynastie startet.
+            if (AktHum.GetAmtID() != 0)
+                SW.Dynamisch.AmtVonXfreigeben(SW.Dynamisch.GetAktiverSpieler());
+
             return new TestamentErgebnis(true, false, bezeichnung);
         }
 

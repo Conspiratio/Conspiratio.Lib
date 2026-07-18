@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.15.0
+
+_18.07.2026_
+
+**[DE]**
+- Geändert: Beim Tod eines Spielers mit Erben wird das Amt des Verstorbenen nicht mehr an den Erben vererbt, sondern – wie bei jedem Todesfall – freigegeben und steht damit im nächsten Jahr zur Wahl (`FamilieManager.FuehreTestamentAus`); erbt der Ehepartner, wird auch dessen von der Erbübernahme übernommenes Amt freigegeben
+
+**[EN]**
+- Changed: when a player with an heir dies, the deceased's office is no longer inherited by the heir but – like in any death – freed and thus stands for election the next year (`FamilieManager.FuehreTestamentAus`); if the spouse inherits, their office taken over during the succession is freed as well
+
 ## 3.14.0
 
 _18.07.2026_
