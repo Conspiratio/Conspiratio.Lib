@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.11.0
+
+_18.07.2026_
+
+**[DE]**
+- Neue Klassen `AnwesenManager`, `HausAngebot` und `ErweiterungsAngebot` hinzugefügt: Wohnsitze bauen und umbauen (mit halbem Restwert als Fixpreisreduzierung), renovieren (Preis nach fehlendem Zustand, Abschluss bei Rundenende), erweitern (fehlende Hauserweiterungen mit Preis) und verkaufen (nur ohne verbleibende Werkstätten in der Stadt) aus dem alten WinForms-Client; alle Kosten berücksichtigen den Sparplan-Faktor (Privileg 15)
+
+**[EN]**
+- Added new classes `AnwesenManager`, `HausAngebot` and `ErweiterungsAngebot`: building and rebuilding residences (with half the remaining value as a fixed price reduction), renovating (price based on the missing condition, completed at the end of the turn), extending (missing house extensions with price) and selling (only without remaining workshops in the town) from the old WinForms client; all costs take the savings plan factor (privilege 15) into account
+
 ## 3.10.0
 
 _17.07.2026_
