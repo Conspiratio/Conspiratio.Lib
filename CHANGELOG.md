@@ -1,5 +1,17 @@
 # Changelog Conspiratio.Lib
 
+## 3.14.0
+
+_18.07.2026_
+
+**[DE]**
+- Neue Klasse `FamilieManager` (mit `KupplerinVorschlag`, `WerbeGeschenk`, `GeschenkAuswahl`, `WerbungsErgebnis`, `HochzeitErgebnis`, `KindInfo`, `ErbeOption`, `TestamentErgebnis`) hinzugefügt: Partnersuche über die Kupplerin, jährliche Brautwerbung mit Geschenken (Verliebtheit steigt nach Gefallen und Bosheit), Hochzeit bei voller Verliebtheit (inkl. Titelangleich), Nachwuchs (Geburt mit Geschlecht und Namen, Kindestod) sowie das Testament (Erbe bestimmen unter Erzbistum/Ehepartner/Kindern und die Erbfolge beim Tod über `TestamentVollstrecken`) und `KIVerheiraten` am Jahresende
+- Behoben: Der Kindestod nutzt nun den korrekten Kind-Slot-Bereich (im WinForms-Original lief die Schleife durch einen falschen Startindex nie, sodass Kinder faktisch nie starben)
+
+**[EN]**
+- Added new class `FamilieManager` (with `KupplerinVorschlag`, `WerbeGeschenk`, `GeschenkAuswahl`, `WerbungsErgebnis`, `HochzeitErgebnis`, `KindInfo`, `ErbeOption`, `TestamentErgebnis`): partner search via the matchmaker, yearly courtship with gifts (affection grows by liking and malice), marriage at full affection (including title adjustment), offspring (birth with gender and name, child death) as well as the will (choosing an heir among archbishopric/spouse/children and the succession on death via `TestamentVollstrecken`) and `KIVerheiraten` at the end of the year
+- Fixed: child death now uses the correct child slot range (in the WinForms original the loop never ran due to a wrong start index, so children effectively never died)
+
 ## 3.13.0
 
 _18.07.2026_
