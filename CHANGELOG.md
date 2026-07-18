@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.10.0
+
+_17.07.2026_
+
+**[DE]**
+- Neue Klassen `SchreibstubeManager`, `KreditAngebot` und `KreditInfo` hinzugefügt: Kreditangebote des Geldleihers (zufälliger KI-Spieler, 10 % seines Vermögens, Zufallszins mit Privileg-30-Halbierung, 4 bis 7 Jahre Laufzeit), Kreditaufnahme (inkl. Deliktpunkt bei Kreditverbot und Statistik), Kreditbuch mit Tilgung sowie die Gesetzesanzeige (Ebenen-Überschrift mit Strenge-Bewertung und die zehn Gesetzestexte je Ebene) aus dem alten WinForms-Client
+
+**[EN]**
+- Added new classes `SchreibstubeManager`, `KreditAngebot` and `KreditInfo`: money lender credit offers (random AI player, 10% of his fortune, random interest halved with privilege 30, 4 to 7 years term), taking credits (including offense point when credits are forbidden and statistics), the credit book with repayment as well as the law display (level heading with strictness rating and the ten law texts per level) from the old WinForms client
+
 ## 3.9.1
 
 _17.07.2026_
