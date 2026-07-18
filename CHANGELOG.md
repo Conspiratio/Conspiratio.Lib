@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.12.0
+
+_18.07.2026_
+
+**[DE]**
+- Neue Klasse `AemterManager` (mit `BewerbungsAngebot`, `BewerbungsErgebnis`, `WahlDetails`, `WahlKandidat`, `WahlWaehler`, `WahlAnsicht`, `WahlErgebnis`) hinzugefügt: Bewerbung um freie Ämter (An- und Abmelden zu einer Wahl, Infoanzeige der Wähler und Mitbewerber) sowie die Auszählung der Wahlen am Jahresende (Ermittlung der beteiligten Wahlen, Auflösung der Wähler über Stadt-, Land- und Reichsebene, KI-Stimmlogik nach Sympathie, Auswertung mit Los bei Stimmengleichheit, Amtsvergabe und Auffüllen der übrigen Ämter) aus dem alten WinForms-Client
+
+**[EN]**
+- Added new class `AemterManager` (with `BewerbungsAngebot`, `BewerbungsErgebnis`, `WahlDetails`, `WahlKandidat`, `WahlWaehler`, `WahlAnsicht`, `WahlErgebnis`): applying for free offices (registering and withdrawing from an election, info display of voters and competitors) as well as the resolution of elections at the end of the year (determining the involved elections, resolving voters across town, land and empire level, AI voting logic by sympathy, evaluation with a lot on a tie, office assignment and filling the remaining offices) from the old WinForms client
+
 ## 3.11.0
 
 _18.07.2026_
