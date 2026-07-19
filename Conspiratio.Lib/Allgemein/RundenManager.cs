@@ -22,6 +22,16 @@ namespace Conspiratio.Lib.Allgemein
         }
 
         /// <summary>
+        /// Prüft, ob der aktuell aktive Spieler der letzte Spieler des Jahres ist – nach seinem Zugende
+        /// folgen also die Rundenende-Ereignisse und der Jahreswechsel.
+        /// </summary>
+        [PublicAPI]
+        public bool IstLetzterSpielerImJahr()
+        {
+            return SW.Dynamisch.GetAktiverSpieler() >= SW.Dynamisch.GetAktivSpielerAnzahl();
+        }
+
+        /// <summary>
         /// Prüft, ob der aktuell aktive Spieler dieses Jahr im Schuldturm sitzt.
         /// </summary>
         [PublicAPI]

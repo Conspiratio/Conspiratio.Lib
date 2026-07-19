@@ -1,5 +1,25 @@
 # Changelog Conspiratio.Lib
 
+## 3.17.0
+
+_18.07.2026_
+
+**[DE]**
+- Spiellogik, die noch im Godot-Frontend lag, in die Lib gekapselt: `HandelsManager.HatPraesenzInStadt` (Wohnsitz oder Werkstätte mit Lager – für das Banner auf der Weltkarte), `HandelsManager.NaechsterProduktionsRohstoff` und `NaechsterVerkaufsRohstoff` (Weiterschalten auf den nächsten gültigen Rohstoff), `HandelsManager.SetzeVerkaufsStadtAusWert` (Zielstadt aus einem Zählerwert setzen, eigene Stadt überspringen, am Rand umbrechen) sowie `RundenManager.IstLetzterSpielerImJahr`
+
+**[EN]**
+- Encapsulated game logic that still lived in the Godot frontend into the Lib: `HandelsManager.HatPraesenzInStadt` (residence or workshop with storage – for the banner on the world map), `HandelsManager.NaechsterProduktionsRohstoff` and `NaechsterVerkaufsRohstoff` (advancing to the next valid resource), `HandelsManager.SetzeVerkaufsStadtAusWert` (setting the target town from a counter value, skipping the own town, wrapping at the edge) as well as `RundenManager.IstLetzterSpielerImJahr`
+
+## 3.16.0
+
+_18.07.2026_
+
+**[DE]**
+- Neue Klasse `KircheManager` hinzugefügt: die kirchlichen Tätigkeiten aus dem alten WinForms-Client – Kirchgang (Ablass kaufen, beichten, Waisenkind adoptieren), Konvertieren und Austreten sowie der Beitritt zu einer Konfession für Konfessionslose (Daten und Mutationen von der UI getrennt)
+
+**[EN]**
+- Added new class `KircheManager`: the church activities from the old WinForms client – the church visit (buy an indulgence, confess, adopt an orphan), converting and leaving the church as well as adopting a faith for the denominationless (data and mutations separated from the UI)
+
 ## 3.15.0
 
 _18.07.2026_

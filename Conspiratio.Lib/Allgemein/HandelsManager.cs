@@ -39,6 +39,27 @@ namespace Conspiratio.Lib.Allgemein
             return SW.Dynamisch.GetAktHum().GetSpielerHatHausVonStadtAnArraystelle(stadtId).GetHausID() != 0;
         }
 
+        /// <summary>
+        /// Gibt an, ob der aktive Spieler in der Stadt eine Präsenz hat, also entweder einen Wohnsitz
+        /// oder eine Werkstätte mit Lagerraum besitzt (z. B. für das Wehen des Banners auf der Weltkarte).
+        /// </summary>
+        [PublicAPI]
+        public bool HatPraesenzInStadt(int stadtId)
+        {
+            var spieler = SW.Dynamisch.GetAktHum();
+
+            if (spieler.GetSpielerHatHausVonStadtAnArraystelle(stadtId).GetHausID() != 0)
+                return true;
+
+            for (int werkstattNr = 1; werkstattNr <= SW.Statisch.GetMaxWerkstaettenProStadt(); werkstattNr++)
+            {
+                if (spieler.GetSpielerHatInStadtXWerkstaettenY(werkstattNr, stadtId).GetSKillX(1) != 0)
+                    return true;
+            }
+
+            return false;
+        }
+
         [PublicAPI]
         public int GetWerkstattKaufpreis(int stadtId, int werkstattNr)
         {
@@ -316,6 +337,35 @@ namespace Conspiratio.Lib.Allgemein
             produktionsslot.SetProduktionStaetten(0);
         }
 
+        /// <summary>
+        /// Schaltet den Produktionsrohstoff des Slots auf den nächsten Rohstoff der Stadt weiter, für den
+        /// der Spieler sowohl das Rohstoffrecht als auch eine Werkstätte besitzt (mit Umbruch am Ende).
+        /// </summary>
+        [PublicAPI]
+        public void NaechsterProduktionsRohstoff(int stadtId, int slot)
+        {
+            var produktionsslot = GetProduktionsslot(stadtId, slot);
+            int werkstattNr = SW.Dynamisch.GetWerkposInStadtXzuRohIDy(stadtId, produktionsslot.GetProduktionRohstoff());
+
+            for (int i = 0; i < SW.Statisch.GetMaxWerkstaettenProStadt(); i++)
+            {
+                werkstattNr++;
+
+                if (werkstattNr > SW.Statisch.GetMaxWerkstaettenProStadt())
+                    werkstattNr = 1;
+
+                if (HatRohstoffrecht(stadtId, werkstattNr) && HatWerkstatt(stadtId, werkstattNr))
+                {
+                    int neueRohstoffId = RohstoffIdAnPlatz(stadtId, werkstattNr);
+
+                    if (neueRohstoffId != produktionsslot.GetProduktionRohstoff())
+                        SetzeProduktionsRohstoff(stadtId, slot, neueRohstoffId);
+
+                    break;
+                }
+            }
+        }
+
         [PublicAPI]
         public void SetzeProduktionsArbeiter(int stadtId, int slot, int anzahl)
         {
@@ -354,6 +404,26 @@ namespace Conspiratio.Lib.Allgemein
         }
 
         /// <summary>
+        /// Schaltet den Verkaufsrohstoff des Slots auf den nächsten Rohstoff der Stadt weiter (mit Umbruch).
+        /// </summary>
+        [PublicAPI]
+        public void NaechsterVerkaufsRohstoff(int stadtId, int slot)
+        {
+            var produktionsslot = GetProduktionsslot(stadtId, slot);
+            int werkstattNr = SW.Dynamisch.GetWerkposInStadtXzuRohIDy(stadtId, produktionsslot.GetVerkaufRohstoff());
+
+            werkstattNr++;
+
+            if (werkstattNr > SW.Statisch.GetMaxWerkstaettenProStadt())
+                werkstattNr = 1;
+
+            int neueRohstoffId = RohstoffIdAnPlatz(stadtId, werkstattNr);
+
+            if (neueRohstoffId != 0)
+                SetzeVerkaufsRohstoff(stadtId, slot, neueRohstoffId);
+        }
+
+        /// <summary>
         /// Reserviert die zu verkaufende Anzahl aus dem Lager (begrenzt auf den Bestand).
         /// </summary>
         /// <returns>Die tatsächlich reservierte Anzahl.</returns>
@@ -384,6 +454,28 @@ namespace Conspiratio.Lib.Allgemein
                 return;
 
             SW.Dynamisch.GetAktHum().GetProduktionsslot(stadtId, slot).SetVerkaufStadt(zielStadtId);
+        }
+
+        /// <summary>
+        /// Setzt die Zielstadt des Verkaufsauftrags aus einem gewünschten Stadtwert (z. B. von einem
+        /// Zähler): die eigene Stadt wird in Änderungsrichtung übersprungen und der Wert am Rand umgebrochen.
+        /// </summary>
+        [PublicAPI]
+        public void SetzeVerkaufsStadtAusWert(int stadtId, int slot, int gewuenschteStadt)
+        {
+            var produktionsslot = GetProduktionsslot(stadtId, slot);
+            int alteStadt = produktionsslot.GetVerkaufStadt();
+            int neueStadt = gewuenschteStadt;
+
+            if (neueStadt == stadtId)
+                neueStadt += neueStadt > alteStadt ? 1 : -1;
+
+            if (neueStadt >= SW.Statisch.GetMaxStadtID())
+                neueStadt = SW.Statisch.GetMinStadtID();
+            else if (neueStadt < SW.Statisch.GetMinStadtID())
+                neueStadt = SW.Statisch.GetMaxStadtID() - 1;
+
+            produktionsslot.SetVerkaufStadt(neueStadt);
         }
 
         [PublicAPI]
