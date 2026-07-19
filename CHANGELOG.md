@@ -1,5 +1,17 @@
 # Changelog Conspiratio.Lib
 
+## 3.18.0
+
+_18.07.2026_
+
+**[DE]**
+- Neue Klasse `PrivilegienManager` (mit `PrivilegInfo`) hinzugefügt: aktualisiert die Privilegien des aktiven Spielers, listet die derzeit gültigen (abhängig von Amt, Titel und Familienstand) und führt ein Privileg über dessen `PrivExecute` aus
+- Behoben: Die Privilegien `PrivAmtNiederlegen` und `PrivJurist` blockierten den UI-Thread synchron auf einem asynchronen Ja/Nein-Dialog (`.GetAwaiter().GetResult()`) und wurden auf einen asynchronen Ablauf umgestellt, damit sie im Godot-Client nicht deadlocken
+
+**[EN]**
+- Added new class `PrivilegienManager` (with `PrivilegInfo`): refreshes the active player's privileges, lists the currently valid ones (depending on office, title and family status) and executes a privilege via its `PrivExecute`
+- Fixed: the privileges `PrivAmtNiederlegen` and `PrivJurist` blocked the UI thread synchronously on an asynchronous yes/no dialog (`.GetAwaiter().GetResult()`) and were changed to an asynchronous flow so they no longer deadlock in the Godot client
+
 ## 3.17.0
 
 _18.07.2026_

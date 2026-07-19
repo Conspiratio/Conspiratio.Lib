@@ -11,7 +11,13 @@ namespace Conspiratio.Lib.Gameplay.Privilegien
 
         public override void PrivExecute()
         {
-            if (SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr wirklich\nEuer Amt niederlegen?", "Ja", "Nein").GetAwaiter().GetResult() == DialogResultGame.Yes)
+            // Läuft asynchron (fire-and-forget), damit der UI-Thread nicht auf den YesNo-Dialog blockiert
+            PrivExecuteAsync();
+        }
+
+        private async void PrivExecuteAsync()
+        {
+            if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr wirklich\nEuer Amt niederlegen?", "Ja", "Nein") == DialogResultGame.Yes)
             {
                 // Absetzungsanträge zurückziehen
                 for (int i = 1; i < SW.Statisch.GetMaxAnzahlAmtsenthebungen(); i++)

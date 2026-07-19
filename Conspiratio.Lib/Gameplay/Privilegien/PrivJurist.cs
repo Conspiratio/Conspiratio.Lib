@@ -12,10 +12,16 @@ namespace Conspiratio.Lib.Gameplay.Privilegien
 
         public override void PrivExecute()
         {
+            // Läuft asynchron (fire-and-forget), damit der UI-Thread nicht auf den YesNo-Dialog blockiert
+            PrivExecuteAsync();
+        }
+
+        private async void PrivExecuteAsync()
+        {
             int preis = 1000;
 
-            if (SW.UI.YesNoQuestion.ShowDialogText("Beim Jurist erhaltet Ihr Einblicke\nin Eure bisherigen Verbrechen und deren Bewertung.\n" +
-                                                $"Wollt Ihr diese Dienste für\n{preis.ToStringGeld()} in Anspruch nehmen?").GetAwaiter().GetResult() != DialogResultGame.Yes)
+            if (await SW.UI.YesNoQuestion.ShowDialogText("Beim Jurist erhaltet Ihr Einblicke\nin Eure bisherigen Verbrechen und deren Bewertung.\n" +
+                                                $"Wollt Ihr diese Dienste für\n{preis.ToStringGeld()} in Anspruch nehmen?") != DialogResultGame.Yes)
             {
                 return;
             }
