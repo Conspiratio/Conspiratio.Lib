@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.21.0
+
+_21.07.2026_
+
+**[DE]**
+- `ProzentwertFestlegenManager` hinzugefügt (Kapselung von ProzentwertFestlegenForm für alle fünf Prozentwert-Arten): Anzeige-Texte, NumericButton-Konfiguration (Min/Start/Max/Stellen), Live-Übernahme bei Umsatzsteuer und Zollsatz sowie Kostenberechnung und Auftragsausführung bei den Stützpunkt-Verbesserungen (Sicherheit/Tarnung, Zustand, Kapazität)
+
+**[EN]**
+- Added `ProzentwertFestlegenManager` (encapsulation of ProzentwertFestlegenForm for all five percentage types): the display texts, the NumericButton configuration (min/start/max/digits), live application for sales tax and toll rate, and the cost calculation plus order execution for the stronghold improvements (security/camouflage, condition, capacity)
+
 ## 3.20.0
 
 _21.07.2026_
