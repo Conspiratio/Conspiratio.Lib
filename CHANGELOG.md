@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.20.0
+
+_21.07.2026_
+
+**[DE]**
+- `BauwerkStiftenManager` hinzugefügt (Kapselung von BauwerkStiftenForm): stiftbare Bauwerke samt Preisen, zyklische Städtewahl, Bezahlbarkeits-Prüfung ohne Nebenwirkung, Bestätigungsfrage und die eigentliche Stiftung (Permaansehen erhöhen, Taler abziehen)
+
+**[EN]**
+- Added `BauwerkStiftenManager` (encapsulation of BauwerkStiftenForm): the buildings that can be donated with their prices, cyclic town selection, a side-effect-free affordability check, the confirmation prompt and the donation itself (raising the permanent reputation, deducting the Taler)
+
 ## 3.19.0
 
 _18.07.2026_
