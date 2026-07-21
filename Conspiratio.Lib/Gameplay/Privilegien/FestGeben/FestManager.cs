@@ -33,6 +33,25 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.FestGeben
             return SW.Dynamisch.GetStadtwithID(stadtID).GetGebietsName();
         }
 
+        /// <summary>
+        /// Feiert das in diesem Jahr für den aktiven Spieler geplante Fest (falls vorhanden) und entfernt es
+        /// aus der Planung. Wird zu Zugbeginn aufgerufen.
+        /// </summary>
+        /// <returns>Die Ergebnismeldung des Festes oder null, wenn dieses Jahr kein Fest geplant ist.</returns>
+        public string FeiereFaelligesFest()
+        {
+            var fest = SW.Dynamisch.Spielstand.Feste.FirstOrDefault(
+                x => x.SpielerID == SW.Dynamisch.GetAktiverSpieler() && x.Jahr == SW.Dynamisch.GetAktuellesJahr());
+
+            if (fest == null)
+                return null;
+
+            string message = FestFeiern(fest);
+            SW.Dynamisch.Spielstand.Feste.Remove(fest);
+
+            return message;
+        }
+
         public int GetMaxJahr()
         {
             return Jahr + 9;

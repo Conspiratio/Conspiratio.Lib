@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.19.0
+
+_18.07.2026_
+
+**[DE]**
+- `FestManager.FeiereFaelligesFest` hinzugefügt: feiert das für den aktiven Spieler im aktuellen Jahr geplante Fest (falls vorhanden), entfernt es aus der Planung und liefert die Ergebnismeldung – kapselt die Feste-Abfrage, die bisher im Frontend liegen müsste
+
+**[EN]**
+- Added `FestManager.FeiereFaelligesFest`: celebrates the feast planned for the active player in the current year (if any), removes it from the planning and returns the result message – encapsulating the feast lookup that would otherwise live in the frontend
+
 ## 3.18.0
 
 _18.07.2026_
