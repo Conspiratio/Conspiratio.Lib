@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.26.0
+
+_21.07.2026_
+
+**[DE]**
+- `AemterEbeneManager`: `AemterSlotInfo` um die Statusdaten der Amtsinhaber erweitert – laufende Sabotage/Spionage des aktiven Spielers gegen den Inhaber, Ehe-Status, Konfession (`AemterKonfession`) sowie ob es ein KI-Spieler ist und dessen Beziehung zum aktiven Spieler (0–100). Dient den Symbol-Overlays und dem Beziehungs-Balken der Ämter-Ebene
+
+**[EN]**
+- `AemterEbeneManager`: extended `AemterSlotInfo` with the office holders' status data – the active player's running sabotage/spying against the holder, marital status, confession (`AemterKonfession`) as well as whether it is an AI player and its relationship to the active player (0–100). Feeds the office layer's symbol overlays and relationship bar
+
 ## 3.25.0
 
 _21.07.2026_

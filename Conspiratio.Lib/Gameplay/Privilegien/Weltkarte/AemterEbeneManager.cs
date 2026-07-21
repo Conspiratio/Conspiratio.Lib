@@ -5,7 +5,15 @@ using Conspiratio.Lib.Gameplay.Spielwelt;
 
 namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
 {
-    /// <summary>Ein Amt einer Ämter-Ebene samt aktuellem Inhaber.</summary>
+    /// <summary>Konfession eines Amtsinhabers für das Religions-Symbol.</summary>
+    public enum AemterKonfession
+    {
+        Keine,
+        Katholisch,
+        Evangelisch
+    }
+
+    /// <summary>Ein Amt einer Ämter-Ebene samt aktuellem Inhaber und dessen Statussymbolen.</summary>
     public class AemterSlotInfo
     {
         public int AmtId { get; }
@@ -14,13 +22,34 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
         public string HolderName { get; }
         public bool Besetzt { get; }
 
-        public AemterSlotInfo(int amtId, string amtName, int holderId, string holderName, bool besetzt)
+        /// <summary>Der aktive Spieler hat eine laufende Sabotage gegen den Inhaber.</summary>
+        public bool HatSabotage { get; }
+        /// <summary>Der aktive Spieler hat eine laufende Spionage gegen den Inhaber.</summary>
+        public bool HatSpionage { get; }
+        /// <summary>Der Inhaber ist verheiratet.</summary>
+        public bool IstVerheiratet { get; }
+        /// <summary>Konfession des Inhabers (für das Religions-Symbol).</summary>
+        public AemterKonfession Konfession { get; }
+        /// <summary>Der Inhaber ist ein KI-Spieler (nur dann gibt es einen Beziehungswert).</summary>
+        public bool IstKI { get; }
+        /// <summary>Beziehung des KI-Inhabers zum aktiven Spieler (0–100), sonst 0.</summary>
+        public int Beziehung { get; }
+
+        public AemterSlotInfo(int amtId, string amtName, int holderId, string holderName, bool besetzt,
+            bool hatSabotage, bool hatSpionage, bool istVerheiratet, AemterKonfession konfession,
+            bool istKI, int beziehung)
         {
             AmtId = amtId;
             AmtName = amtName;
             HolderId = holderId;
             HolderName = holderName;
             Besetzt = besetzt;
+            HatSabotage = hatSabotage;
+            HatSpionage = hatSpionage;
+            IstVerheiratet = istVerheiratet;
+            Konfession = konfession;
+            IstKI = istKI;
+            Beziehung = beziehung;
         }
     }
 
@@ -115,7 +144,32 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
                     .GetAmtsname(besetzt ? SW.Dynamisch.GetSpWithID(holder).GetMaennlich() : true);
                 string holderName = besetzt ? SW.Dynamisch.GetSpWithID(holder).GetName() : "(unbesetzt)";
 
-                result.Add(new AemterSlotInfo(amtId, amtName, holder, holderName, besetzt));
+                bool hatSabotage = false;
+                bool hatSpionage = false;
+                bool istVerheiratet = false;
+                var konfession = AemterKonfession.Keine;
+                bool istKI = false;
+                int beziehung = 0;
+
+                if (besetzt)
+                {
+                    hatSabotage = SW.Dynamisch.GetAktHum().GetAktiveSabotage(holder).GetDauer() > 0;
+                    hatSpionage = SW.Dynamisch.GetAktHum().GetAktiveSpionage(holder).GetKosten() > 0;
+                    istVerheiratet = SW.Dynamisch.GetSpWithID(holder).GetVerheiratet() != 0;
+
+                    int religion = SW.Dynamisch.GetSpWithID(holder).GetReligion();
+                    if (religion == SW.Statisch.GetRelKathID())
+                        konfession = AemterKonfession.Katholisch;
+                    else if (religion == SW.Statisch.GetRelEvanID())
+                        konfession = AemterKonfession.Evangelisch;
+
+                    istKI = holder >= SW.Statisch.GetMinKIID();
+                    if (istKI)
+                        beziehung = SW.Dynamisch.GetKIwithID(holder).GetBeziehungZuKIX(SW.Dynamisch.GetAktiverSpieler());
+                }
+
+                result.Add(new AemterSlotInfo(amtId, amtName, holder, holderName, besetzt,
+                    hatSabotage, hatSpionage, istVerheiratet, konfession, istKI, beziehung));
             }
 
             return result;
