@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.22.0
+
+_21.07.2026_
+
+**[DE]**
+- `UntergebeneManager` hinzugefügt (Kapselung von UntergebeneForm/UntergebenenOptionen): liefert die Untergebenen des aktiven Spielers (durch dessen Amt bestimmt), die Optionsfrage sowie die einzige echte Aktion – die Einleitung einer Amtsenthebung samt Ergebnismeldung
+
+**[EN]**
+- Added `UntergebeneManager` (encapsulation of UntergebeneForm/UntergebenenOptionen): provides the active player's subordinates (determined by their office), the options prompt and the only real action – initiating a dismissal from office including the result message
+
 ## 3.21.0
 
 _21.07.2026_
