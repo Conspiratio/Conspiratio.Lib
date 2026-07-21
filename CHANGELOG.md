@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.24.0
+
+_21.07.2026_
+
+**[DE]**
+- `KontrahentenManager` hinzugefügt (Kapselung von KontrahentenForm/UI.PersonWasMachen für die Personen-Ziel-Privilegien der Weltkarte): liefert die wählbaren Kontrahenten (menschliche Mitspieler zuerst, dann die KI) und führt die zielgerichtete Aktion aus – Modus 8 = Prozess initiieren, Modus 13 = Hand des Henkers (mit Selbst-Schutz und Leer-Guard)
+
+**[EN]**
+- Added `KontrahentenManager` (encapsulation of KontrahentenForm/UI.PersonWasMachen for the world map's person-targeting privileges): provides the selectable contestants (human players first, then the AI) and performs the targeted action – mode 8 = initiate a lawsuit, mode 13 = executioner's hand (with a self-protection and empty guard)
+
 ## 3.23.0
 
 _21.07.2026_
