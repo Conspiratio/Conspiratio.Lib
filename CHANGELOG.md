@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.23.0
+
+_21.07.2026_
+
+**[DE]**
+- `RohstoffpreiseManager` hinzugefügt (Kapselung von RohstoffpreiseForm für die Weltkarte-Modi Händler/Kaufmann/Großkaufmann): Rohstoffpreise einer Stadt sowie die level-abhängige Aktion beim Anklicken eines Rohstoffs (Level 0 Einsicht, Level 1/2 Preis-Beeinflussung mit geteilter Einmal-pro-Jahr-Sperre). Die Original-Eigenheit, dass die Preisänderung nur erzählt, der Grundpreis aber nicht verändert wird, bleibt erhalten
+
+**[EN]**
+- Added `RohstoffpreiseManager` (encapsulation of RohstoffpreiseForm for the world map modes merchant/trader/grand merchant): a town's raw material prices and the level-dependent action when clicking a raw material (level 0 view-only, level 1/2 price influence with a shared once-per-year lock). The original quirk that the price change is only narrated but the base price is not actually altered is preserved
+
 ## 3.22.0
 
 _21.07.2026_
