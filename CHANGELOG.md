@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.25.0
+
+_21.07.2026_
+
+**[DE]**
+- `AemterEbeneManager` hinzugefügt (Kapselung der Ämter-Struktur von AemterEbene): liefert für ein Gebiet (Stadt/Land/Reich = Stufe 0/1/2) je politischer, kirchlicher und militärischer Ebene die Ämter mit ihren Inhabern (generisch über `Gebiet.GetAmtX` und die statischen Amt-IDs, geschlechtsabhängige Amtsnamen) sowie die Titelzeile und die zielgerichtete Aktion (Prozess/Henkershand)
+
+**[EN]**
+- Added `AemterEbeneManager` (encapsulation of AemterEbene's office structure): for a territory (town/land/realm = level 0/1/2) it provides the offices with their holders for the political, church and military layer (generically via `Gebiet.GetAmtX` and the static office IDs, with gender-aware office names) as well as the title line and the targeted action (lawsuit/executioner's hand)
+
 ## 3.24.0
 
 _21.07.2026_
