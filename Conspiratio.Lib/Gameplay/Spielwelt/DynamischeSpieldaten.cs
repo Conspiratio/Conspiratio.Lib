@@ -1648,6 +1648,61 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         }
         #endregion
 
+        #region BeziehungenPflegen (Karten spielen / Bestechen)
+        /// <summary>
+        /// "Karten spielen" aus dem Beziehungen-pflegen-Menü: nur gegen KI-Spieler. Ist der eigene
+        /// Geldbeutel im Verhältnis prall genug, sagt die KI sofort zu; andernfalls sinkt ihre Beziehung.
+        /// </summary>
+        /// <returns>true, wenn das Kartenspiel zustande kam (dann schließt der Dialog im Original).</returns>
+        public bool KartenSpielen(int id)
+        {
+            if (id < SW.Statisch.GetMinKIID())
+            {
+                BelTextAnzeigen("Ihr könnt (noch) nicht mit einem menschlichem Mitspieler Karten spielen");
+                return false;
+            }
+
+            int kiGeld = GetSpWithID(id).GetTaler();
+
+            if (kiGeld * SW.Statisch.GetKartenSpielenProzentsatz() < GetAktHum().GetTaler())
+            {
+                GetAktHum().SetSpieltKartenGegenSpielerID(id);
+                GetAktHum().GetSpielerStatistik().HiKartenSpielen++;
+
+                string zusage = GetSpWithID(id).GetMaennlich()
+                    ? "Ihr kontaktiert " + GetSpWithID(id).GetName() + ", welcher Euch sofort zusagt"
+                    : "Ihr kontaktiert " + GetSpWithID(id).GetName() + ", welche Euch sofort zusagt";
+                BelTextAnzeigen(zusage);
+                return true;
+            }
+
+            GetKIwithID(id).ErhoeheBeziehungZuX(GetAktiverSpieler(), -10);
+            BelTextAnzeigen(GetKIwithID(id).GetName() + ": \"Fragt mich wieder, wenn Euer Münzbeutel praller ist\"");
+            return false;
+        }
+
+        /// <summary>
+        /// "Bestechen" aus dem Beziehungen-pflegen-Menü: überlässt dem Spieler <paramref name="id"/> die
+        /// angegebene Taler-Summe (zieht sie ab, vermerkt die Bestechung und ggf. den Gesetzesverstoß).
+        /// </summary>
+        public void Bestechen(int id, int wert)
+        {
+            if (wert <= 0)
+                return;
+
+            GetAktHum().GetSpielerStatistik().HiBestechungssumme += wert;
+            GetAktHum().GetSpielerStatistik().HiBestechungen++;
+
+            GetAktHum().ErhoeheTaler(-wert);
+            GetAktHum().ErhoeheBestechungVonSpielerMitIDXUmY(id, wert);
+
+            if (GetGesetzX(1) != 0) // Wenn es verboten ist
+                GetAktHum().ErhoeheGesetzXUmEins(1);
+
+            BelTextAnzeigen(GetSpWithID(id).GetName() + " wird Eure Taler erhalten.");
+        }
+        #endregion
+
         #region Spionage
         /// <summary>
         /// Setzt Spione auf den Spieler <paramref name="id"/> an bzw. pfeift eine bereits laufende

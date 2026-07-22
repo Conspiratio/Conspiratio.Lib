@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.30.0
+
+_21.07.2026_
+
+**[DE]**
+- `DynamischeSpieldaten.KartenSpielen(id)` und `DynamischeSpieldaten.Bestechen(id, wert)` hinzugefügt (Migration von BeziehungenPflegen/Bestechen aus dem Hinterzimmer): Karten spielen (nur gegen KI – bei genügend eigenem Reichtum sagt sie zu, sonst sinkt die Beziehung) und Bestechen (eine Taler-Summe zukommen lassen, mit Statistik und Gesetzesprüfung). `KontrahentenManager.PersonWasMachen` ruft für Modus 0 den Beziehungen-pflegen-Dialog über `SW.UI.BeziehungPflegen` auf
+
+**[EN]**
+- Added `DynamischeSpieldaten.KartenSpielen(id)` and `DynamischeSpieldaten.Bestechen(id, wert)` (migration of BeziehungenPflegen/Bestechen from the back room): playing cards (only against AI – with enough own wealth it agrees, otherwise the relationship drops) and bribing (giving a Taler sum, with statistics and law check). `KontrahentenManager.PersonWasMachen` invokes the relations dialog via `SW.UI.BeziehungPflegen` for mode 0
+
 ## 3.29.0
 
 _21.07.2026_

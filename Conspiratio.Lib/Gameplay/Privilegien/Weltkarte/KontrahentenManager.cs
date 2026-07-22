@@ -64,6 +64,9 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
 
             switch (modus)
             {
+                case 0: // Beziehungen pflegen (Hinterzimmer)
+                    SW.UI.BeziehungPflegen.ShowDialog(id);
+                    break;
                 case 1: // Sabotage (Hinterzimmer)
                     await SW.Dynamisch.Sabotage(id);
                     break;
