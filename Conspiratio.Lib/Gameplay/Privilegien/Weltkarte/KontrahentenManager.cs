@@ -67,6 +67,9 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
                 case 0: // Beziehungen pflegen (Hinterzimmer)
                     SW.UI.BeziehungPflegen.ShowDialog(id);
                     break;
+                case 2: // Anschwärzen (Hinterzimmer, zweistufig)
+                    SW.Dynamisch.Anschwaerzen(id);
+                    break;
                 case 1: // Sabotage (Hinterzimmer)
                     await SW.Dynamisch.Sabotage(id);
                     break;
@@ -83,8 +86,7 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
                     SW.Dynamisch.HenkersHand(id);
                     break;
                 default:
-                    // Beziehungen (0), Sabotage (1), Anschwärzen (2), Spionage (3), Erpressung (5)
-                    // werden in eigenen Migrationsschritten ergänzt.
+                    // Erpressung (5) ist bereits im Original deaktiviert und bleibt es hier.
                     SW.Dynamisch.BelTextAnzeigen("Diese Aktion ist noch nicht verfügbar.");
                     break;
             }

@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.31.0
+
+_21.07.2026_
+
+**[DE]**
+- `DynamischeSpieldaten.Anschwaerzen(id)` samt `GetAnschwaerzID`/`SetAnschwaerzID` hinzugefügt (Migration des zweistufigen Anschwärzens aus dem Hinterzimmer): der erste Klick wählt den Anzuschwärzenden X, der zweite den Adressaten Y. Glaubt Y (nur KI, ab Beziehung 80) die Anschuldigung, sinkt dessen Beziehung zu X; andernfalls berichtet Y dem X davon und die eigene Beziehung leidet. `KontrahentenManager.PersonWasMachen` ruft dies für Modus 2 auf
+
+**[EN]**
+- Added `DynamischeSpieldaten.Anschwaerzen(id)` with `GetAnschwaerzID`/`SetAnschwaerzID` (migration of the back room's two-step denunciation): the first click selects the denounced X, the second the addressee Y. If Y (AI only, from relationship 80) believes the accusation, its relationship to X drops; otherwise Y reports it to X and one's own relationship suffers. `KontrahentenManager.PersonWasMachen` invokes this for mode 2
+
 ## 3.30.0
 
 _21.07.2026_

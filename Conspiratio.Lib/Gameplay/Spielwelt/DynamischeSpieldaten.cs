@@ -1648,6 +1648,73 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         }
         #endregion
 
+        #region Anschwaerzen
+        // Transienter Merker für den zweistufigen Anschwärz-Vorgang ("X bei Y anschwärzen").
+        private int _anschwaerzID;
+
+        /// <summary>ID des Spielers, der gerade angeschwärzt werden soll (0 = kein Vorgang aktiv).</summary>
+        public int GetAnschwaerzID() => _anschwaerzID;
+
+        /// <summary>Setzt bzw. löscht (0) den laufenden Anschwärz-Vorgang.</summary>
+        public void SetAnschwaerzID(int id) => _anschwaerzID = id;
+
+        /// <summary>
+        /// Anschwärzen aus dem Hinterzimmer (zweistufig): Der erste Klick wählt den Anzuschwärzenden X,
+        /// der zweite den Adressaten Y. Glaubt Y (nur KI, ab Beziehung 80) die Anschuldigung, sinkt
+        /// dessen Beziehung zu X; andernfalls berichtet Y dem X davon und die eigene Beziehung leidet.
+        /// </summary>
+        public void Anschwaerzen(int id)
+        {
+            // Erster Schritt: Anzuschwärzenden merken.
+            if (_anschwaerzID == 0)
+            {
+                BelTextAnzeigen(GetSpWithID(id).GetName() + " anschwärzen bei...");
+                _anschwaerzID = id;
+                return;
+            }
+
+            // Zweiter Schritt: Adressat Y wählen.
+            if (id < SW.Statisch.GetMinKIID()) // Bei einem menschlichen Mitspieler kann man nicht anschwärzen.
+            {
+                BelTextAnzeigen("Ihr könnt nicht bei einem Mitspieler anschwärzen.");
+                return;
+            }
+
+            int x = _anschwaerzID; // der Angeschwärzte
+            int y = id;            // der Adressat
+
+            if (x == y)
+            {
+                BelTextAnzeigen("Ihr könnt nicht jemanden bei sich selbst anschwärzen");
+                _anschwaerzID = 0;
+                return;
+            }
+
+            if (GetGesetzX(22) != 0) // Wenn es verboten ist
+                GetAktHum().ErhoeheGesetzXUmEins(22);
+
+            GetAktHum().GetSpielerStatistik().HiAnschwaerzungen++;
+
+            bool glaubtAnschuldigung = GetKIwithID(y).GetBeziehungZuKIX(GetAktiverSpieler()) >= 80;
+
+            if (glaubtAnschuldigung)
+            {
+                GetKIwithID(y).ErhoeheBeziehungZuX(x, -30);
+                GetKIwithID(y).ErhoeheBeziehungZuX(GetAktiverSpieler(), -10);
+                BelTextAnzeigen(GetKIwithID(y).GetKompletterName() + " schenkt Euren Worten Glauben.");
+            }
+            else if (x >= SW.Statisch.GetMinKIID()) // Y glaubt nicht; nur wenn X eine KI ist, berichtet Y ihm davon.
+            {
+                GetKIwithID(x).ErhoeheBeziehungZuX(GetAktiverSpieler(), -50);
+                GetKIwithID(y).ErhoeheBeziehungZuX(GetAktiverSpieler(), -20);
+                BelTextAnzeigen(GetSpWithID(y).GetKompletterName() + " glaubt Euch kein Wort und berichtet " +
+                                GetSpWithID(x).GetKompletterName() + " von Euren Anschuldigungen.");
+            }
+
+            _anschwaerzID = 0;
+        }
+        #endregion
+
         #region BeziehungenPflegen (Karten spielen / Bestechen)
         /// <summary>
         /// "Karten spielen" aus dem Beziehungen-pflegen-Menü: nur gegen KI-Spieler. Ist der eigene
