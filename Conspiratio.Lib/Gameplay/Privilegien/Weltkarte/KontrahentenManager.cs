@@ -67,6 +67,9 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
                 case 1: // Sabotage (Hinterzimmer)
                     await SW.Dynamisch.Sabotage(id);
                     break;
+                case 3: // Spionage (Hinterzimmer)
+                    await SW.Dynamisch.Spionage(id);
+                    break;
                 case 4: // Ermordung (Hinterzimmer)
                     await SW.Dynamisch.Ermordung(id);
                     break;

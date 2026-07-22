@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.29.0
+
+_21.07.2026_
+
+**[DE]**
+- `DynamischeSpieldaten.Spionage(id)` hinzugefügt (Migration der Spionage-Form aus dem Hinterzimmer): läuft noch keine Spionage, werden – wie im Original ohne Rückfrage – für 5 Jahre Spione angesetzt (Kosten 2 % der Taler des Ziels, mind. 1.000 Taler) und darüber informiert; läuft bereits eine, kann man sie zurückpfeifen oder weiterlaufen lassen. `KontrahentenManager.PersonWasMachen` ruft dies für Modus 3 auf
+
+**[EN]**
+- Added `DynamischeSpieldaten.Spionage(id)` (migration of the back room's spying form): if no spying is running yet, spies are set on the target for 5 years – as in the original without a confirmation – (cost 2 % of the target's Taler, at least 1,000 Taler) and reported via an info message; if one is already running, it can be called off or left to continue. `KontrahentenManager.PersonWasMachen` invokes this for mode 3
+
 ## 3.28.0
 
 _21.07.2026_

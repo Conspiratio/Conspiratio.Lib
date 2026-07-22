@@ -1648,6 +1648,46 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         }
         #endregion
 
+        #region Spionage
+        /// <summary>
+        /// Setzt Spione auf den Spieler <paramref name="id"/> an bzw. pfeift eine bereits laufende
+        /// Spionage zurück (Migration der Spionage-Form aus dem Hinterzimmer). Das Ansetzen erfolgt –
+        /// wie im Original – ohne Rückfrage und wird nur mit einer Info-Meldung bestätigt.
+        /// </summary>
+        public async Task Spionage(int id)
+        {
+            bool bereitsAktiv = GetAktHum().GetAktiveSpionage(id).GetDauer() > 0;
+
+            if (!bereitsAktiv)
+            {
+                const double malfaktor = 0.02;
+                int summe = Convert.ToInt32(GetSpWithID(id).GetTaler() * malfaktor);
+                if (summe < 1000)
+                    summe = 1000;
+
+                const int dauer = 5;
+
+                GetAktHum().ErhoeheGesetzXUmEins(20);
+                GetAktHum().GetAktiveSpionage(id).SetKosten(summe);
+                GetAktHum().GetAktiveSpionage(id).SetDauer(dauer);
+
+                BelTextAnzeigen("In den nächsten " + dauer + " Jahren werden Eure Spione " + GetSpWithID(id).GetName() +
+                                " überwachen und Euch von sämtlichen Verbrechen berichten. Die Spione verlangen dafür " +
+                                summe.ToStringGeld() + ".");
+                return;
+            }
+
+            // Es läuft bereits eine Spionage – zurückpfeifen oder weitermachen lassen?
+            if (await SW.UI.YesNoQuestion.ShowDialogText(
+                    "Ihr habt bereits einige Spione auf " + GetSpWithID(id).GetName() + " angesetzt. Wollt Ihr diese",
+                    "zurückpfeifen", "weitermachen lassen?") != DialogResultGame.Yes)
+                return;
+
+            GetAktHum().AktiveSpionageEntfernen(id);
+            BelTextAnzeigen("Ihr pfeift Eure Leute zurück...");
+        }
+        #endregion
+
         #region Ermordung
         public async Task<bool> Ermordung(int id)
         {
