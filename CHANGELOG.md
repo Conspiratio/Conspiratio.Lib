@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.28.0
+
+_21.07.2026_
+
+**[DE]**
+- `DynamischeSpieldaten.Sabotage(id)` hinzugefügt (Migration der Sabotage-Form aus dem Hinterzimmer): läuft noch keine Sabotage gegen das Ziel, wird sie gegen jährliche Kosten (4 % des Zielvermögens, mind. 1.000 Taler, über 5 Jahre) mit Rückfrage eingeleitet; läuft bereits eine, kann man sie zurückpfeifen oder weiterlaufen lassen. `KontrahentenManager.PersonWasMachen` ruft dies für Modus 1 auf
+
+**[EN]**
+- Added `DynamischeSpieldaten.Sabotage(id)` (migration of the back room's sabotage form): if no sabotage against the target is running yet, it is initiated for an annual cost (4 % of the target's wealth, at least 1,000 Taler, over 5 years) with a confirmation; if one is already running, it can be called off or left to continue. `KontrahentenManager.PersonWasMachen` invokes this for mode 1
+
 ## 3.27.0
 
 _21.07.2026_

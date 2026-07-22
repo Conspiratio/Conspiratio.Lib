@@ -1601,6 +1601,53 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         }
         #endregion
 
+        #region Sabotage
+        /// <summary>
+        /// Leitet eine Sabotage gegen den Spieler <paramref name="id"/> ein bzw. pfeift eine bereits
+        /// laufende Sabotage zurück (Migration der Sabotage-Form aus dem Hinterzimmer).
+        /// </summary>
+        public async Task<bool> Sabotage(int id)
+        {
+            bool bereitsAktiv = GetAktHum().GetAktiveSabotage(id).GetDauer() > 0;
+
+            if (!bereitsAktiv)
+            {
+                const double malfaktor = 0.04;
+                int saboKosten = Convert.ToInt32(GetSpWithID(id).GetGesamtVermoegen(id) * malfaktor);
+                if (saboKosten < 1000)
+                    saboKosten = 1000;
+
+                const int jahre = 5;
+                string namensSuffix = GetSpWithID(id).GetName().EndsWith("s") ? "'" : "s";
+
+                if (await SW.UI.YesNoQuestion.ShowDialogText(
+                        "Einige zwielichtige Gestalten bieten Euch an, " + jahre + " Jahre für jeweils " +
+                        saboKosten.ToStringGeld() + " zu versuchen, " + GetSpWithID(id).GetName() + namensSuffix +
+                        " Besitzungen mit Unheil zu überziehen. Wollt Ihr", "Ja", "Nein") != DialogResultGame.Yes)
+                    return false;
+
+                GetAktHum().GetAktiveSabotage(id).SetDauer(jahre);
+                GetAktHum().GetAktiveSabotage(id).SetKosten(saboKosten);
+
+                if (GetGesetzX(21) != 0) // Wenn es verboten ist
+                    GetAktHum().ErhoeheGesetzXUmEins(21);
+
+                BelTextAnzeigen(GetSpWithID(id).GetName() + " wird Ärger bekommen...");
+                return true;
+            }
+
+            // Es läuft bereits eine Sabotage – zurückpfeifen oder weitermachen lassen?
+            if (await SW.UI.YesNoQuestion.ShowDialogText(
+                    "Ihr habt bereits einige Gesetzlose mit dem Auftrag betraut, " + GetSpWithID(id).GetName() +
+                    " Ärger zu bereiten. Wollt Ihr Eure Leute", "zurückpfeifen", "weitermachen lassen?") != DialogResultGame.Yes)
+                return false;
+
+            GetAktHum().AktiveSabotageEntfernen(id);
+            BelTextAnzeigen("Ihr pfeift Eure Leute zurück...");
+            return true;
+        }
+        #endregion
+
         #region Ermordung
         public async Task<bool> Ermordung(int id)
         {
