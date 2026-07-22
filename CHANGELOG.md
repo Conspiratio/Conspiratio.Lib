@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.27.0
+
+_21.07.2026_
+
+**[DE]**
+- `KontrahentenManager.PersonWasMachen` um den Hinterzimmer-Modus 4 (Ermordung, `SW.Dynamisch.Ermordung`) erweitert; noch nicht migrierte Modi (Beziehungen, Sabotage, Anschwärzen, Spionage, Erpressung) liefern vorerst einen Hinweis "noch nicht verfügbar"
+
+**[EN]**
+- Extended `KontrahentenManager.PersonWasMachen` with the back-room mode 4 (assassination, `SW.Dynamisch.Ermordung`); not-yet-migrated modes (relations, sabotage, denunciation, spying, blackmail) return a "not yet available" notice for now
+
 ## 3.26.0
 
 _21.07.2026_

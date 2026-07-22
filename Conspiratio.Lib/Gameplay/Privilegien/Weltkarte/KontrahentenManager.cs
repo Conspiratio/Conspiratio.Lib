@@ -64,11 +64,19 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
 
             switch (modus)
             {
+                case 4: // Ermordung (Hinterzimmer)
+                    await SW.Dynamisch.Ermordung(id);
+                    break;
                 case 8: // Prozess initiieren
                     await SW.Dynamisch.ProzessInitiieren(id);
                     break;
                 case 13: // Hand des Henkers
                     SW.Dynamisch.HenkersHand(id);
+                    break;
+                default:
+                    // Beziehungen (0), Sabotage (1), Anschwärzen (2), Spionage (3), Erpressung (5)
+                    // werden in eigenen Migrationsschritten ergänzt.
+                    SW.Dynamisch.BelTextAnzeigen("Diese Aktion ist noch nicht verfügbar.");
                     break;
             }
         }
