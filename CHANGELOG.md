@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.38.0
+
+_23.07.2026_
+
+**[DE]**
+- `Kartenspiel` um die Spiellogik von "17 und 4" erweitert (Migration von KartenSpielen aus dem WinForms-Client): Einsatz festlegen (Min = 5 % des Vermögens, Max = Bargeld), Austeilen (Gegner eine Karte, Spieler zwei), Karten kaufen mit Status (weiter / genau 21 / überkauft) und die Auswertung – der Gegner zieht bis mindestens 17, danach werden Taler und die Beziehung zum Gegner verbucht. Ebenso der Fall zu geringer Taler (der Gegner verlässt verärgert den Tisch). Behebt beiläufig einen Kopier-Fehler des Originals, durch den die zweite Startkarte des Spielers nie ausgelost wurde
+
+**[EN]**
+- Extended `Kartenspiel` with the "17 and 4" game logic (migration of KartenSpielen from the WinForms client): setting the bet (min = 5 % of wealth, max = cash), dealing (one card for the opponent, two for the player), buying cards with a status (continue / exactly 21 / bust) and the evaluation – the opponent draws until at least 17, after which Taler and the relationship to the opponent are booked. Likewise the too-few-Taler case (the opponent leaves the table annoyed). Fixes in passing a copy-paste bug of the original that meant the player's second starting card was never drawn
+
 ## 3.37.0
 
 _23.07.2026_
