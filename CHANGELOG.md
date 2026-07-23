@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.37.0
+
+_23.07.2026_
+
+**[DE]**
+- `ZufallsereignisseManager` hinzugefügt (Extraktion von RandomEreignisse aus dem WinForms-Client): wickelt die jährlichen Zufallsereignisse eines Zugs ab – je ein zufälliges Finanz-, Ansehens- und Gesundheitsereignis (mit vermögensabhängigem Taler-, Ansehens- bzw. Gesundheitseffekt) sowie ein datengesteuertes Datumsereignis mit Multiplikatoren –, verbucht deren Auswirkungen und liefert die anzuzeigenden Meldungen der Reihe nach zurück (im Startjahr passiert nichts)
+
+**[EN]**
+- Added `ZufallsereignisseManager` (extraction of RandomEreignisse from the WinForms client): handles a turn's yearly random events – one random financial, reputation and health event each (with a wealth-based Taler, reputation resp. health effect) as well as a data-driven date event with multipliers –, applies their effects and returns the messages to be shown in order (nothing happens in the starting year)
+
 ## 3.36.0
 
 _23.07.2026_
