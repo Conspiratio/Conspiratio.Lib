@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.35.0
+
+_21.07.2026_
+
+**[DE]**
+- `KampfereignisseManager` hinzugefügt (Kapselung von frmKampfereignisse): wickelt die militärischen Ereignisse am Jahresende ab – führt die Aktionen der KI-Stützpunkte aus, initialisiert die Landsicherheiten, ermittelt und wertet die stattfindenden Kämpfe aus (Karawanen-Plünderungen, Angriffe auf Stützpunkte) – und liefert die Meldungen der Reihe nach zurück
+
+**[EN]**
+- Added `KampfereignisseManager` (encapsulation of frmKampfereignisse): handles the year-end military events – executes the AI strongholds' actions, initializes the land securities, determines and resolves the battles that take place (caravan plundering, attacks on strongholds) – and returns the messages in order
+
 ## 3.34.0
 
 _21.07.2026_
