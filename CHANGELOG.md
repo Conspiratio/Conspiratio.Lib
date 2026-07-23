@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.41.0
+
+_23.07.2026_
+
+**[DE]**
+- `TitelverleihungErgebnis` um `TitelTyp` (Typ-Name des verliehenen Titels, z. B. "Graf") erweitert – der Client kann damit die passende Sprachausgabe der Titelverleihung auswählen
+
+**[EN]**
+- Extended `TitelverleihungErgebnis` with `TitelTyp` (type name of the bestowed title, e.g. "Graf") – the client can use it to select the fitting voice output for the title bestowal
+
 ## 3.40.0
 
 _23.07.2026_

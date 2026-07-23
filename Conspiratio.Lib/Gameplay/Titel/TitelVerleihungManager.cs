@@ -43,6 +43,7 @@ namespace Conspiratio.Lib.Gameplay.Titel
             {
                 UrkundenText = text,
                 TitelName = titelName,
+                TitelTyp = titel.GetType().Name,
                 Maennlich = maennlich
             };
         }
@@ -53,6 +54,10 @@ namespace Conspiratio.Lib.Gameplay.Titel
     {
         public string UrkundenText { get; set; }
         public string TitelName { get; set; }
+
+        /// <summary>Der Typ-Name des verliehenen Titels (z. B. "Graf") – dient dem Client zur Auswahl der Sprachausgabe.</summary>
+        public string TitelTyp { get; set; }
+
         public bool Maennlich { get; set; }
     }
 }
