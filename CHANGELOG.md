@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.36.0
+
+_23.07.2026_
+
+**[DE]**
+- `ZugNachrichtenManager` um die verdeckten Zugende-Ereignisse erweitert (Extraktion aus dem WinForms-Client): Korruptionsgelder (Privileg 21) und Schmuggelgelder (Privileg 22) als Amtseinkünfte, Kerkerklatsch (Privileg 7, Beweise gegen einen Amtsträger der Amtsstadt), die Abwicklung laufender Spionagen (Dauer, Ablauf, Beweisbeschaffung abhängig von Deliktpunkten und Schutzprivilegien) und Sabotagen (vermögensabhängiger Schaden mit Chance) sowie die Ausführung einer beauftragten Ermordung und eines beauftragten vergifteten Weins (je mit Erfolgschance und Zustandsänderung)
+
+**[EN]**
+- Extended `ZugNachrichtenManager` with the covert turn-end events (extraction from the WinForms client): corruption money (privilege 21) and smuggling money (privilege 22) as office earnings, dungeon gossip (privilege 7, evidence against an office holder of the office city), the processing of ongoing espionage (duration, expiry, evidence gathering depending on delict points and protective privileges) and sabotage (wealth-based damage with a chance) as well as carrying out a commissioned assassination and a commissioned poisoned wine (each with a success chance and state change)
+
 ## 3.35.0
 
 _21.07.2026_

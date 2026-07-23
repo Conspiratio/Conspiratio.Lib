@@ -265,6 +265,286 @@ namespace Conspiratio.Lib.Allgemein
 
             return ergebnis;
         }
+
+        /// <summary>
+        /// Korruptionsgelder (Privileg 21): Als Amtsträger erhält der Spieler kleine "Spenden".
+        /// </summary>
+        /// <returns>Die anzuzeigende Meldung oder null, wenn keine anfallen.</returns>
+        [PublicAPI]
+        public string KassiereKorruptionsgelder()
+        {
+            var spieler = SW.Dynamisch.GetAktHum();
+
+            if (!spieler.CheckPrivilegX(21))
+                return null;
+
+            int betrag = SW.Statisch.Rnd.Next(100, SW.Statisch.GetmaxKorruptionsGelder());
+            spieler.ErhoeheTaler(betrag);
+
+            return "Als " + SW.Dynamisch.GetAmtsnameVonSPIDx(SW.Dynamisch.GetAktiverSpieler()) +
+                   " habt Ihr dieses Jahr " + betrag.ToStringGeld() + " in Form von kleinen 'Spenden' erhalten.";
+        }
+
+        /// <summary>
+        /// Schmuggelgelder (Privileg 22): Als Amtsträger verdient der Spieler an Schmuggelgeschäften.
+        /// </summary>
+        /// <returns>Die anzuzeigende Meldung oder null, wenn keine anfallen.</returns>
+        [PublicAPI]
+        public string KassiereSchmuggelgelder()
+        {
+            var spieler = SW.Dynamisch.GetAktHum();
+
+            if (!spieler.CheckPrivilegX(22))
+                return null;
+
+            int betrag = SW.Statisch.Rnd.Next(1000, 10000);
+            spieler.ErhoeheTaler(betrag);
+
+            return "Als " + SW.Dynamisch.GetAmtsnameVonSPIDx(SW.Dynamisch.GetAktiverSpieler()) +
+                   " habt Ihr dieses Jahr " + betrag.ToStringGeld() + " mit Schmuggelgeschäften verdient.";
+        }
+
+        /// <summary>
+        /// Kerkerklatsch (Privileg 7): Als Kerkermeister werden dem Spieler von einem Gefangenen
+        /// Beweise gegen einen zufälligen Amtsträger seiner Amtsstadt zugetragen.
+        /// </summary>
+        /// <returns>Die anzuzeigende Meldung oder null, wenn keine anfällt.</returns>
+        [PublicAPI]
+        public string ErmittleKerkerklatsch()
+        {
+            var spieler = SW.Dynamisch.GetAktHum();
+
+            if (!spieler.CheckPrivilegX(7))
+                return null;
+
+            var amtsstadt = SW.Dynamisch.GetStadtwithID(spieler.GetAmtGebiet());
+
+            int opferAmtId = 0;
+
+            // Einen belegten, fremden Amtsposten der Amtsstadt suchen (Slot 15 ist der eigene).
+            for (int versuch = 0; versuch < 1000; versuch++)
+            {
+                int kandidat = SW.Statisch.Rnd.Next(1, SW.Statisch.GetMaxAmtStadtID());
+
+                if (kandidat != 15 && amtsstadt.GetAmtX(kandidat) != 0)
+                {
+                    opferAmtId = kandidat;
+                    break;
+                }
+            }
+
+            if (opferAmtId == 0)
+                return null;
+
+            int opferSpielerId = amtsstadt.GetAmtX(opferAmtId);
+            int beweismaechtigkeit = SW.Statisch.Rnd.Next(1, 5);
+
+            var spionage = spieler.GetAktiveSpionage(opferSpielerId);
+            spionage.SetDelikte(spionage.GetDelikte() + beweismaechtigkeit);
+
+            return "Als Kerkermeister habt Ihr dieses Jahr von einem Eurer Gefangenen\n" +
+                   BeweisStaerkeText(beweismaechtigkeit) + " Beweise gegen " +
+                   SW.Dynamisch.GetKIwithID(opferSpielerId).GetKompletterName() + " zugetragen bekommen.";
+        }
+
+        /// <summary>
+        /// Wickelt die laufenden Spionagen des Spielers ab: reduziert deren Dauer, entfernt ausgelaufene
+        /// und sammelt – abhängig von den Deliktpunkten des Ziels – neue Beweise ein.
+        /// </summary>
+        /// <returns>Die zusammengefasste Meldung oder null (wie im Original nur, wenn Beweise gefunden wurden).</returns>
+        [PublicAPI]
+        public string ErmittleSpionageNachrichten()
+        {
+            var spieler = SW.Dynamisch.GetAktHum();
+            var zeilen = new List<string>();
+
+            bool etwasSpioniert = false;
+            bool beweiseGefunden = false;
+
+            for (int i = 1; i < SW.Statisch.GetMaxKIID(); i++)
+            {
+                if (spieler.GetAktiveSpionage(i).GetKosten() <= 0)
+                    continue;
+
+                // Dauer reduzieren, um endlose Spionagen bei Amtsverlust des Ziels zu verhindern.
+                spieler.GetAktiveSpionage(i).DauerReduzieren();
+
+                if (spieler.GetAktiveSpionage(i).GetDauer() < 0)
+                {
+                    zeilen.Add("Eure Spionage gegen " + SW.Dynamisch.GetSpWithID(i).GetKompletterName() + " ist ausgelaufen.");
+                    spieler.AktiveSpionageEntfernen(i);
+                    continue;
+                }
+
+                spieler.GetAktiveSpionage(i).SetJahr(SW.Dynamisch.GetAktuellesJahr());
+
+                int opferDelikte = SW.Dynamisch.GetSpWithID(i).GetDeliktpunkte() - spieler.GetAktiveSpionage(i).GetDelikte();
+
+                // Durch Privilegien geschützte Ziele erschweren die Beweisbeschaffung.
+                if (SW.Dynamisch.GetSpWithID(i).CheckPrivilegX(18))
+                    opferDelikte = opferDelikte * 2 / 3;
+                if (SW.Dynamisch.GetSpWithID(i).CheckPrivilegX(19))
+                    opferDelikte /= 2;
+
+                etwasSpioniert = true;
+
+                int zufall = SW.Statisch.Rnd.Next(0, 5);
+
+                if (opferDelikte > zufall)
+                {
+                    beweiseGefunden = true;
+
+                    int beweismaechtigkeit = SW.Statisch.Rnd.Next(1, zufall + 1);
+                    spieler.GetAktiveSpionage(i).SetDelikte(spieler.GetAktiveSpionage(i).GetDelikte() + beweismaechtigkeit);
+
+                    zeilen.Add("Eure Spione haben Euch " + BeweisStaerkeText(beweismaechtigkeit) + " Beweise gegen " +
+                               SW.Dynamisch.GetSpWithID(i).GetKompletterName() + " gebracht.");
+                }
+            }
+
+            if (etwasSpioniert && beweiseGefunden)
+                return string.Join("\n\n", zeilen);
+
+            return null;
+        }
+
+        /// <summary>
+        /// Wickelt die laufenden Sabotagen des Spielers ab: mit einer gewissen Chance richten die
+        /// Saboteure beim Ziel einen vermögensabhängigen Schaden an; abgelaufene Sabotagen werden entfernt.
+        /// </summary>
+        /// <returns>Die zusammengefasste Meldung oder null, wenn nichts sabotiert wurde.</returns>
+        [PublicAPI]
+        public string ErmittleSabotageNachrichten()
+        {
+            var spieler = SW.Dynamisch.GetAktHum();
+            var zeilen = new List<string>();
+
+            for (int i = 1; i < SW.Statisch.GetMaxKIID(); i++)
+            {
+                if (spieler.GetAktiveSabotage(i).GetDauer() <= 0)
+                    continue;
+
+                int chance = 2;
+
+                if (SW.Dynamisch.GetSpWithID(i).CheckPrivilegX(18))
+                    chance = 3;
+                if (SW.Dynamisch.GetSpWithID(i).CheckPrivilegX(19))
+                    chance = 4;
+
+                if (SW.Statisch.Rnd.Next(0, chance) != 1)
+                    continue;
+
+                int sabMaechtigkeit = SW.Statisch.Rnd.Next(1, 9);
+                int schaden = SW.Dynamisch.GetSpWithID(i).GetGesamtVermoegen(i) * sabMaechtigkeit / 100;
+
+                zeilen.Add("Es gelang Euren Saboteueren bei " + SW.Dynamisch.GetSpWithID(i).GetKompletterName() + " " +
+                           SabotageStaerkeText(sabMaechtigkeit) + " Schäden in Höhe von " + schaden + " anzurichten.");
+
+                SW.Dynamisch.GetSpWithID(i).ErhoeheTaler(-schaden);
+
+                spieler.GetAktiveSabotage(i).ReduziereDauerUmEins();
+
+                if (spieler.GetAktiveSabotage(i).GetDauer() <= 0)
+                    spieler.AktiveSabotageEntfernen(i);
+            }
+
+            return zeilen.Count > 0 ? string.Join("\n\n", zeilen) : null;
+        }
+
+        /// <summary>
+        /// Führt eine vom Spieler beauftragte Ermordung eines KI-Spielers aus (mit Erfolgschance).
+        /// </summary>
+        /// <returns>Die anzuzeigende Meldung oder null, wenn kein Auftrag vorlag.</returns>
+        [PublicAPI]
+        public string FuehreErmordungDurch()
+        {
+            var spieler = SW.Dynamisch.GetAktHum();
+
+            int zielId = spieler.GetErmordetKISpielerID();
+
+            if (zielId == 0)
+                return null;
+
+            spieler.SetErmordetKISpielerID(0);
+
+            if (SW.Statisch.Rnd.Next(0, SW.Statisch.GetErmordungsChance()) == 0)
+            {
+                spieler.GetSpielerStatistik().HiErfolgreicheErmordungen++;
+                SW.Dynamisch.GetKIwithID(zielId).SetStirbt(true);
+
+                return "Die Ermordung von " + SW.Dynamisch.GetKIwithID(zielId).GetKompletterName() +
+                       " wird wie geplant durchgeführt!\n\nMöge die Wahrheit nie ans Licht kommen...";
+            }
+
+            return "Die Ermordung von " + SW.Dynamisch.GetKIwithID(zielId).GetKompletterName() +
+                   " ist fehlgeschlagen.\n\nDie Männer und Euer Geld sind spurlos verschwunden...";
+        }
+
+        /// <summary>
+        /// Führt einen vom Spieler beauftragten vergifteten Wein aus (mit Erfolgschance). Bei Erfolg
+        /// stirbt das (KI-)Ziel, sonst leidet nur dessen Gesundheit; menschliche Ziele leiden immer nur.
+        /// </summary>
+        /// <returns>Die beiden Meldungen (Andeutung, dann Ergebnis) oder null, wenn kein Auftrag vorlag.</returns>
+        [PublicAPI]
+        public List<string> FuehreVergiftetenWeinDurch()
+        {
+            var spieler = SW.Dynamisch.GetAktHum();
+
+            int zielId = spieler.GetVergiftetWeinVonKISpielerID();
+
+            if (zielId == 0)
+                return null;
+
+            spieler.SetVergiftetWeinVonKISpielerID(0);
+
+            var ziel = SW.Dynamisch.GetKIwithID(zielId);
+
+            string andeutung = "Bei einem Fest mischt Ihr " + ziel.GetKompletterName() + " einen Tropfen Gift in " +
+                               ziel.GetSeinenIhren() + " Trank. Einige Tage später erfahrt Ihr von Euren Informanten, dass " +
+                               ziel.GetName() + " ein seltsames Leiden hat...";
+
+            int rand = SW.Statisch.Rnd.Next(0, SW.Statisch.GetVergifteterWeinChance());
+
+            // Menschliche Ziele leiden nur an ihrer Gesundheit.
+            if (zielId < SW.Statisch.GetMinKIID())
+                rand = 0;
+
+            string ergebnis;
+
+            if (rand == 1)
+            {
+                ziel.SetStirbt(true);
+                ergebnis = "Bald wird " + ziel.GetName() + " " + ziel.GetSeinerIhrer() +
+                           " Krankheit erliegen\nMöge die Wahrheit nie ans Licht kommen...";
+            }
+            else
+            {
+                ziel.ErhoeheGesundheit(-10);
+                ergebnis = "Nach kurzer Zeit erholt sich " + ziel.GetName() + " wieder. " + ziel.GetSeinerIhrer() +
+                           " Gesundheit hat gelitten.";
+            }
+
+            return new List<string> { andeutung, ergebnis };
+        }
+
+        /// <summary>Übersetzt eine Beweismächtigkeit (1..4) in die Beschreibung des Originals.</summary>
+        private static string BeweisStaerkeText(int beweismaechtigkeit)
+        {
+            if (beweismaechtigkeit > 3) return "stark belastende";
+            if (beweismaechtigkeit > 2) return "belastende";
+            if (beweismaechtigkeit > 1) return "einige";
+            return "schwache";
+        }
+
+        /// <summary>Übersetzt eine Sabotagemächtigkeit (1..8) in die Beschreibung des Originals.</summary>
+        private static string SabotageStaerkeText(int sabMaechtigkeit)
+        {
+            if (sabMaechtigkeit > 8) return "sehr starke";
+            if (sabMaechtigkeit > 6) return "starke";
+            if (sabMaechtigkeit > 4) return "einige";
+            if (sabMaechtigkeit > 2) return "geringe";
+            return "sehr geringe";
+        }
     }
 
     /// <summary>
