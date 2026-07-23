@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.32.0
+
+_21.07.2026_
+
+**[DE]**
+- `SoeldnerRaeuberManager` hinzugefügt (Kapselung von frmSoeldnerRaeuberKarte/frmStuetzpunktKaufen): liefert die acht Stützpunkte (Zollburgen und Räuberlager) mit ihren Kartenrechtecken und Besitzverhältnissen (für Hover und Flaggen), die Anzeigedaten für den Kauf-Dialog (Name, Art, Besitzer, Wert, Zustand, Sicherheit/Tarnung) sowie das jährlich einmalige Kaufangebot an fremde Besitzer
+
+**[EN]**
+- Added `SoeldnerRaeuberManager` (encapsulation of frmSoeldnerRaeuberKarte/frmStuetzpunktKaufen): provides the eight strongholds (toll castles and robber camps) with their map rectangles and ownership (for hover and flags), the display data for the purchase dialog (name, type, owner, value, condition, security/camouflage) and the once-a-year purchase offer to other owners
+
 ## 3.31.0
 
 _21.07.2026_
