@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.39.0
+
+_23.07.2026_
+
+**[DE]**
+- `GerichtsverhandlungManager` hinzugefügt (Kapselung von CheckGerichtsVerhandlungen/GerichtsverhandlungDurchfuehren): schrittweiser Ablauf einer Verhandlung, damit der Client die Anzeige steuern und menschliche Richter interaktiv abstimmen lassen kann – Verhandlungen mit dem aktiven Spieler ermitteln, Verhandlung starten (Delikte des Angeklagten bestimmen: bei KI zufällig, bei Mensch aus den begangenen Verbrechen), die Vorwürfe je Gesetzeskategorie (Finanz/Straf/Kirche) mit passender Überschrift liefern, die drei Richter abstimmen lassen (KI-Urteil aus Sympathie, Verbrechenssumme und Schwierigkeitsgrad) und auswerten (bei mehr als einem Freispruch Freispruch, sonst eine zufällige Strafart ausführen)
+
+**[EN]**
+- Added `GerichtsverhandlungManager` (encapsulation of CheckGerichtsVerhandlungen/GerichtsverhandlungDurchfuehren): a step-by-step trial flow so the client can drive the display and let human judges vote interactively – determine the trials involving the active player, start a trial (determine the defendant's delicts: random for an AI, from the committed crimes for a human), return the charges per law category (financial/criminal/church) with a fitting heading, let the three judges vote (AI verdict from sympathy, crime sum and difficulty) and evaluate (acquittal on more than one not-guilty vote, otherwise execute a random punishment)
+
 ## 3.38.0
 
 _23.07.2026_
