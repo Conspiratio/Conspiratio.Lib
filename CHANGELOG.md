@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.34.0
+
+_21.07.2026_
+
+**[DE]**
+- `StuetzpunktAktionenManager` hinzugefügt (Kapselung des Aktionsbereichs von frmStuetzpunktVerwalten): die beiden Auftrags-Slots eines Stützpunkts – Aktionsart (Kein Auftrag / Truppen schicken → anderer Stützpunkt / Überwachen bzw. Plündern → Grafschaft), Ziel und Einheiten-Zuteilung samt der Obergrenze je Einheit (stationierte Truppen minus Zuteilung des anderen Slots)
+
+**[EN]**
+- Added `StuetzpunktAktionenManager` (encapsulation of frmStuetzpunktVerwalten's action area): the two order slots of a stronghold – action type (no order / send troops → another stronghold / monitor resp. plunder → county), target and unit allocation including the per-unit upper limit (stationed troops minus the other slot's allocation)
+
 ## 3.33.0
 
 _21.07.2026_
