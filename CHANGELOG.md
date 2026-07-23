@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.33.0
+
+_21.07.2026_
+
+**[DE]**
+- `StuetzpunktVerwaltenManager` hinzugefügt (Kapselung des Kernbereichs von frmStuetzpunktVerwalten): die vier Einheitentypen eines eigenen Stützpunkts (je nach Zollburg oder Räuberlager) mit Plural-Name und Anzahl, das Anheuern/Entlassen von Truppen sowie das Manöver. Sicherheit/Tarnung, Zustand, Kapazität und Zollsatz laufen über den bestehenden Prozentwert-festlegen-Dialog
+
+**[EN]**
+- Added `StuetzpunktVerwaltenManager` (encapsulation of frmStuetzpunktVerwalten's core area): the four unit types of one's own stronghold (depending on toll castle or robber camp) with plural name and count, the recruiting/dismissing of troops and the maneuver. Security/camouflage, condition, capacity and toll rate go through the existing set-percentage dialog
+
 ## 3.32.0
 
 _21.07.2026_
