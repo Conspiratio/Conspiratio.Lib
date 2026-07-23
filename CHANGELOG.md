@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.40.0
+
+_23.07.2026_
+
+**[DE]**
+- `TitelVerleihungManager` hinzugefügt (Kapselung von TitelVerleihen/TitelVerleihForm): prüft, ob dem aktiven Spieler ein höherer Titel zusteht (vorgemerkt über das bestehende `VersuchTitelVerleihen`) und ein Regent amtiert, und vollzieht die Verleihung – erstellt den Urkundentext des Regenten, setzt den neuen Adelstitel des Spielers und quittiert den Vermerk. Ohne Regenten wird die Verleihung auf später verschoben
+
+**[EN]**
+- Added `TitelVerleihungManager` (encapsulation of TitelVerleihen/TitelVerleihForm): checks whether the active player is entitled to a higher title (flagged via the existing `VersuchTitelVerleihen`) and a regent is in office, and carries out the bestowal – creates the regent's decree text, sets the player's new noble title and clears the flag. Without a regent the bestowal is deferred
+
 ## 3.39.0
 
 _23.07.2026_
