@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.45.0
+
+_24.07.2026_
+
+**[DE]**
+- `TippsManager` hinzugefügt (Kapselung von TippsAnzeigen): liefert einen zufälligen Start-Tipp, den Text zu einem Index und die Navigation zum nächsten (belegten) bzw. vorherigen Tipp
+
+**[EN]**
+- Added `TippsManager` (encapsulation of TippsAnzeigen): provides a random starting tip, the text for an index and navigation to the next (non-empty) resp. previous tip
+
 ## 3.44.0
 
 _24.07.2026_
