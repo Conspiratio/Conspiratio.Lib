@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.44.0
+
+_24.07.2026_
+
+**[DE]**
+- `StatistikManager` hinzugefügt (Kapselung von FormStatistik): liefert die menschlichen Spieler samt Banner sowie – je Spieler – die Statistikwerte in zwei Spalten (Beschriftung und formatierter Wert: Hinterzimmer, Kirche, Schreibstube, Handel, Sonstiges sowie Gesamtvermögen und Taler), in der Reihenfolge des Originals
+
+**[EN]**
+- Added `StatistikManager` (encapsulation of FormStatistik): provides the human players with their banner as well as – per player – the statistics values in two columns (label and formatted value: back room, church, writing room, trade, other, plus total assets and Taler), in the order of the original
+
 ## 3.43.0
 
 _24.07.2026_
