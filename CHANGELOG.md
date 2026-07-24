@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.42.0
+
+_24.07.2026_
+
+**[DE]**
+- `HandelszertifikatManager` hinzugefügt (Kapselung von Handelszertifikat/HandelszertifikatAnzeigen): prüft, ob dem aktiven Spieler ein neues Handelszertifikat zusteht (über den beim Amtsgewinn bzw. Stützpunktkauf gesetzten Vermerk „BekamHandelszertifikat"), und vollzieht die Verleihung – erstellt den Urkundentext samt ausstellendem Rat (Stadt-, Land- oder Reichsrat je nach Tier-Stufe des Rohstoffs) und quittiert den Vermerk
+
+**[EN]**
+- Added `HandelszertifikatManager` (encapsulation of Handelszertifikat/HandelszertifikatAnzeigen): checks whether the active player is entitled to a new trade certificate (via the "BekamHandelszertifikat" flag set on winning an office resp. buying a stronghold) and carries out the bestowal – creates the certificate text including the issuing council (town, land or realm council depending on the resource's tier) and clears the flag
+
 ## 3.41.0
 
 _23.07.2026_
