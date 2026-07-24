@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.43.0
+
+_24.07.2026_
+
+**[DE]**
+- `LagerraumManager` hinzugefügt (Kapselung von LagerraumKaufen): für eine Werkstätte des Spielers in einer Stadt werden drei Angebote für zusätzlichen Lagerraum (Fläche in m² und Preis) ermittelt – der Preis richtet sich nach dem Reichtum der Stadt; ein Angebot lässt sich bei ausreichendem Guthaben kaufen (erweitert den Lagerraum, zieht den Preis ab)
+
+**[EN]**
+- Added `LagerraumManager` (encapsulation of LagerraumKaufen): for a player's workshop in a town, three offers for additional storage space (area in m² and price) are determined – the price depends on the town's wealth; an offer can be bought with sufficient funds (extends the storage, deducts the price)
+
 ## 3.42.0
 
 _24.07.2026_
