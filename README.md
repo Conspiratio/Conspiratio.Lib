@@ -1,3 +1,5 @@
+_🇩🇪 Deutsch | [🇬🇧 English](README-en.md)_
+
 # Conspiratio.Lib
 
 Dies ist der aktuelle Stand der C# .NET Standard 2.0 Klassenbibliothek mit der Gameplay Logik von Conspiratio, entnommen aus dem [Conspiratio WinForms Client](https://github.com/Conspiratio/Conspiratio.WinForms). Die Bibiliothek ist noch nicht vollständig, enthält aber bereits die wichtigsten Klassen und Methoden und dient als Grundbaustein für den [Godot Client](https://github.com/Conspiratio/Conspiratio.Godot) dienen.

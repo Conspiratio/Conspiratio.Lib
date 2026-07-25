@@ -35,7 +35,10 @@ namespace Conspiratio.Lib.Allgemein
         {
             if (!ValidateName(name, out error))
                 return false;
-            
+
+            // Spielwelt zurücksetzen und neu aufbauen (legt auch die leeren menschlichen Spieler-Slots an)
+            SW.Dynamisch.NeuInitialisieren();
+
             SW.Dynamisch.SpielName = SanitizeName(name);
             SW.Dynamisch.SetAktivSpielerAnzahl(playerCount);
             SW.Dynamisch.Cheatmodus = cheating;

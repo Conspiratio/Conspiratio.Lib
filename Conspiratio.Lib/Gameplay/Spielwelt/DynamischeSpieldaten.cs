@@ -1519,11 +1519,34 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr wirklich all' Euer Geld aus dem Fenster\n werfen und das Spiel verlassen?", "Ja", "Lieber nicht") != DialogResultGame.Yes)
                 return null;
 
+            string name = GetHumWithID(GetAktiverSpieler()).GetName();
+
+            bool keineSpielerMehr = EntferneAktivenSpielerAusDemSpiel();
+
+            if (keineSpielerMehr == false)
+            {
+                BelTextAnzeigen($"Der Spieler {name} wurde aus dem Spiel entfernt.");
+                return false;
+            }
+            else
+            {
+                BelTextAnzeigen($"Der Spieler {name} wurde aus dem Spiel entfernt.\n Es befinden sich keine weiteren Mitstreiter in diesem Spiel.\n Das Spiel wird daher beendet.");
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Entfernt den aktiven Spieler ohne Rückfrage aus dem Spiel (z. B. bei seinem Tod):
+        /// löst die Ehe, verteilt seine Stützpunkte neu, gibt sein Amt frei, meldet ihn von Wahlen
+        /// ab und ordnet die Spielerliste neu. War er der letzte Spieler der Runde, beginnt ein neues Jahr.
+        /// </summary>
+        /// <returns>True, wenn kein menschlicher Spieler mehr im Spiel ist (das Spiel ist vorbei).</returns>
+        public bool EntferneAktivenSpielerAusDemSpiel()
+        {
             // Ein möglicher Ehepartner soll nicht mehr verheiratet sein
             if (GetHumWithID(GetAktiverSpieler()).GetVerheiratet() != 0)
                 GetKIwithID(GetHumWithID(GetAktiverSpieler()).GetVerheiratet()).SetVerheiratet(0);
 
-            string name = GetHumWithID(GetAktiverSpieler()).GetName();
             bool last = GetAktiverSpieler() == GetAktivSpielerAnzahl();
 
             // Stützpunkte des verstorbenen Spielers wieder zufälligen KI-Spielern zuteilen
@@ -1574,16 +1597,216 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
                 }
             }
 
-            if (GetAktivSpielerAnzahl() != 0)
+            return GetAktivSpielerAnzahl() == 0;
+        }
+        #endregion
+
+        #region Sabotage
+        /// <summary>
+        /// Leitet eine Sabotage gegen den Spieler <paramref name="id"/> ein bzw. pfeift eine bereits
+        /// laufende Sabotage zurück (Migration der Sabotage-Form aus dem Hinterzimmer).
+        /// </summary>
+        public async Task<bool> Sabotage(int id)
+        {
+            bool bereitsAktiv = GetAktHum().GetAktiveSabotage(id).GetDauer() > 0;
+
+            if (!bereitsAktiv)
             {
-                BelTextAnzeigen($"Der Spieler {name} wurde aus dem Spiel entfernt.");
-                return false;
-            }
-            else
-            {
-                BelTextAnzeigen($"Der Spieler {name} wurde aus dem Spiel entfernt.\n Es befinden sich keine weiteren Mitstreiter in diesem Spiel.\n Das Spiel wird daher beendet.");
+                const double malfaktor = 0.04;
+                int saboKosten = Convert.ToInt32(GetSpWithID(id).GetGesamtVermoegen(id) * malfaktor);
+                if (saboKosten < 1000)
+                    saboKosten = 1000;
+
+                const int jahre = 5;
+                string namensSuffix = GetSpWithID(id).GetName().EndsWith("s") ? "'" : "s";
+
+                if (await SW.UI.YesNoQuestion.ShowDialogText(
+                        "Einige zwielichtige Gestalten bieten Euch an, " + jahre + " Jahre für jeweils " +
+                        saboKosten.ToStringGeld() + " zu versuchen, " + GetSpWithID(id).GetName() + namensSuffix +
+                        " Besitzungen mit Unheil zu überziehen. Wollt Ihr", "Ja", "Nein") != DialogResultGame.Yes)
+                    return false;
+
+                GetAktHum().GetAktiveSabotage(id).SetDauer(jahre);
+                GetAktHum().GetAktiveSabotage(id).SetKosten(saboKosten);
+
+                if (GetGesetzX(21) != 0) // Wenn es verboten ist
+                    GetAktHum().ErhoeheGesetzXUmEins(21);
+
+                BelTextAnzeigen(GetSpWithID(id).GetName() + " wird Ärger bekommen...");
                 return true;
             }
+
+            // Es läuft bereits eine Sabotage – zurückpfeifen oder weitermachen lassen?
+            if (await SW.UI.YesNoQuestion.ShowDialogText(
+                    "Ihr habt bereits einige Gesetzlose mit dem Auftrag betraut, " + GetSpWithID(id).GetName() +
+                    " Ärger zu bereiten. Wollt Ihr Eure Leute", "zurückpfeifen", "weitermachen lassen?") != DialogResultGame.Yes)
+                return false;
+
+            GetAktHum().AktiveSabotageEntfernen(id);
+            BelTextAnzeigen("Ihr pfeift Eure Leute zurück...");
+            return true;
+        }
+        #endregion
+
+        #region Anschwaerzen
+        // Transienter Merker für den zweistufigen Anschwärz-Vorgang ("X bei Y anschwärzen").
+        private int _anschwaerzID;
+
+        /// <summary>ID des Spielers, der gerade angeschwärzt werden soll (0 = kein Vorgang aktiv).</summary>
+        public int GetAnschwaerzID() => _anschwaerzID;
+
+        /// <summary>Setzt bzw. löscht (0) den laufenden Anschwärz-Vorgang.</summary>
+        public void SetAnschwaerzID(int id) => _anschwaerzID = id;
+
+        /// <summary>
+        /// Anschwärzen aus dem Hinterzimmer (zweistufig): Der erste Klick wählt den Anzuschwärzenden X,
+        /// der zweite den Adressaten Y. Glaubt Y (nur KI, ab Beziehung 80) die Anschuldigung, sinkt
+        /// dessen Beziehung zu X; andernfalls berichtet Y dem X davon und die eigene Beziehung leidet.
+        /// </summary>
+        public void Anschwaerzen(int id)
+        {
+            // Erster Schritt: Anzuschwärzenden merken.
+            if (_anschwaerzID == 0)
+            {
+                BelTextAnzeigen(GetSpWithID(id).GetName() + " anschwärzen bei...");
+                _anschwaerzID = id;
+                return;
+            }
+
+            // Zweiter Schritt: Adressat Y wählen.
+            if (id < SW.Statisch.GetMinKIID()) // Bei einem menschlichen Mitspieler kann man nicht anschwärzen.
+            {
+                BelTextAnzeigen("Ihr könnt nicht bei einem Mitspieler anschwärzen.");
+                return;
+            }
+
+            int x = _anschwaerzID; // der Angeschwärzte
+            int y = id;            // der Adressat
+
+            if (x == y)
+            {
+                BelTextAnzeigen("Ihr könnt nicht jemanden bei sich selbst anschwärzen");
+                _anschwaerzID = 0;
+                return;
+            }
+
+            if (GetGesetzX(22) != 0) // Wenn es verboten ist
+                GetAktHum().ErhoeheGesetzXUmEins(22);
+
+            GetAktHum().GetSpielerStatistik().HiAnschwaerzungen++;
+
+            bool glaubtAnschuldigung = GetKIwithID(y).GetBeziehungZuKIX(GetAktiverSpieler()) >= 80;
+
+            if (glaubtAnschuldigung)
+            {
+                GetKIwithID(y).ErhoeheBeziehungZuX(x, -30);
+                GetKIwithID(y).ErhoeheBeziehungZuX(GetAktiverSpieler(), -10);
+                BelTextAnzeigen(GetKIwithID(y).GetKompletterName() + " schenkt Euren Worten Glauben.");
+            }
+            else if (x >= SW.Statisch.GetMinKIID()) // Y glaubt nicht; nur wenn X eine KI ist, berichtet Y ihm davon.
+            {
+                GetKIwithID(x).ErhoeheBeziehungZuX(GetAktiverSpieler(), -50);
+                GetKIwithID(y).ErhoeheBeziehungZuX(GetAktiverSpieler(), -20);
+                BelTextAnzeigen(GetSpWithID(y).GetKompletterName() + " glaubt Euch kein Wort und berichtet " +
+                                GetSpWithID(x).GetKompletterName() + " von Euren Anschuldigungen.");
+            }
+
+            _anschwaerzID = 0;
+        }
+        #endregion
+
+        #region BeziehungenPflegen (Karten spielen / Bestechen)
+        /// <summary>
+        /// "Karten spielen" aus dem Beziehungen-pflegen-Menü: nur gegen KI-Spieler. Ist der eigene
+        /// Geldbeutel im Verhältnis prall genug, sagt die KI sofort zu; andernfalls sinkt ihre Beziehung.
+        /// </summary>
+        /// <returns>true, wenn das Kartenspiel zustande kam (dann schließt der Dialog im Original).</returns>
+        public bool KartenSpielen(int id)
+        {
+            if (id < SW.Statisch.GetMinKIID())
+            {
+                BelTextAnzeigen("Ihr könnt (noch) nicht mit einem menschlichem Mitspieler Karten spielen");
+                return false;
+            }
+
+            int kiGeld = GetSpWithID(id).GetTaler();
+
+            if (kiGeld * SW.Statisch.GetKartenSpielenProzentsatz() < GetAktHum().GetTaler())
+            {
+                GetAktHum().SetSpieltKartenGegenSpielerID(id);
+                GetAktHum().GetSpielerStatistik().HiKartenSpielen++;
+
+                string zusage = GetSpWithID(id).GetMaennlich()
+                    ? "Ihr kontaktiert " + GetSpWithID(id).GetName() + ", welcher Euch sofort zusagt"
+                    : "Ihr kontaktiert " + GetSpWithID(id).GetName() + ", welche Euch sofort zusagt";
+                BelTextAnzeigen(zusage);
+                return true;
+            }
+
+            GetKIwithID(id).ErhoeheBeziehungZuX(GetAktiverSpieler(), -10);
+            BelTextAnzeigen(GetKIwithID(id).GetName() + ": \"Fragt mich wieder, wenn Euer Münzbeutel praller ist\"");
+            return false;
+        }
+
+        /// <summary>
+        /// "Bestechen" aus dem Beziehungen-pflegen-Menü: überlässt dem Spieler <paramref name="id"/> die
+        /// angegebene Taler-Summe (zieht sie ab, vermerkt die Bestechung und ggf. den Gesetzesverstoß).
+        /// </summary>
+        public void Bestechen(int id, int wert)
+        {
+            if (wert <= 0)
+                return;
+
+            GetAktHum().GetSpielerStatistik().HiBestechungssumme += wert;
+            GetAktHum().GetSpielerStatistik().HiBestechungen++;
+
+            GetAktHum().ErhoeheTaler(-wert);
+            GetAktHum().ErhoeheBestechungVonSpielerMitIDXUmY(id, wert);
+
+            if (GetGesetzX(1) != 0) // Wenn es verboten ist
+                GetAktHum().ErhoeheGesetzXUmEins(1);
+
+            BelTextAnzeigen(GetSpWithID(id).GetName() + " wird Eure Taler erhalten.");
+        }
+        #endregion
+
+        #region Spionage
+        /// <summary>
+        /// Setzt Spione auf den Spieler <paramref name="id"/> an bzw. pfeift eine bereits laufende
+        /// Spionage zurück (Migration der Spionage-Form aus dem Hinterzimmer). Das Ansetzen erfolgt –
+        /// wie im Original – ohne Rückfrage und wird nur mit einer Info-Meldung bestätigt.
+        /// </summary>
+        public async Task Spionage(int id)
+        {
+            bool bereitsAktiv = GetAktHum().GetAktiveSpionage(id).GetDauer() > 0;
+
+            if (!bereitsAktiv)
+            {
+                const double malfaktor = 0.02;
+                int summe = Convert.ToInt32(GetSpWithID(id).GetTaler() * malfaktor);
+                if (summe < 1000)
+                    summe = 1000;
+
+                const int dauer = 5;
+
+                GetAktHum().ErhoeheGesetzXUmEins(20);
+                GetAktHum().GetAktiveSpionage(id).SetKosten(summe);
+                GetAktHum().GetAktiveSpionage(id).SetDauer(dauer);
+
+                BelTextAnzeigen("In den nächsten " + dauer + " Jahren werden Eure Spione " + GetSpWithID(id).GetName() +
+                                " überwachen und Euch von sämtlichen Verbrechen berichten. Die Spione verlangen dafür " +
+                                summe.ToStringGeld() + ".");
+                return;
+            }
+
+            // Es läuft bereits eine Spionage – zurückpfeifen oder weitermachen lassen?
+            if (await SW.UI.YesNoQuestion.ShowDialogText(
+                    "Ihr habt bereits einige Spione auf " + GetSpWithID(id).GetName() + " angesetzt. Wollt Ihr diese",
+                    "zurückpfeifen", "weitermachen lassen?") != DialogResultGame.Yes)
+                return;
+
+            GetAktHum().AktiveSpionageEntfernen(id);
+            BelTextAnzeigen("Ihr pfeift Eure Leute zurück...");
         }
         #endregion
 
