@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.46.0
+
+_25.07.2026_
+
+**[DE]**
+- `StadtInformationenManager` hinzugefügt (Kapselung von StadtInformationen): liefert zu einer Stadt Reichtum, Umsatzsteuer, Einwohner und Kriminalität sowie die Rohstoffangaben (Haupt-/Nebenproduktion, Nachfrage, mögliche Werkstätten) und den Lagerstand des Landes je Rohstoff samt Bewertung (niedrig/normal/hoch)
+
+**[EN]**
+- Added `StadtInformationenManager` (encapsulation of StadtInformationen): provides a city's wealth, sales tax, population and crime, plus the resource data (main/secondary production, demand, possible workshops) and the country-wide stock per resource with a rating (low/normal/high)
+
 ## 3.45.0
 
 _24.07.2026_
