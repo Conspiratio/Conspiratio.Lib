@@ -31,8 +31,8 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
   <PropertyGroup>
-    <AssemblyVersion>3.19.0</AssemblyVersion>
-    <FileVersion>3.19.0</FileVersion>
+    <AssemblyVersion>3.46.0</AssemblyVersion>
+    <FileVersion>3.46.0</FileVersion>
     <Description>A library with gameplay logic for the free and open-source game Conspiratio</Description>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Version>3.46.0</Version>
