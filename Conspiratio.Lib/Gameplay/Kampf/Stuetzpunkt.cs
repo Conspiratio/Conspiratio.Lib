@@ -75,6 +75,17 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         public StuetzpunktAktion[] Aktionen { get; set;  }
 
         /// <summary>
+        /// ID des menschlichen Spielers, der ein Kaufangebot für diesen Stützpunkt abgegeben hat (0 = keines).
+        /// Das Angebot wird zu Beginn des nächsten Zuges des Besitzers vorgelegt.
+        /// </summary>
+        public int AngebotVonSpielerID { get; set; }
+
+        /// <summary>
+        /// Höhe des ausstehenden Kaufangebots (beim Anbieter bereits reserviert/abgezogen).
+        /// </summary>
+        public int AngebotPreis { get; set; }
+
+        /// <summary>
         /// Zustand des Stützpunktes in Prozent (0 - 100), hat Einfluss auf die Verteidung bei einem Angriff.
         /// </summary>
         public int ZustandInProzent
@@ -514,7 +525,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             if (Besitzer >= SW.Statisch.GetMinKIID())
                 NameBesitzer = SW.Dynamisch.GetKIwithID(Besitzer).GetName();
             else
-                NameBesitzer = SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler()).GetName();
+                NameBesitzer = SW.Dynamisch.GetHumWithID(Besitzer).GetName();
 
             if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr " + NameBesitzer + " wirklich ein Angebot\nüber " + Preis.ToStringGeld() +
                                                  " unterbreiten?\nIhr könnt pro Jahr nur einmal ein Angebot abgeben.", "Ja", "Lieber nicht!") == DialogResultGame.Yes)
@@ -558,13 +569,65 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 }
                 else
                 {
-                    // TODO: Kauf von anderem Spieler
-                    SW.Dynamisch.BelTextAnzeigen("Ein Kaufangebot an einen Mitspieler ist leider noch nicht möglich.");
+                    // Angebot an einen menschlichen Mitspieler: Es wird beim nächsten Zug des Besitzers vorgelegt.
+                    if (AngebotVonSpielerID != 0)
+                    {
+                        SW.Dynamisch.BelTextAnzeigen($"Für {Name} liegt bereits ein Kaufangebot vor.\nWartet, bis der Besitzer darüber entschieden hat.");
+                        return false;
+                    }
+
+                    // Das Angebot wird beim Anbieter sofort reserviert (bei Ablehnung später zurückerstattet).
+                    SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler()).HatAngebotFuerStuetzpunktAbgegeben = true;
+                    SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler()).ErhoeheTaler(-Preis);
+                    AngebotVonSpielerID = SW.Dynamisch.GetAktiverSpieler();
+                    AngebotPreis = Preis;
+
+                    SW.Dynamisch.BelTextAnzeigen($"Euer Angebot über {Preis.ToStringGeld()} für {Name} wurde übermittelt.\n{NameBesitzer} wird es zu Beginn des nächsten Zuges prüfen.");
                     return false;
                 }
             }
             else
                 return false;
+        }
+        #endregion
+
+        #region AngebotVorlegen
+        /// <summary>
+        /// Legt dem aktuellen (menschlichen) Besitzer ein ausstehendes Kaufangebot eines Mitspielers vor.
+        /// Bei Annahme wechselt der Stützpunkt gegen den reservierten Preis den Besitzer, bei Ablehnung
+        /// wird der reservierte Betrag an den Anbieter zurückerstattet. Danach ist das Angebot verbraucht.
+        /// </summary>
+        public async Task AngebotVorlegen()
+        {
+            if (AngebotVonSpielerID == 0)
+                return;
+
+            int anbieterId = AngebotVonSpielerID;
+            int preis = AngebotPreis;
+
+            AngebotVonSpielerID = 0;
+            AngebotPreis = 0;
+
+            var anbieter = SW.Dynamisch.GetHumWithID(anbieterId);
+
+            // Anbieter nicht mehr im Spiel: Angebot verfällt (keine Rückerstattung möglich).
+            if (anbieter == null || anbieter.GetName() == "")
+                return;
+
+            if (await SW.UI.YesNoQuestion.ShowDialogText(
+                    $"{anbieter.GetName()} bietet Euch {preis.ToStringGeld()} für {Name}.\nWollt Ihr den Stützpunkt verkaufen?",
+                    "Ja, verkaufen", "Nein, behalten") == DialogResultGame.Yes)
+            {
+                SW.Dynamisch.GetHumWithID(Besitzer).ErhoeheTaler(preis);
+                Besitzer = anbieterId;
+                anbieter.NeuesHandelszertifikatVerleihen(3);  // Wie beim Kauf gibt es ein Handelszertifikat der Stufe 3.
+                SW.Dynamisch.BelTextAnzeigen($"Ihr habt {Name} für {preis.ToStringGeld()} an {anbieter.GetName()} verkauft.");
+            }
+            else
+            {
+                anbieter.ErhoeheTaler(preis);  // Reservierten Betrag zurückerstatten.
+                SW.Dynamisch.BelTextAnzeigen($"Ihr habt das Kaufangebot von {anbieter.GetName()} für {Name} abgelehnt.");
+            }
         }
         #endregion
 

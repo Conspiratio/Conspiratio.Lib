@@ -74,5 +74,30 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         /// <summary>Unterbreitet dem Besitzer des Stützpunkts ein Kaufangebot (nur einmal pro Jahr möglich).</summary>
         public Task<bool> KaufangebotAbgeben(int stuetzpunktId, int preis) =>
             SW.Dynamisch.GetStuetzpunkte()[stuetzpunktId - 1].KaufangebotAbgeben(preis);
+
+        /// <summary>Liegt für einen Stützpunkt des aktiven Spielers ein Kaufangebot vor?</summary>
+        public bool StehenKaufangeboteAn()
+        {
+            int aktiverSpieler = SW.Dynamisch.GetAktiverSpieler();
+
+            foreach (var stuetzpunkt in SW.Dynamisch.GetStuetzpunkte())
+                if (stuetzpunkt.Besitzer == aktiverSpieler && stuetzpunkt.AngebotVonSpielerID != 0)
+                    return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Legt dem aktiven Spieler zu Zugbeginn alle eingegangenen Kaufangebote seiner Mitspieler vor
+        /// (Annahme verkauft den Stützpunkt, Ablehnung erstattet dem Anbieter den reservierten Betrag).
+        /// </summary>
+        public async Task VerarbeiteEingehendeKaufangebote()
+        {
+            int aktiverSpieler = SW.Dynamisch.GetAktiverSpieler();
+
+            foreach (var stuetzpunkt in SW.Dynamisch.GetStuetzpunkte())
+                if (stuetzpunkt.Besitzer == aktiverSpieler && stuetzpunkt.AngebotVonSpielerID != 0)
+                    await stuetzpunkt.AngebotVorlegen();
+        }
     }
 }

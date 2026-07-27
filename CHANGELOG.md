@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.47.0
+
+_28.07.2026_
+
+**[DE]**
+- Räuber/Söldner-System (Issue #16): Kaufangebote für Stützpunkte können nun auch an menschliche Mitspieler gerichtet werden. Das Angebot reserviert den Betrag beim Anbieter und wird dem Besitzer zu Beginn seines nächsten Zuges vorgelegt (`Stuetzpunkt.AngebotVorlegen`, `SoeldnerRaeuberManager.VerarbeiteEingehendeKaufangebote`/`StehenKaufangeboteAn`); bei Annahme wechselt der Stützpunkt gegen den Preis den Besitzer (samt Handelszertifikat der Stufe 3), bei Ablehnung wird der reservierte Betrag zurückerstattet. Nebenbei behoben: Der Besitzername im Bestätigungstext bezog sich fälschlich auf den aktiven Spieler statt auf den Stützpunkt-Besitzer.
+
+**[EN]**
+- Robbers/mercenaries system (issue #16): purchase offers for bases can now also be directed at human fellow players. The offer reserves the amount from the bidder and is presented to the owner at the start of their next turn (`Stuetzpunkt.AngebotVorlegen`, `SoeldnerRaeuberManager.VerarbeiteEingehendeKaufangebote`/`StehenKaufangeboteAn`); if accepted, the base changes owner for the price (including a tier-3 trade certificate), if declined the reserved amount is refunded. Also fixed: the owner name in the confirmation text wrongly referred to the active player instead of the base owner.
+
 ## 3.46.0
 
 _25.07.2026_
