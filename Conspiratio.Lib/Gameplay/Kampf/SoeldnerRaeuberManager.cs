@@ -99,5 +99,22 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 if (stuetzpunkt.Besitzer == aktiverSpieler && stuetzpunkt.AngebotVonSpielerID != 0)
                     await stuetzpunkt.AngebotVorlegen();
         }
+
+        /// <summary>
+        /// Zeigt dem aktiven Spieler zu Zugbeginn die Ergebnisse seiner eigenen Kaufangebote (Annahme oder
+        /// Ablehnung durch den jeweiligen Besitzer) und leert die Nachrichtenliste anschließend.
+        /// </summary>
+        public async Task ZeigeHandelsnachrichten()
+        {
+            var spieler = SW.Dynamisch.GetAktHum();
+
+            if (spieler.HandelsNachrichten.Count == 0)
+                return;
+
+            foreach (string nachricht in spieler.HandelsNachrichten)
+                await SW.UI.ShowText.ShowDialog(nachricht);
+
+            spieler.HandelsNachrichten.Clear();
+        }
     }
 }

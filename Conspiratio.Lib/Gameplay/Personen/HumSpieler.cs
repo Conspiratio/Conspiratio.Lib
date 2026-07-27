@@ -20,6 +20,21 @@ namespace Conspiratio.Lib.Gameplay.Personen
         public bool HatAngebotFuerStuetzpunktAbgegeben { get; set; }
         public List<Ereigniszeitpunkt> EreignisseZuletztPassiert { get; set; }
 
+        /// <summary>
+        /// Zu Zugbeginn vorzulegende Meldungen zum Stützpunkt-Handel (z. B. Annahme/Ablehnung eines eigenen
+        /// Kaufangebots). Lazy initialisiert, damit ältere Spielstände (ohne dieses Feld) kompatibel bleiben.
+        /// </summary>
+        public List<string> HandelsNachrichten
+        {
+            get
+            {
+                if (_handelsNachrichten == null)
+                    _handelsNachrichten = new List<string>();
+
+                return _handelsNachrichten;
+            }
+        }
+
         private int _bannerID;
         private bool _sitztImKerker;
         private int _bekamHandelszertifikatX;
@@ -41,6 +56,7 @@ namespace Conspiratio.Lib.Gameplay.Personen
         private int[] _karawaneInStadt = new int[SW.Statisch.GetMaxStadtID()];
         private int[] _begingVerbrechenX;
         private bool _privilegKaufmannBenutzt;
+        private List<string> _handelsNachrichten;
 
         private SpielerStatistik _spielerStatistik;
         private Produktionsslot[,] _produktionsslotsInStadtX;

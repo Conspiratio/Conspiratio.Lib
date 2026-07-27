@@ -614,6 +614,8 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             if (anbieter == null || anbieter.GetName() == "")
                 return;
 
+            string besitzerName = SW.Dynamisch.GetHumWithID(Besitzer).GetName();
+
             if (await SW.UI.YesNoQuestion.ShowDialogText(
                     $"{anbieter.GetName()} bietet Euch {preis.ToStringGeld()} für {Name}.\nWollt Ihr den Stützpunkt verkaufen?",
                     "Ja, verkaufen", "Nein, behalten") == DialogResultGame.Yes)
@@ -622,11 +624,17 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 Besitzer = anbieterId;
                 anbieter.NeuesHandelszertifikatVerleihen(3);  // Wie beim Kauf gibt es ein Handelszertifikat der Stufe 3.
                 SW.Dynamisch.BelTextAnzeigen($"Ihr habt {Name} für {preis.ToStringGeld()} an {anbieter.GetName()} verkauft.");
+
+                // Den Anbieter zu seinem nächsten Zug über die Annahme informieren.
+                anbieter.HandelsNachrichten.Add($"{besitzerName} hat Euer Angebot über {preis.ToStringGeld()} angenommen.\n{Name} gehört nun Euch.");
             }
             else
             {
                 anbieter.ErhoeheTaler(preis);  // Reservierten Betrag zurückerstatten.
                 SW.Dynamisch.BelTextAnzeigen($"Ihr habt das Kaufangebot von {anbieter.GetName()} für {Name} abgelehnt.");
+
+                // Den Anbieter zu seinem nächsten Zug über die Ablehnung und die Rückerstattung informieren.
+                anbieter.HandelsNachrichten.Add($"{besitzerName} hat Euer Kaufangebot für {Name} abgelehnt.\nDer reservierte Betrag ({preis.ToStringGeld()}) wurde Euch zurückerstattet.");
             }
         }
         #endregion

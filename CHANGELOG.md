@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.48.0
+
+_28.07.2026_
+
+**[DE]**
+- Räuber/Söldner-System (Issue #16): Der Anbieter eines Stützpunkt-Kaufangebots erhält nun zu Beginn seines nächsten Zuges eine eigene Meldung über das Ergebnis (Annahme durch den Besitzer inkl. Besitzwechsel bzw. Ablehnung mit Rückerstattung des reservierten Betrags). Dazu Nachrichtenliste `HumSpieler.HandelsNachrichten` (lazy initialisiert, spielstandskompatibel) und `SoeldnerRaeuberManager.ZeigeHandelsnachrichten`.
+
+**[EN]**
+- Robbers/mercenaries system (issue #16): the bidder of a base purchase offer now receives their own message about the outcome at the start of their next turn (acceptance by the owner incl. change of ownership, or rejection with refund of the reserved amount). Adds the message list `HumSpieler.HandelsNachrichten` (lazily initialized, savegame-compatible) and `SoeldnerRaeuberManager.ZeigeHandelsnachrichten`.
+
 ## 3.47.0
 
 _28.07.2026_
