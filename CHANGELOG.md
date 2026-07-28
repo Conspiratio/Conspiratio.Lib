@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.49.0
+
+_28.07.2026_
+
+**[DE]**
+- Räuber/Söldner-System (Issue #16): Ein eigener Stützpunkt kann nun zum Verkauf angeboten werden (`Stuetzpunkt.ZumVerkaufAngeboten`, `StuetzpunktVerwaltenManager.ZumVerkaufAngeboten`, `SoeldnerRaeuberManager.SetzeZumVerkauf`/`IstZumVerkaufAngeboten`). Zu Zugbeginn unterbreiten KI-Spieler dann gelegentlich zufällige Kaufangebote (`GeneriereKiKaufangebote`, Preis um den aktuellen Wert), die dem Besitzer vorgelegt werden. `Stuetzpunkt.AngebotVorlegen` verarbeitet jetzt auch KI-Anbieter: bei Annahme wechselt der Stützpunkt gegen Bezahlung zur KI (Verkaufs-Flag wird zurückgesetzt), bei Ablehnung bleibt er gelistet.
+
+**[EN]**
+- Robbers/mercenaries system (issue #16): an own base can now be put up for sale (`Stuetzpunkt.ZumVerkaufAngeboten`, `StuetzpunktVerwaltenManager.ZumVerkaufAngeboten`, `SoeldnerRaeuberManager.SetzeZumVerkauf`/`IstZumVerkaufAngeboten`). At the start of the turn AI players then occasionally submit random purchase offers (`GeneriereKiKaufangebote`, price around the current value) that are presented to the owner. `Stuetzpunkt.AngebotVorlegen` now also handles AI bidders: on acceptance the base changes to the AI for payment (the for-sale flag is reset), on rejection it stays listed.
+
 ## 3.48.0
 
 _28.07.2026_

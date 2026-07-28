@@ -64,5 +64,15 @@ namespace Conspiratio.Lib.Gameplay.Kampf
 
         /// <summary>Führt ein Manöver durch (kostet Taler, hebt die Moral) – mit Rückfrage in der Lib.</summary>
         public Task<bool> ManoeverDurchfuehren() => _stuetzpunkt.ManoeverDurchfuehrenSpieler();
+
+        /// <summary>
+        /// Ob der Stützpunkt zum Verkauf angeboten wird. Ist dies gesetzt, unterbreiten KI-Spieler
+        /// von Zeit zu Zeit zufällige Kaufangebote, die dem Besitzer zu Zugbeginn vorgelegt werden.
+        /// </summary>
+        public bool ZumVerkaufAngeboten
+        {
+            get => _stuetzpunkt.ZumVerkaufAngeboten;
+            set => _stuetzpunkt.ZumVerkaufAngeboten = value;
+        }
     }
 }

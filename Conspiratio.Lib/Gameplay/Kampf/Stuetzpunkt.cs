@@ -81,9 +81,15 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         public int AngebotVonSpielerID { get; set; }
 
         /// <summary>
-        /// Höhe des ausstehenden Kaufangebots (beim Anbieter bereits reserviert/abgezogen).
+        /// Höhe des ausstehenden Kaufangebots (bei einem menschlichen Anbieter bereits reserviert/abgezogen).
         /// </summary>
         public int AngebotPreis { get; set; }
+
+        /// <summary>
+        /// Ob der Besitzer diesen Stützpunkt zum Verkauf anbietet. Ist dies gesetzt, unterbreiten
+        /// KI-Spieler von Zeit zu Zeit zufällige Kaufangebote, die dem Besitzer vorgelegt werden.
+        /// </summary>
+        public bool ZumVerkaufAngeboten { get; set; }
 
         /// <summary>
         /// Zustand des Stützpunktes in Prozent (0 - 100), hat Einfluss auf die Verteidung bei einem Angriff.
@@ -608,33 +614,48 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             AngebotVonSpielerID = 0;
             AngebotPreis = 0;
 
-            var anbieter = SW.Dynamisch.GetHumWithID(anbieterId);
+            bool anbieterIstKi = anbieterId >= SW.Statisch.GetMinKIID();
+            string anbieterName = anbieterIstKi ? SW.Dynamisch.GetKIwithID(anbieterId).GetName()
+                                                : SW.Dynamisch.GetHumWithID(anbieterId).GetName();
 
-            // Anbieter nicht mehr im Spiel: Angebot verfällt (keine Rückerstattung möglich).
-            if (anbieter == null || anbieter.GetName() == "")
+            // Menschlicher Anbieter nicht mehr im Spiel: Angebot verfällt (keine Rückerstattung möglich).
+            if (!anbieterIstKi && (SW.Dynamisch.GetHumWithID(anbieterId) == null || anbieterName == ""))
                 return;
 
             string besitzerName = SW.Dynamisch.GetHumWithID(Besitzer).GetName();
 
             if (await SW.UI.YesNoQuestion.ShowDialogText(
-                    $"{anbieter.GetName()} bietet Euch {preis.ToStringGeld()} für {Name}.\nWollt Ihr den Stützpunkt verkaufen?",
+                    $"{anbieterName} bietet Euch {preis.ToStringGeld()} für {Name}.\nWollt Ihr den Stützpunkt verkaufen?",
                     "Ja, verkaufen", "Nein, behalten") == DialogResultGame.Yes)
             {
                 SW.Dynamisch.GetHumWithID(Besitzer).ErhoeheTaler(preis);
                 Besitzer = anbieterId;
-                anbieter.NeuesHandelszertifikatVerleihen(3);  // Wie beim Kauf gibt es ein Handelszertifikat der Stufe 3.
-                SW.Dynamisch.BelTextAnzeigen($"Ihr habt {Name} für {preis.ToStringGeld()} an {anbieter.GetName()} verkauft.");
+                ZumVerkaufAngeboten = false;  // Nach dem Verkauf ist der Stützpunkt nicht mehr im Angebot.
+                SW.Dynamisch.BelTextAnzeigen($"Ihr habt {Name} für {preis.ToStringGeld()} an {anbieterName} verkauft.");
 
-                // Den Anbieter zu seinem nächsten Zug über die Annahme informieren.
-                anbieter.HandelsNachrichten.Add($"{besitzerName} hat Euer Angebot über {preis.ToStringGeld()} angenommen.\n{Name} gehört nun Euch.");
+                if (anbieterIstKi)
+                {
+                    SW.Dynamisch.GetKIwithID(anbieterId).SetTaler(SW.Dynamisch.GetKIwithID(anbieterId).GetTaler() - preis);
+                }
+                else
+                {
+                    var anbieter = SW.Dynamisch.GetHumWithID(anbieterId);
+                    anbieter.NeuesHandelszertifikatVerleihen(3);  // Wie beim Kauf gibt es ein Handelszertifikat der Stufe 3.
+                    anbieter.HandelsNachrichten.Add($"{besitzerName} hat Euer Angebot über {preis.ToStringGeld()} angenommen.\n{Name} gehört nun Euch.");
+                }
             }
             else
             {
-                anbieter.ErhoeheTaler(preis);  // Reservierten Betrag zurückerstatten.
-                SW.Dynamisch.BelTextAnzeigen($"Ihr habt das Kaufangebot von {anbieter.GetName()} für {Name} abgelehnt.");
+                SW.Dynamisch.BelTextAnzeigen($"Ihr habt das Kaufangebot von {anbieterName} für {Name} abgelehnt.");
 
-                // Den Anbieter zu seinem nächsten Zug über die Ablehnung und die Rückerstattung informieren.
-                anbieter.HandelsNachrichten.Add($"{besitzerName} hat Euer Kaufangebot für {Name} abgelehnt.\nDer reservierte Betrag ({preis.ToStringGeld()}) wurde Euch zurückerstattet.");
+                if (!anbieterIstKi)
+                {
+                    // Menschlicher Anbieter: reservierten Betrag zurückerstatten und informieren.
+                    var anbieter = SW.Dynamisch.GetHumWithID(anbieterId);
+                    anbieter.ErhoeheTaler(preis);
+                    anbieter.HandelsNachrichten.Add($"{besitzerName} hat Euer Kaufangebot für {Name} abgelehnt.\nDer reservierte Betrag ({preis.ToStringGeld()}) wurde Euch zurückerstattet.");
+                }
+                // Bei KI-Angeboten bleibt der Stützpunkt weiter im Verkaufsangebot (nächste Runde neuer Versuch).
             }
         }
         #endregion

@@ -100,6 +100,42 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                     await stuetzpunkt.AngebotVorlegen();
         }
 
+        /// <summary>Ob der Stützpunkt vom Besitzer zum Verkauf angeboten wird.</summary>
+        public bool IstZumVerkaufAngeboten(int stuetzpunktId) =>
+            SW.Dynamisch.GetStuetzpunkte()[stuetzpunktId - 1].ZumVerkaufAngeboten;
+
+        /// <summary>Bietet den Stützpunkt zum Verkauf an bzw. nimmt das Angebot zurück.</summary>
+        public void SetzeZumVerkauf(int stuetzpunktId, bool angeboten) =>
+            SW.Dynamisch.GetStuetzpunkte()[stuetzpunktId - 1].ZumVerkaufAngeboten = angeboten;
+
+        /// <summary>
+        /// Erzeugt zu Zugbeginn für zum Verkauf angebotene Stützpunkte des aktiven Spielers gelegentlich ein
+        /// zufälliges KI-Kaufangebot (Preis um den aktuellen Wert), das anschließend vorgelegt wird.
+        /// </summary>
+        public void GeneriereKiKaufangebote()
+        {
+            int aktiverSpieler = SW.Dynamisch.GetAktiverSpieler();
+
+            foreach (var stuetzpunkt in SW.Dynamisch.GetStuetzpunkte())
+            {
+                if (stuetzpunkt.Besitzer != aktiverSpieler || !stuetzpunkt.ZumVerkaufAngeboten || stuetzpunkt.AngebotVonSpielerID != 0)
+                    continue;
+
+                // Nicht jede Runde meldet sich ein Käufer.
+                if (SW.Statisch.Rnd.Next(0, 100) >= 50)
+                    continue;
+
+                int kiId = SW.Statisch.Rnd.Next(SW.Statisch.GetMinKIID(), SW.Statisch.GetMaxKIID());
+                int preis = stuetzpunkt.BerechneWert() * SW.Statisch.Rnd.Next(70, 116) / 100;
+
+                if (preis < 1)
+                    preis = 1;
+
+                stuetzpunkt.AngebotVonSpielerID = kiId;
+                stuetzpunkt.AngebotPreis = preis;
+            }
+        }
+
         /// <summary>
         /// Zeigt dem aktiven Spieler zu Zugbeginn die Ergebnisse seiner eigenen Kaufangebote (Annahme oder
         /// Ablehnung durch den jeweiligen Besitzer) und leert die Nachrichtenliste anschließend.
