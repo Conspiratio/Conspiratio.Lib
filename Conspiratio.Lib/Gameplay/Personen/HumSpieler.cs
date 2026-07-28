@@ -18,6 +18,12 @@ namespace Conspiratio.Lib.Gameplay.Personen
 
         public int WirbtUmSpielerID { get; set; }
         public bool HatAngebotFuerStuetzpunktAbgegeben { get; set; }
+
+        /// <summary>
+        /// Seit dem letzten Zug dieses Spielers eingenommene Zölle aus seinen Zollburgen (wird ihm zu
+        /// Zugbeginn gemeldet und danach zurückgesetzt). Alte Spielstände starten mit 0.
+        /// </summary>
+        public int ZolleinnahmenGesammelt { get; set; }
         public List<Ereigniszeitpunkt> EreignisseZuletztPassiert { get; set; }
 
         /// <summary>

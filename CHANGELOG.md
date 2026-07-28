@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.50.0
+
+_28.07.2026_
+
+**[DE]**
+- Räuber/Söldner-System (Issue #16): Die von menschlichen Zollburg-Besitzern eingenommenen Zölle werden nun mitgezählt (`HumSpieler.ZolleinnahmenGesammelt`, akkumuliert in der Abrechnung) und dem Spieler zu Zugbeginn als Einnahme gemeldet (`SoeldnerRaeuberManager.ZeigeZolleinnahmen`), danach zurückgesetzt.
+
+**[EN]**
+- Robbers/mercenaries system (issue #16): the tolls collected by human toll-castle owners are now tallied (`HumSpieler.ZolleinnahmenGesammelt`, accumulated during settlement) and reported to the player as income at the start of the turn (`SoeldnerRaeuberManager.ZeigeZolleinnahmen`), then reset.
+
 ## 3.49.0
 
 _28.07.2026_

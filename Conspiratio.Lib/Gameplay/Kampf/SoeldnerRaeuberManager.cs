@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 
+using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
 namespace Conspiratio.Lib.Gameplay.Kampf
@@ -134,6 +135,21 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 stuetzpunkt.AngebotVonSpielerID = kiId;
                 stuetzpunkt.AngebotPreis = preis;
             }
+        }
+
+        /// <summary>
+        /// Meldet dem aktiven Spieler zu Zugbeginn die seit seinem letzten Zug aus seinen Zollburgen
+        /// eingenommenen Zölle und setzt den Zähler anschließend zurück.
+        /// </summary>
+        public async Task ZeigeZolleinnahmen()
+        {
+            var spieler = SW.Dynamisch.GetAktHum();
+
+            if (spieler.ZolleinnahmenGesammelt <= 0)
+                return;
+
+            await SW.UI.ShowText.ShowDialog($"Aus Euren Zollburgen habt Ihr {spieler.ZolleinnahmenGesammelt.ToStringGeld()} an Zöllen eingenommen.");
+            spieler.ZolleinnahmenGesammelt = 0;
         }
 
         /// <summary>

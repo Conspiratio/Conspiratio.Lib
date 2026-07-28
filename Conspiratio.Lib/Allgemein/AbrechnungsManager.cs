@@ -155,12 +155,12 @@ namespace Conspiratio.Lib.Allgemein
                     if (zollburgStart.Besitzer == SW.Dynamisch.GetAktiverSpieler())
                         zollsatzStart = 0;
                     else
-                        SW.Dynamisch.GetSpWithID(zollburgStart.Besitzer).ErhoeheTaler(Convert.ToInt32(zollsatzStart * grundumsatz));
+                        ZahleZollAusUndSammle(zollburgStart.Besitzer, Convert.ToInt32(zollsatzStart * grundumsatz));
 
                     if (zollburgZiel.Besitzer == SW.Dynamisch.GetAktiverSpieler())
                         zollsatzZiel = 0;
                     else
-                        SW.Dynamisch.GetSpWithID(zollburgZiel.Besitzer).ErhoeheTaler(Convert.ToInt32(zollsatzZiel * grundumsatz));
+                        ZahleZollAusUndSammle(zollburgZiel.Besitzer, Convert.ToInt32(zollsatzZiel * grundumsatz));
 
                     ergebnis.Zollkosten += Convert.ToInt32((zollsatzStart + zollsatzZiel) * grundumsatz);
                 }
@@ -199,6 +199,18 @@ namespace Conspiratio.Lib.Allgemein
                 spieler.SetUmsatzInStadtX(0, stadtId);
 
             return ergebnis;
+        }
+
+        /// <summary>
+        /// Zahlt einem Zollburg-Besitzer seinen Zollanteil aus und summiert ihn – sofern der Besitzer ein
+        /// menschlicher Spieler ist – in dessen Zolleinnahmen-Zähler, damit er ihm zu Zugbeginn gemeldet werden kann.
+        /// </summary>
+        private static void ZahleZollAusUndSammle(int besitzerId, int betrag)
+        {
+            SW.Dynamisch.GetSpWithID(besitzerId).ErhoeheTaler(betrag);
+
+            if (besitzerId < SW.Statisch.GetMinKIID())
+                SW.Dynamisch.GetHumWithID(besitzerId).ZolleinnahmenGesammelt += betrag;
         }
     }
 }
