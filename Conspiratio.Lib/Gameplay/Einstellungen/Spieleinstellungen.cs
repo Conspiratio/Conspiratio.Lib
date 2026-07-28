@@ -13,5 +13,12 @@ namespace Conspiratio.Lib.Gameplay.Einstellungen
         /// Gibt an, wie hoch die Aggressivität der KI-Spieler sein soll. Dies bezieht sich u.a. auf die Häufigkeit von Anklagen und die Häufigkeit der Aktionen in den Militärstütztpunkten.
         /// </summary>
         public EnumSchwierigkeitsgrad AggressivitaetKISpieler { get; set; } = EnumSchwierigkeitsgrad.Mittel;
+
+        /// <summary>
+        /// Aktivität der KI-Spieler in den Militärstützpunkten als Prozentwert (1–100, Standard 50). Bestimmt
+        /// die Häufigkeit von Ausbau, Rekrutierung und Aktionen; 50 % entspricht dem bisherigen Normalwert.
+        /// Alte Spielstände (Wert 0) werden wie 50 % behandelt.
+        /// </summary>
+        public int KiAktivitaetProzent { get; set; } = 50;
     }
 }

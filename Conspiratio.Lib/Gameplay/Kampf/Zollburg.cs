@@ -83,22 +83,15 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         {
             string text = "";
             string result;
-            double kiAktivitaetsfaktor = 1d;  // 1.00 = normal (50 %), von 0.02 (1 %) bis 2.00 (100 %) möglich
             int wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
             Type truppeneinheit = null;
 
-            switch (SW.Dynamisch.Spielstand.Einstellungen.AggressivitaetKISpieler)
-            {
-                case Einstellungen.EnumSchwierigkeitsgrad.Niedrig:
-                    kiAktivitaetsfaktor = 0.5d;  // 25 %
-                    break;
-                case Einstellungen.EnumSchwierigkeitsgrad.Mittel:
-                    kiAktivitaetsfaktor = 1d;  // 50 %
-                    break;
-                case Einstellungen.EnumSchwierigkeitsgrad.Hoch:
-                    kiAktivitaetsfaktor = 1.7d;  // 85 %
-                    break;
-            }
+            // KI-Aktivität als Prozentwert (1–100, Standard 50). 50 % entspricht dem Normalfaktor 1.0,
+            // 100 % dem Faktor 2.0; alte Spielstände (0) werden wie 50 % behandelt.
+            int aktivitaetProzent = SW.Dynamisch.Spielstand.Einstellungen.KiAktivitaetProzent;
+            if (aktivitaetProzent <= 0)
+                aktivitaetProzent = 50;
+            double kiAktivitaetsfaktor = aktivitaetProzent / 50d;
 
             if (wuerfel <= Convert.ToInt32(Math.Round(50 * kiAktivitaetsfaktor, 0)))  // Auswürfeln, ob generell in diesem Zug etwas passieren soll
             {

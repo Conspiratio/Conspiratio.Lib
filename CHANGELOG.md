@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.51.0
+
+_28.07.2026_
+
+**[DE]**
+- Räuber/Söldner-System (Issue #16): Die Aktivität der KI-Spieler in den Militärstützpunkten wird nun über einen feinen Prozentwert gesteuert (`Spieleinstellungen.KiAktivitaetProzent`, 1–100, Standard 50) statt der bisherigen drei Stufen. Räuberlager und Zollburg leiten ihren Aktivitätsfaktor direkt daraus ab (50 % = bisheriger Normalwert); alte Spielstände (Wert 0) werden wie 50 % behandelt.
+
+**[EN]**
+- Robbers/mercenaries system (issue #16): the activity of the AI players in the military bases is now controlled via a fine percentage value (`Spieleinstellungen.KiAktivitaetProzent`, 1–100, default 50) instead of the previous three levels. Robber camps and toll castles derive their activity factor directly from it (50 % = the previous normal value); old savegames (value 0) are treated as 50 %.
+
 ## 3.50.0
 
 _28.07.2026_
