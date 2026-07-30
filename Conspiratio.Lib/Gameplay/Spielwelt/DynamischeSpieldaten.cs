@@ -729,7 +729,40 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
 
                     startki = SW.Statisch.Rnd.Next(SW.Statisch.GetMinKIID(), SW.Statisch.GetMaxKIID());
                 }
-                //Dann abkürzen und die Voraussetzungen ignorieren
+                // Gelockerte Prüfung, falls sich unter der strengen Regel nicht genügend Kandidaten finden.
+                else if (gocounter < 200)
+                {
+                    if (CheckBewerbAmtGelockert(GetKIwithID(startki).GetAmtID(), AmtID))
+                    {
+                        if (kandx[0] == 0)
+                        {
+                            kandx[0] = startki;
+                            GetKIwithID(startki).SetNimmtAnWahlTeil(true);
+                        }
+                        else if (kandx[1] == 0)
+                        {
+                            if (startki != kandx[0])
+                            {
+                                kandx[1] = startki;
+                                GetKIwithID(startki).SetNimmtAnWahlTeil(true);
+                            }
+                        }
+
+                        if (kandx[1] != 0)
+                        {
+                            go = false;
+                            break;
+                        }
+                    }
+
+                    if (go == false)
+                    {
+                        break;
+                    }
+
+                    startki = SW.Statisch.Rnd.Next(SW.Statisch.GetMinKIID(), SW.Statisch.GetMaxKIID());
+                }
+                // Als letzte Reserve die Voraussetzungen ignorieren, damit die Wahl garantiert zwei Kandidaten hat.
                 else
                 {
                     if (kandx[0] == 0)
@@ -2920,6 +2953,29 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Gelockerte Eignungsprüfung für die KI-Kandidatensuche, wenn sich unter der strengen Regel
+        /// (genau 1–2 Stufen Abstand) nicht genügend Kandidaten finden. Der starre Stufensprung entfällt –
+        /// der Kandidat muss nur unterhalb des Zielamts liegen. Amtslose (Stufe 0) bleiben aber auf
+        /// Einstiegsämter (Stufe 1–2) beschränkt, so wie es auch die strenge Regel zulässt; sie kandidieren
+        /// damit nicht länger für höhere Ämter wie den Regenten.
+        /// </summary>
+        private bool CheckBewerbAmtGelockert(int amtIDKlein, int amtIDGross)
+        {
+            int amtstgr = SW.Statisch.GetAmtwithID(amtIDGross).GetAmtsStufe();
+            int amtstkl = SW.Statisch.GetAmtwithID(amtIDKlein).GetAmtsStufe();
+
+            // Kandidat muss unterhalb des Zielamts liegen.
+            if (amtstgr <= amtstkl)
+                return false;
+
+            // Amtslose nur für Einstiegsämter (Stufe 1-2) zulassen.
+            if (amtIDKlein == 0 && amtstgr > 2)
+                return false;
+
+            return true;
         }
         #endregion
 

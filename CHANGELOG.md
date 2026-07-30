@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.60.0
+
+_30.07.2026_
+
+**[DE]**
+- Fehlerbehebung Wahlen: Bei der KI-Kandidatensuche für ein frei gewordenes Amt (`WahlAnlegen`) konnten bislang völlig unpassende Kandidaten aufgestellt werden – z. B. ein amtsloser Spieler als Kandidat für den Regenten. Grund war ein Fallback, der nach 100 erfolglosen Versuchen die Eignungsprüfung komplett ignorierte (relevant vor allem bei hohen Ämtern, für die kaum jemand die geforderte Vorstufe hält). Neu gibt es eine gelockerte Zwischenstufe: Findet sich unter der strengen Regel (genau 1–2 Amtsstufen Abstand) niemand, wird der starre Stufensprung fallengelassen – der Kandidat muss aber weiterhin unterhalb des Zielamts liegen, und Amtslose bleiben auf Einstiegsämter (Stufe 1–2) beschränkt. Erst als allerletzte Reserve wird wie zuvor die Prüfung ignoriert, damit jede Wahl garantiert zwei Kandidaten hat.
+
+**[EN]**
+- Bugfix elections: when searching AI candidates for a vacated office (`WahlAnlegen`), completely unsuitable candidates could be nominated – e.g. a player without any office running for regent. The cause was a fallback that, after 100 unsuccessful attempts, ignored the eligibility check entirely (mostly relevant for high offices, for which hardly anyone holds the required lower rank). There is now a relaxed intermediate tier: if no one qualifies under the strict rule (exactly 1–2 office levels below), the rigid level step is dropped – but the candidate must still be below the target office, and office-less players remain limited to entry-level offices (level 1–2). Only as a very last resort is the check ignored, as before, so every election is guaranteed two candidates.
+
 ## 3.59.0
 
 _30.07.2026_
