@@ -64,8 +64,11 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                     ergebnis.SpielerIDVerteidiger <= SW.Statisch.GetMinKIID() ||
                     (ergebnis.Karawane != null && ergebnis.Karawane.SpielerID <= SW.Statisch.GetMinKIID());
 
+                // Die Zusammenfassung enthält Spielernamen in |...|-Markern (die Markup-Konvention der Lib).
+                // Sie bleiben erhalten, damit die Ansicht die Namen hervorheben kann (fett, menschliche Spieler
+                // zusätzlich dunkelrot – wie im WinForms-Original). Ansichten ohne Formatierung entfernen sie.
                 if (zeigeKiMilitaerereignisse || menschlicherSpielerBeteiligt)
-                    meldungen.Add(ergebnis.Zusammenfassung.Replace("|", ""));
+                    meldungen.Add(ergebnis.Zusammenfassung);
 
                 // Ein bezahlter Moral-Bonus ist mit dem Kampf verbraucht – bei Sieg wie bei Niederlage
                 // gibt es keine Rückerstattung.

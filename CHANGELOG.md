@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.59.0
+
+_30.07.2026_
+
+**[DE]**
+- Kampfereignisse (Issue #16): `KampfereignisseManager.ErmittleEreignisse` entfernt die `|`-Marker um die Spielernamen nicht mehr aus den Kampf-Zusammenfassungen. Die Marker sind die Markup-Konvention der Lib und bleiben nun erhalten, damit die Ansicht die Namen hervorheben kann (fett, menschliche Spieler zusätzlich dunkelrot – wie im WinForms-Original). Ansichten ohne Formatierung können sie weiterhin selbst entfernen.
+
+**[EN]**
+- Combat events (issue #16): `KampfereignisseManager.ErmittleEreignisse` no longer strips the `|` markers around player names from the battle summaries. The markers are the Lib's markup convention and are now preserved so the view can highlight the names (bold, human players additionally in dark red – as in the WinForms original). Views without formatting can still remove them themselves.
+
 ## 3.58.0
 
 _30.07.2026_
