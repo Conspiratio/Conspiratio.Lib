@@ -56,7 +56,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             get { return _zielStuetzpunktID; }
             set
             {
-                if ((SW.Dynamisch.GetStuetzpunkte().Length <= (value - 1)) && (SW.Dynamisch.GetStuetzpunkte()[value - 1] != null))  // gültiger Ziel-Stützpunkt?
+                if (value >= 1 && value <= SW.Dynamisch.GetStuetzpunkte().Length && SW.Dynamisch.GetStuetzpunkte()[value - 1] != null)  // gültiger Ziel-Stützpunkt?
                     _zielStuetzpunktID = value;
                 else
                     _zielStuetzpunktID = 0;

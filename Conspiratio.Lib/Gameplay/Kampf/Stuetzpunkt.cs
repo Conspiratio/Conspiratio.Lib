@@ -361,6 +361,16 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         {
             return GetAnzahlTruppen(TypeEinheit) + GetAnzahlGeworben(TypeEinheit);
         }
+
+        /// <summary>
+        /// Liefert für die KI die ID eines zufälligen gegnerischen Stützpunkts (anderer Besitzer) als
+        /// mögliches Angriffsziel, oder 0, wenn es kein solches Ziel gibt.
+        /// </summary>
+        public int KiZufaelligesAngriffsziel()
+        {
+            var ziele = SW.Dynamisch.GetStuetzpunkte().Where(s => s.ID != ID && s.Besitzer != Besitzer).ToList();
+            return ziele.Count == 0 ? 0 : ziele[SW.Statisch.Rnd.Next(0, ziele.Count)].ID;
+        }
         #endregion
 
         #region BerechneWert

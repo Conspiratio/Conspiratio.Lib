@@ -5,6 +5,7 @@
     /// </summary>
     public enum EnumKampfArt
     {
-        KarawanenPluenderung
+        KarawanenPluenderung,
+        StuetzpunktAngriff  // Angriff eines Stützpunkts auf einen anderen (Truppen schicken)
     }
 }

@@ -1,5 +1,17 @@
 # Changelog Conspiratio.Lib
 
+## 3.56.0
+
+_30.07.2026_
+
+**[DE]**
+- Räuber/Söldner-System (Issue #16): Stützpunkte können nun andere Stützpunkte angreifen. Die „Truppen schicken"-Aktion mit einem gegnerischen Stützpunkt als Ziel erzeugt beim Rundenende einen Kampf (`EnumKampfArt.StuetzpunktAngriff`; `Kampfberechnung.ErmittleStattfindendeKaempfe` baut die Angriffe aus den Aktionen auf, `StuetzpunktAngriffAnwenden` wickelt das Ergebnis ab). Gewinnt der Angreifer und ist die gesamte Garnison des Ziels ausgelöscht, während überlebende Truppen einrücken, wird der Stützpunkt **eingenommen** (Besitzerwechsel, offene Angebote/Boni verfallen); gewinnt der Angreifer ohne vollständige Auslöschung, wird das Ziel nur **beschädigt** (−25 Zustand). Angriffe unterliegen wie Karawanen-Überfälle der 7-Jahres-Anlaufzeit. Die KI greift abhängig von ihrer Aktivität (`kiAktivitaetsfaktor`) ebenfalls gegnerische Stützpunkte an (`Zollburg`/`Raeuberlager` `VersucheKiAngriff`, `Stuetzpunkt.KiZufaelligesAngriffsziel`).
+- Fehlerbehebung: Der `ZielStuetzpunktID`-Setter in `StuetzpunktAktion` verwarf zuvor durch eine invertierte Bereichsprüfung jedes gültige Ziel (fiel auf 0 zurück), wodurch „Truppen schicken" nie ein Ziel speichern konnte. Die Prüfung akzeptiert nun korrekt gültige Stützpunkt-IDs.
+
+**[EN]**
+- Robbers/mercenaries system (issue #16): bases can now attack other bases. The "send troops" action with an enemy base as its target creates a battle at round end (`EnumKampfArt.StuetzpunktAngriff`; `Kampfberechnung.ErmittleStattfindendeKaempfe` builds the attacks from the actions, `StuetzpunktAngriffAnwenden` applies the result). If the attacker wins and the target's entire garrison is wiped out while surviving troops move in, the base is **captured** (owner change, open offers/bonuses expire); if the attacker wins without a complete wipeout, the target is merely **damaged** (−25 condition). Like caravan raids, attacks are subject to the 7-year grace period. Depending on its activity level (`kiAktivitaetsfaktor`), the AI also attacks enemy bases (`Zollburg`/`Raeuberlager` `VersucheKiAngriff`, `Stuetzpunkt.KiZufaelligesAngriffsziel`).
+- Bugfix: the `ZielStuetzpunktID` setter in `StuetzpunktAktion` previously discarded every valid target through an inverted bounds check (fell back to 0), so "send troops" could never store a target. The check now correctly accepts valid base IDs.
+
 ## 3.55.0
 
 _28.07.2026_
