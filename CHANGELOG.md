@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.58.0
+
+_30.07.2026_
+
+**[DE]**
+- Zölle (Issue #16): Ist der handelnde Spieler zollfrei (Privileg 23 oder die 50%-Chance von Privileg 31), erhalten jetzt auch die Zollburg-Besitzer keinen Zollanteil mehr ausgezahlt. Zuvor wurde der Zoll den Besitzern gutgeschrieben, obwohl der Händler nichts zahlte (`AbrechnungsManager`: die Zollfreiheit wird nun **vor** der Auszahlung ermittelt und überspringt die gesamte Zollberechnung).
+
+**[EN]**
+- Tolls (issue #16): if the trading player is toll-free (privilege 23 or the 50 % chance of privilege 31), the toll castle owners no longer receive a toll share either. Previously the toll was credited to the owners even though the trader paid nothing (`AbrechnungsManager`: toll-freedom is now determined **before** the payout and skips the entire toll calculation).
+
 ## 3.57.0
 
 _30.07.2026_

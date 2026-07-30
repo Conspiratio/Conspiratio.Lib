@@ -127,51 +127,51 @@ namespace Conspiratio.Lib.Allgemein
 
             #region Zölle (Zollburg-Besitzer erhalten ihren Anteil sofort ausgezahlt)
 
-            for (int slot = 0; slot < SW.Statisch.GetMaxProdSlots(); slot++)
+            // Privilegien: Zollfreiheit (23) bzw. 50%-Chance auf Zollfreiheit (31). Ist der Spieler zollfrei,
+            // zahlt er keinen Zoll – dann erhalten auch die Zollburg-Besitzer keinen Anteil ausgezahlt.
+            bool zollfrei = spieler.CheckPrivilegX(23) || (spieler.CheckPrivilegX(31) && SW.Statisch.Rnd.Next(0, 2) == 0);
+
+            if (!zollfrei)
             {
-                for (int stadtId = 1; stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
+                for (int slot = 0; slot < SW.Statisch.GetMaxProdSlots(); slot++)
                 {
-                    var produktionsslot = spieler.GetProduktionsslot(stadtId, slot);
+                    for (int stadtId = 1; stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
+                    {
+                        var produktionsslot = spieler.GetProduktionsslot(stadtId, slot);
 
-                    if (produktionsslot.GetTaetigkeit() != (int)EnumProduktionsslotAktionsart.Verkaufen &&
-                        produktionsslot.GetTaetigkeit() != (int)EnumProduktionsslotAktionsart.PermanentVerkaufen)
-                        continue;
+                        if (produktionsslot.GetTaetigkeit() != (int)EnumProduktionsslotAktionsart.Verkaufen &&
+                            produktionsslot.GetTaetigkeit() != (int)EnumProduktionsslotAktionsart.PermanentVerkaufen)
+                            continue;
 
-                    int startland = SW.Dynamisch.GetStadtwithID(stadtId).GetLandID();
-                    int zielland = SW.Dynamisch.GetStadtwithID(produktionsslot.GetVerkaufStadt()).GetLandID();
+                        int startland = SW.Dynamisch.GetStadtwithID(stadtId).GetLandID();
+                        int zielland = SW.Dynamisch.GetStadtwithID(produktionsslot.GetVerkaufStadt()).GetLandID();
 
-                    if (startland == zielland)
-                        continue;
+                        if (startland == zielland)
+                            continue;
 
-                    // Es wird mindestens eine Grenze überschritten
-                    int grundumsatz = SW.Dynamisch.GetRohstoffwithID(produktionsslot.GetVerkaufRohstoff()).GetPreisStd() * produktionsslot.GetVerkaufAnzahl();
+                        // Es wird mindestens eine Grenze überschritten
+                        int grundumsatz = SW.Dynamisch.GetRohstoffwithID(produktionsslot.GetVerkaufRohstoff()).GetPreisStd() * produktionsslot.GetVerkaufAnzahl();
 
-                    var zollburgStart = SW.Dynamisch.GetZollburgWithIDx(SW.Dynamisch.GetLandWithID(startland).GetZollburgIndex());
-                    var zollburgZiel = SW.Dynamisch.GetZollburgWithIDx(SW.Dynamisch.GetLandWithID(zielland).GetZollburgIndex());
+                        var zollburgStart = SW.Dynamisch.GetZollburgWithIDx(SW.Dynamisch.GetLandWithID(startland).GetZollburgIndex());
+                        var zollburgZiel = SW.Dynamisch.GetZollburgWithIDx(SW.Dynamisch.GetLandWithID(zielland).GetZollburgIndex());
 
-                    double zollsatzStart = zollburgStart.Zoll;
-                    double zollsatzZiel = zollburgZiel.Zoll;
+                        double zollsatzStart = zollburgStart.Zoll;
+                        double zollsatzZiel = zollburgZiel.Zoll;
 
-                    if (zollburgStart.Besitzer == SW.Dynamisch.GetAktiverSpieler())
-                        zollsatzStart = 0;
-                    else
-                        ZahleZollAusUndSammle(zollburgStart.Besitzer, Convert.ToInt32(zollsatzStart * grundumsatz));
+                        if (zollburgStart.Besitzer == SW.Dynamisch.GetAktiverSpieler())
+                            zollsatzStart = 0;
+                        else
+                            ZahleZollAusUndSammle(zollburgStart.Besitzer, Convert.ToInt32(zollsatzStart * grundumsatz));
 
-                    if (zollburgZiel.Besitzer == SW.Dynamisch.GetAktiverSpieler())
-                        zollsatzZiel = 0;
-                    else
-                        ZahleZollAusUndSammle(zollburgZiel.Besitzer, Convert.ToInt32(zollsatzZiel * grundumsatz));
+                        if (zollburgZiel.Besitzer == SW.Dynamisch.GetAktiverSpieler())
+                            zollsatzZiel = 0;
+                        else
+                            ZahleZollAusUndSammle(zollburgZiel.Besitzer, Convert.ToInt32(zollsatzZiel * grundumsatz));
 
-                    ergebnis.Zollkosten += Convert.ToInt32((zollsatzStart + zollsatzZiel) * grundumsatz);
+                        ergebnis.Zollkosten += Convert.ToInt32((zollsatzStart + zollsatzZiel) * grundumsatz);
+                    }
                 }
             }
-
-            // Privilegien: Zollfreiheit bzw. 50%-Chance auf Zollfreiheit
-            if (spieler.CheckPrivilegX(23))
-                ergebnis.Zollkosten = 0;
-
-            if (spieler.CheckPrivilegX(31) && SW.Statisch.Rnd.Next(0, 2) == 0)
-                ergebnis.Zollkosten = 0;
 
             ergebnis.Gesamtkosten += ergebnis.Zollkosten;
 
