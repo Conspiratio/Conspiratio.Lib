@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.54.0
+
+_28.07.2026_
+
+**[DE]**
+- Räuber/Söldner-System (Issue #16): Truppen werden nun angeworben statt sofort eingestellt – der Werbe-Etat wird beim Auftrag bezahlt, die Truppen treffen erst zum nächsten Rundenende ein (`Stuetzpunkt.GeworbeneTruppen`, `TruppenAnheuern` reiht ein statt sofort `ErhoeheTruppen`; `GeworbeneTruppenEinstellen` im `KampfereignisseManager` vor den Kämpfen). Die Verwaltung zeigt stationierte plus angeworbene Truppen an (`GetAnzahlTruppenInklGeworben`); `TruppenEntlassen` storniert zunächst noch nicht eingetroffene Anwerbungen und erstattet den Werbe-Etat zurück, bevor stationierte Truppen entlassen werden. Kapazitätsprüfung inkl. angeworbener Truppen.
+
+**[EN]**
+- Robbers/mercenaries system (issue #16): troops are now recruited instead of hired immediately – the advertising budget is paid when ordering, but the troops only arrive at the next round end (`Stuetzpunkt.GeworbeneTruppen`, `TruppenAnheuern` queues them instead of calling `ErhoeheTruppen` right away; `GeworbeneTruppenEinstellen` in the `KampfereignisseManager` before the battles). The management shows stationed plus recruited troops (`GetAnzahlTruppenInklGeworben`); `TruppenEntlassen` first cancels not-yet-arrived recruits and refunds the advertising budget before dismissing stationed troops. Capacity check includes recruited troops.
+
 ## 3.53.0
 
 _28.07.2026_

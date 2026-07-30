@@ -21,6 +21,14 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             var meldungen = new List<string>();
             var kampf = new Kampfberechnung();
 
+            // Angeworbene Truppen treffen zum Rundenende ein (einmal je Runde), bevor die Kämpfe stattfinden.
+            foreach (var stuetzpunkt in SW.Dynamisch.GetStuetzpunkte())
+            {
+                string angeworben = stuetzpunkt.GeworbeneTruppenEinstellen();
+                if (!string.IsNullOrEmpty(angeworben) && stuetzpunkt.Besitzer < SW.Statisch.GetMinKIID())
+                    meldungen.Add(angeworben);
+            }
+
             // KI-Aktionen je KI-Stützpunkt ausführen (menschliche Stützpunkte werden übersprungen).
             foreach (var stuetzpunkt in SW.Dynamisch.GetStuetzpunkte())
             {

@@ -23,6 +23,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         private int _maximaleKapazitaet;
         private int _kapazitaet;
         private int _moralTruppeInProzent;
+        private List<Einheit> _geworbeneTruppen;
 
         /// <summary>
         /// Interne, eindeutige Nummer des Stützpunktes (laufend, beginnt mit 1)
@@ -332,6 +333,33 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         public int GetAnzahlTruppen(Type TypeEinheit)
         {
             return Einheiten.Count(x => x.GetType() == TypeEinheit);
+        }
+
+        /// <summary>
+        /// Truppen, die für diesen Stützpunkt angeworben (und bereits bezahlt) sind, aber erst zum nächsten
+        /// Rundenende tatsächlich eintreffen. Lazy initialisiert, damit ältere Spielstände kompatibel bleiben.
+        /// </summary>
+        public List<Einheit> GeworbeneTruppen
+        {
+            get
+            {
+                if (_geworbeneTruppen == null)
+                    _geworbeneTruppen = new List<Einheit>();
+
+                return _geworbeneTruppen;
+            }
+        }
+
+        /// <summary>Anzahl der für einen Einheitentyp angeworbenen (noch nicht eingetroffenen) Truppen.</summary>
+        public int GetAnzahlGeworben(Type TypeEinheit)
+        {
+            return GeworbeneTruppen.Count(x => x.GetType() == TypeEinheit);
+        }
+
+        /// <summary>Aktuelle plus angeworbene Truppen eines Typs (für die Anzeige in der Verwaltung).</summary>
+        public int GetAnzahlTruppenInklGeworben(Type TypeEinheit)
+        {
+            return GetAnzahlTruppen(TypeEinheit) + GetAnzahlGeworben(TypeEinheit);
         }
         #endregion
 
@@ -768,7 +796,6 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         {
             Einheit Truppeneinheit = (Einheit)Activator.CreateInstance(TypeEinheit);
             int Kosten = Truppeneinheit.Basispreis * Anzahl;
-            string Meldung;
             string NameEinheiten = Truppeneinheit.NamePlural;
 
             if (Kosten <= 0)
@@ -777,22 +804,46 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             if (Anzahl == 1)
                 NameEinheiten = Truppeneinheit.Name;
 
-            if (await SW.UI.YesNoQuestion.ShowDialogText($"Wollt Ihr {Anzahl} {NameEinheiten}\n für {Kosten.ToStringGeld()} Handgeld anheuern?", "Ja", "Lieber nicht!") != DialogResultGame.Yes)
+            // Kapazitätsprüfung inkl. bereits angeworbener (noch nicht eingetroffener) Truppen.
+            if (Einheiten.Count + GeworbeneTruppen.Count + Anzahl > Kapazitaet)
+            {
+                SW.Dynamisch.BelTextAnzeigen($"Es gibt in {Name} nicht genügend Unterkünfte\n für {Anzahl} weitere Rekruten.");
+                return false;
+            }
+
+            if (await SW.UI.YesNoQuestion.ShowDialogText($"Wollt Ihr {Anzahl} {NameEinheiten}\n für {Kosten.ToStringGeld()} Werbe-Etat anwerben?\nSie treffen zum nächsten Rundenende ein.", "Ja", "Lieber nicht!") != DialogResultGame.Yes)
                 return false;
 
             if (!SW.Dynamisch.CheckIfenoughGold(Kosten))
                 return false;
 
-            Meldung = ErhoeheTruppen(Anzahl, TypeEinheit);
-
-            if (Meldung != null)
-            {
-                SW.Dynamisch.BelTextAnzeigen(Meldung);
-                return false;
-            }
-
             SW.Dynamisch.GetSpWithID(Besitzer).ErhoeheTaler(-Kosten);
+
+            // Nicht sofort einstellen, sondern anwerben – die Truppen kommen zum Rundenende (einmal je Runde).
+            for (int i = 0; i < Anzahl; i++)
+                GeworbeneTruppen.Add((Einheit)Activator.CreateInstance(TypeEinheit));
+
             return true;
+        }
+
+        /// <summary>
+        /// Stellt die angeworbenen Truppen tatsächlich in den Stützpunkt ein (zum Rundenende aufzurufen) und
+        /// leert die Warteliste. Liefert eine Meldung über die eingetroffenen Truppen (oder null, wenn keine).
+        /// </summary>
+        public string GeworbeneTruppenEinstellen()
+        {
+            if (GeworbeneTruppen.Count == 0)
+                return null;
+
+            int gesamt = GeworbeneTruppen.Count;
+
+            // Nach Typ gruppiert einstellen (mit Moralveränderung wie beim direkten Anheuern).
+            foreach (var gruppe in GeworbeneTruppen.GroupBy(x => x.GetType()).ToList())
+                ErhoeheTruppen(gruppe.Count(), gruppe.Key);
+
+            GeworbeneTruppen.Clear();
+
+            return $"In {Name} sind {gesamt} neu angeworbene Truppen eingetroffen.";
         }
         #endregion
 
@@ -814,6 +865,27 @@ namespace Conspiratio.Lib.Gameplay.Kampf
 
             if (await SW.UI.YesNoQuestion.ShowDialogText($"Wollt Ihr wirklich\n{Anzahl} {NameEinheiten} entlassen?", "Ja", "Lieber nicht!") != DialogResultGame.Yes)
                 return false;
+
+            // Zuerst noch nicht eingetroffene, angeworbene Truppen dieses Typs stornieren und den Werbe-Etat
+            // zurückerstatten, bevor tatsächlich stationierte Truppen entlassen werden.
+            int storniert = 0;
+            for (int i = GeworbeneTruppen.Count - 1; i >= 0 && storniert < Anzahl; i--)
+            {
+                if (GeworbeneTruppen[i].GetType() != TypeEinheit)
+                    continue;
+
+                GeworbeneTruppen.RemoveAt(i);
+                storniert++;
+            }
+
+            if (storniert > 0)
+            {
+                SW.Dynamisch.GetSpWithID(Besitzer).ErhoeheTaler(Truppeneinheit.Basispreis * storniert);
+                Anzahl -= storniert;
+            }
+
+            if (Anzahl <= 0)
+                return true;
 
             Meldung = VerringereTruppen(Anzahl, TypeEinheit);
 

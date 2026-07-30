@@ -53,8 +53,8 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         /// <summary>Plural-Name eines Einheitentyps (z. B. "Söldner").</summary>
         public string GetEinheitName(int index) => _einheiten[index].NamePlural;
 
-        /// <summary>Aktuell stationierte Anzahl eines Einheitentyps.</summary>
-        public int GetAnzahl(int index) => _stuetzpunkt.GetAnzahlTruppen(_typen[index]);
+        /// <summary>Aktuell stationierte Anzahl eines Einheitentyps zuzüglich der angeworbenen (noch eintreffenden) Truppen.</summary>
+        public int GetAnzahl(int index) => _stuetzpunkt.GetAnzahlTruppenInklGeworben(_typen[index]);
 
         /// <summary>Heuert die angegebene Anzahl eines Einheitentyps an (mit Rückfrage/Kostenprüfung in der Lib).</summary>
         public Task<bool> Anheuern(int index, int anzahl) => _stuetzpunkt.TruppenAnheuern(anzahl, _typen[index]);
