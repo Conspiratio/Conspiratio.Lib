@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.61.0
+
+_30.07.2026_
+
+**[DE]**
+- Ämter: Menschliche Spieler können sich jetzt gleichzeitig für mehrere freie Ämter bewerben. `WahlAnmeldungUmschalten` schaltet die Bewerbung je Wahl unabhängig um (die Kandidatenliste der Wahl ist maßgeblich, nicht mehr eine einzelne gespeicherte Teilnahme), und `GetBewerbungsangebote` markiert alle Bewerbungen. Bei der Auszählung sortiert `GetWahlenMitMenschlicherBeteiligung` die Wahlen nach Amtsstufe absteigend (höchstes Amt zuerst); gewinnt der Spieler ein Amt, zieht `VergebeAmt` über die neue `SpielerAusAllenWahlenEntfernen` alle übrigen Bewerbungen des Gewinners zurück – er behält also nur das höchste gewonnene Amt. Die Abmeldungen bei Kerkerstrafe und beim Ausscheiden aus dem Spiel entfernen den Spieler nun ebenfalls aus allen Wahlen. `HatMenschlicheBeteiligung` ist für die erneute Prüfung während der Auszählung öffentlich.
+
+**[EN]**
+- Offices: human players can now apply for several vacant offices at the same time. `WahlAnmeldungUmschalten` toggles the application per election independently (the election's candidate list is authoritative now, no longer a single stored participation), and `GetBewerbungsangebote` marks all applications. When counting, `GetWahlenMitMenschlicherBeteiligung` sorts the elections by office level in descending order (highest office first); if the player wins an office, `VergebeAmt` withdraws all of the winner's remaining applications via the new `SpielerAusAllenWahlenEntfernen` – so they keep only the highest office won. Removals on a prison sentence and on leaving the game now also remove the player from all elections. `HatMenschlicheBeteiligung` is public for the re-check during counting.
+
 ## 3.60.0
 
 _30.07.2026_

@@ -254,9 +254,8 @@ namespace Conspiratio.Lib.Allgemein
                 spieler.SetSitztImKerker(true);
                 spieler.SetSpieltKartenGegenSpielerID(0);
 
-                // Von Wahlen ausschließen
-                if (spieler.GetWahlTeilnahme() != 0)
-                    spieler.SetWahlTeilnahme(0);
+                // Von allen Wahlen ausschließen (der Spieler kann sich für mehrere Ämter beworben haben)
+                SW.Dynamisch.SpielerAusAllenWahlenEntfernen(SW.Dynamisch.GetAktiverSpieler());
 
                 // Gesundheit und Ansehen reduzieren
                 spieler.ErhoeheGesundheit(-SW.Statisch.GetKerkerGesundheit());

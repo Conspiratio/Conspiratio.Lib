@@ -586,6 +586,27 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             }
         }
 
+        /// <summary>
+        /// Entfernt einen Spieler als Kandidat aus allen laufenden Wahlen und setzt seine Wahlteilnahme zurück.
+        /// Wird gebraucht, weil sich Spieler für mehrere Ämter gleichzeitig bewerben können: beim Gewinn eines
+        /// Amts, beim Ausscheiden aus dem Spiel oder bei einer Kerkerstrafe verfallen alle offenen Bewerbungen.
+        /// </summary>
+        public void SpielerAusAllenWahlenEntfernen(int spielerId)
+        {
+            for (int i = 1; i < SW.Statisch.GetMaxAnzahlWahlen(); i++)
+            {
+                int[] kandidaten = GetWahlX(i).GetKandidaten();
+
+                for (int u = 0; u < kandidaten.Length; u++)
+                {
+                    if (kandidaten[u] == spielerId)
+                        GetWahlX(i).SetKandidatenXAufY(u, 0);
+                }
+            }
+
+            GetSpWithID(spielerId).SetWahlTeilnahme(0);
+        }
+
         public void AmtAufStufeXGebietYidZanWvergeben(int x, int y, int z, int w)
         {
             GetSpWithID(w).SetAmt(z, y);
@@ -1592,23 +1613,8 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             // Amt freigeben
             AmtVonXfreigeben(GetAktiverSpieler());
 
-            // Von Wahl abmelden
-            if (GetHumWithID(GetAktiverSpieler()).GetWahlTeilnahme() != 0)
-            {
-                // Position suchen
-                int u = 0;
-                while (true)
-                {
-                    if (GetWahlX(GetHumWithID(GetAktiverSpieler()).GetWahlTeilnahme()).GetKandidaten()[u] == GetAktiverSpieler())
-                    {
-                        GetWahlX(GetHumWithID(GetAktiverSpieler()).GetWahlTeilnahme()).SetKandidatenXAufY(u, 0);
-                        break;
-                    }
-                    u++;
-                }
-
-                GetHumWithID(GetAktiverSpieler()).SetWahlTeilnahme(0);  // Teilnahme zurücksetzen
-            }
+            // Von allen Wahlen abmelden (der Spieler kann sich für mehrere Ämter beworben haben)
+            SpielerAusAllenWahlenEntfernen(GetAktiverSpieler());
 
             CreateSpielerX(GetAktiverSpieler(), 0, "", true, 0, 0);  // Aktuelles Spieler Objekt initialisieren (auf null setzen führt ansonsten z.B. in der Statistik zu Problemen beim Zugriff: NullReference Exception)
             SetAktivSpielerAnzahl(GetAktivSpielerAnzahl() - 1);

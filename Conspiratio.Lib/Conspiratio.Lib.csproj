@@ -35,7 +35,7 @@
     <FileVersion>3.46.0</FileVersion>
     <Description>A library with gameplay logic for the free and open-source game Conspiratio</Description>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>3.60.0</Version>
+    <Version>3.61.0</Version>
     <Title>$(AssemblyName)</Title>
     <Authors>Conspiratio</Authors>
     <Copyright>Copyright © 2011-2025</Copyright>
