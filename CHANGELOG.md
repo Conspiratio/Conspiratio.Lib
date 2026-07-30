@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.53.0
+
+_28.07.2026_
+
+**[DE]**
+- Räuber/Söldner-System (Issue #16): Ein vor dem Kampf bezahlter Moral-Bonus wird nun mit dem Kampf verbraucht und bei einem Sieg **nicht** zurückerstattet (zuvor gab es bei Sieg eine Rückerstattung). Nur ein ungenutzter Bonus (ohne stattgefundenen Kampf) wird weiterhin erstattet.
+
+**[EN]**
+- Robbers/mercenaries system (issue #16): a morale bonus paid before combat is now consumed with the combat and is **no longer** refunded on victory (previously victory triggered a refund). Only an unused bonus (without a combat that took place) is still refunded.
+
 ## 3.52.0
 
 _28.07.2026_

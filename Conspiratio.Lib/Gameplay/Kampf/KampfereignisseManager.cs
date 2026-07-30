@@ -46,16 +46,19 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 // Im Original hebt "|" einzelne Spielernamen hervor; für die Textanzeige entfernen wir die Trenner.
                 meldungen.Add(ergebnis.Zusammenfassung.Replace("|", ""));
 
-                // Bezahlten Moral-Bonus des angreifenden Stützpunkts abwickeln (bei Sieg zurückerstatten).
-                string bonusMeldung = MoralBonusAbwickeln(ergebnis.StuetzpunktIDAngreifer, ergebnis.SpielerIDGewinner == ergebnis.SpielerIDAngreifer);
-                if (!string.IsNullOrEmpty(bonusMeldung))
-                    meldungen.Add(bonusMeldung);
+                // Ein bezahlter Moral-Bonus ist mit dem Kampf verbraucht – bei Sieg wie bei Niederlage
+                // gibt es keine Rückerstattung.
+                MoralBonusAbwickeln(ergebnis.StuetzpunktIDAngreifer, erstatten: false);
             }
 
-            // Verbliebene, ungenutzte Moral-Boni (z. B. ohne stattgefundenen Kampf) zurückerstatten.
+            // Verbliebene, ungenutzte Moral-Boni (ohne stattgefundenen Kampf) werden zurückerstattet.
             foreach (var stuetzpunkt in SW.Dynamisch.GetStuetzpunkte())
                 if (stuetzpunkt.MoralBonusBezahlt > 0)
-                    MoralBonusAbwickeln(stuetzpunkt.ID, true);
+                {
+                    string bonusMeldung = MoralBonusAbwickeln(stuetzpunkt.ID, erstatten: true);
+                    if (!string.IsNullOrEmpty(bonusMeldung))
+                        meldungen.Add(bonusMeldung);
+                }
 
             if (meldungen.Count == 0)
                 meldungen.Add("Dieses Jahr hat sich nichts Besonderes ereignet.");
@@ -64,9 +67,9 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         }
 
         /// <summary>
-        /// Verrechnet einen für den angreifenden Stützpunkt bezahlten Moral-Bonus: Bei einem Sieg (oder einem
-        /// ungenutzten Bonus) wird der Betrag dem menschlichen Besitzer zurückerstattet. Der Bonus wird
-        /// anschließend zurückgesetzt. Liefert ggf. eine Meldung für den Spieler zurück.
+        /// Setzt einen für den angreifenden Stützpunkt bezahlten Moral-Bonus zurück. Ist der Bonus mit einem
+        /// Kampf verbraucht worden, verfällt er (<paramref name="erstatten"/> = false); wurde er nicht genutzt,
+        /// wird der Betrag dem menschlichen Besitzer zurückerstattet. Liefert ggf. eine Meldung zurück.
         /// </summary>
         private static string MoralBonusAbwickeln(int stuetzpunktId, bool erstatten)
         {
@@ -78,7 +81,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             int betrag = stuetzpunkt.MoralBonusBezahlt;
             stuetzpunkt.MoralBonusBezahlt = 0;
 
-            // Nur menschliche Besitzer bezahlen (und erhalten zurück).
+            // Nur menschliche Besitzer bezahlen (und erhalten einen ungenutzten Bonus zurück).
             if (stuetzpunkt.Besitzer >= SW.Statisch.GetMinKIID())
                 return null;
 
@@ -86,7 +89,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 return null;
 
             SW.Dynamisch.GetHumWithID(stuetzpunkt.Besitzer).ErhoeheTaler(betrag);
-            return $"Eure Truppen aus {stuetzpunkt.Name} waren siegreich – der Moral-Bonus über {betrag.ToStringGeld()} wurde Euch zurückerstattet.";
+            return $"Mangels Kampf blieb der Moral-Bonus über {betrag.ToStringGeld()} für die Truppen aus {stuetzpunkt.Name} ungenutzt und wurde Euch zurückerstattet.";
         }
     }
 }

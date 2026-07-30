@@ -488,7 +488,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             int kosten = BerechneKostenMoralBonus();
 
             if (await SW.UI.YesNoQuestion.ShowDialogText(
-                    $"Wollt Ihr Euren Truppen in {Name} vor dem\n Kampf für {kosten.ToStringGeld()} einen Moral-Bonus\n von {MoralBonusWert} % gewähren?\nBei einem Sieg erhaltet Ihr den Betrag zurück.",
+                    $"Wollt Ihr Euren Truppen in {Name} vor dem\n Kampf für {kosten.ToStringGeld()} einen Moral-Bonus\n von {MoralBonusWert} % gewähren?",
                     "Ja", "Lieber nicht!") != DialogResultGame.Yes)
                 return false;
 
