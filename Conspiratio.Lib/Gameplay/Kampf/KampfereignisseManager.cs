@@ -16,7 +16,12 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         /// Wickelt die Kampfereignisse ab und gibt die Meldungen (KI-Aktionen und Kampf-Zusammenfassungen)
         /// in der Reihenfolge des Originals zurück. Gab es nichts, enthält die Liste eine Standardmeldung.
         /// </summary>
-        public List<string> ErmittleEreignisse()
+        /// <param name="zeigeKiStuetzpunktereignisse">Ob Meldungen zu KI-Stützpunkt-Aktionen (Ausbau, neue
+        /// Rekruten) angezeigt werden. Die Aktionen werden unabhängig davon immer ausgeführt.</param>
+        /// <param name="zeigeKiMilitaerereignisse">Ob auch Kämpfe ohne menschliche Beteiligung angezeigt
+        /// werden. Ist dies false, erscheinen nur Kämpfe, an denen ein menschlicher Spieler beteiligt ist.
+        /// Der Kampf wird unabhängig davon immer berechnet und angewendet.</param>
+        public List<string> ErmittleEreignisse(bool zeigeKiStuetzpunktereignisse = true, bool zeigeKiMilitaerereignisse = true)
         {
             var meldungen = new List<string>();
             var kampf = new Kampfberechnung();
@@ -39,7 +44,8 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                     ? ((Zollburg)stuetzpunkt).RundenendeKIAktionenDurchfuehren()
                     : ((Raeuberlager)stuetzpunkt).RundenendeKIAktionenDurchfuehren();
 
-                if (!string.IsNullOrEmpty(text))
+                // Die Aktion wurde bereits ausgeführt; die Meldung nur zeigen, wenn KI-Stützpunktereignisse gewünscht sind.
+                if (zeigeKiStuetzpunktereignisse && !string.IsNullOrEmpty(text))
                     meldungen.Add(text);
             }
 
@@ -51,8 +57,15 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 var ergebnis = kampf.BerechneKampfErgebnis(einzelkampf);
                 kampf.KampfErgebnisAnwenden(ergebnis);
 
-                // Im Original hebt "|" einzelne Spielernamen hervor; für die Textanzeige entfernen wir die Trenner.
-                meldungen.Add(ergebnis.Zusammenfassung.Replace("|", ""));
+                // Kampf immer anwenden; die Zusammenfassung nur zeigen, wenn KI-Militärereignisse gewünscht sind
+                // oder ein menschlicher Spieler beteiligt ist (Angreifer, Verteidiger oder überfallene Karawane).
+                bool menschlicherSpielerBeteiligt =
+                    ergebnis.SpielerIDAngreifer <= SW.Statisch.GetMinKIID() ||
+                    ergebnis.SpielerIDVerteidiger <= SW.Statisch.GetMinKIID() ||
+                    (ergebnis.Karawane != null && ergebnis.Karawane.SpielerID <= SW.Statisch.GetMinKIID());
+
+                if (zeigeKiMilitaerereignisse || menschlicherSpielerBeteiligt)
+                    meldungen.Add(ergebnis.Zusammenfassung.Replace("|", ""));
 
                 // Ein bezahlter Moral-Bonus ist mit dem Kampf verbraucht – bei Sieg wie bei Niederlage
                 // gibt es keine Rückerstattung.

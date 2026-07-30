@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.55.0
+
+_28.07.2026_
+
+**[DE]**
+- Räuber/Söldner-System (Issue #16): `KampfereignisseManager.ErmittleEreignisse` kennt jetzt zwei Filter (aus dem WinForms-Original übernommen): Meldungen zu KI-Stützpunkt-Aktionen (Ausbau, neue Rekruten) lassen sich ausblenden, und Kämpfe ohne menschliche Beteiligung (Angreifer, Verteidiger oder überfallene Karawane alle KI) lassen sich unterdrücken. Die Aktionen und Kämpfe werden unabhängig davon immer abgewickelt – gefiltert wird nur die Anzeige.
+
+**[EN]**
+- Robbers/mercenaries system (issue #16): `KampfereignisseManager.ErmittleEreignisse` now supports two filters (taken from the WinForms original): messages about AI base actions (expansion, new recruits) can be hidden, and battles without human participation (attacker, defender or raided caravan all AI) can be suppressed. The actions and battles are still always carried out – only the display is filtered.
+
 ## 3.54.0
 
 _28.07.2026_
