@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.52.0
+
+_28.07.2026_
+
+**[DE]**
+- Räuber/Söldner-System (Issue #16): Vor dem Kampf kann für die Truppen eines Stützpunkts ein einmaliger Moral-Bonus bezahlt werden (`Stuetzpunkt.MoralBonusZahlen`, Kosten je Truppenstärke; `MoralBonusBezahlt`, `BerechneKostenMoralBonus`). Der Bonus hebt die Kampfmoral der Angreifer um `MoralBonusWert` (15 %-Punkte, siehe `MoralFuerKampf`, im Kampfaufbau berücksichtigt) und wird bei einem Sieg zurückerstattet, sonst verfällt er; ungenutzte Boni (ohne Kampf) werden ebenfalls erstattet (`KampfereignisseManager`).
+
+**[EN]**
+- Robbers/mercenaries system (issue #16): before combat a one-time morale bonus can be paid for a base's troops (`Stuetzpunkt.MoralBonusZahlen`, cost by troop strength; `MoralBonusBezahlt`, `BerechneKostenMoralBonus`). The bonus raises the attackers' combat morale by `MoralBonusWert` (15 percentage points, see `MoralFuerKampf`, applied when building the combat) and is refunded on victory, otherwise it is forfeited; unused bonuses (without a combat) are refunded as well (`KampfereignisseManager`).
+
 ## 3.51.0
 
 _28.07.2026_

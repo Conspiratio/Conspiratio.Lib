@@ -91,6 +91,25 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         /// </summary>
         public bool ZumVerkaufAngeboten { get; set; }
 
+        /// <summary>Moralbonus (in Prozentpunkten), den ein vor dem Kampf bezahlter Bonus den Angreifern gewährt.</summary>
+        public const int MoralBonusWert = 15;
+
+        /// <summary>
+        /// Für den nächsten Kampf bezahlter Moral-Bonus in Talern (0 = keiner). Der Betrag wird beim Sieg
+        /// zurückerstattet; der Bonus hebt die Kampfmoral der angreifenden Truppen dieses Stützpunkts.
+        /// </summary>
+        public int MoralBonusBezahlt { get; set; }
+
+        /// <summary>
+        /// Die für einen Kampf wirksame Moral: die aktuelle Truppenmoral zuzüglich eines bezahlten
+        /// Moral-Bonus (auf höchstens 100 % begrenzt).
+        /// </summary>
+        public int MoralFuerKampf()
+        {
+            int moral = MoralTruppeInProzent + (MoralBonusBezahlt > 0 ? MoralBonusWert : 0);
+            return moral > 100 ? 100 : moral;
+        }
+
         /// <summary>
         /// Zustand des Stützpunktes in Prozent (0 - 100), hat Einfluss auf die Verteidung bei einem Angriff.
         /// </summary>
@@ -437,6 +456,50 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 SW.Dynamisch.BelTextAnzeigen($"Das Manöver verlief erfolgreich.\n Die Moral Eurer Truppe stieg auf\n {MoralTruppeInProzent} %.");
                 return true;
             }
+        }
+        #endregion
+
+        #region MoralBonusZahlen
+        /// <summary>Kosten für einen einmaligen Moral-Bonus vor dem Kampf (abhängig von der Truppenstärke).</summary>
+        public int BerechneKostenMoralBonus()
+        {
+            return Einheiten.Count * 100;  // pro Truppeneinheit 100 Taler
+        }
+
+        /// <summary>
+        /// Bezahlt vor dem Kampf einen einmaligen Moral-Bonus für die Truppen dieses Stützpunkts. Der Bonus
+        /// hebt die Kampfmoral (siehe <see cref="MoralFuerKampf"/>) und wird bei einem Sieg zurückerstattet.
+        /// </summary>
+        /// <returns>Wurde der Bonus bezahlt?</returns>
+        public async Task<bool> MoralBonusZahlen()
+        {
+            if (Einheiten.Count == 0)
+            {
+                SW.Dynamisch.BelTextAnzeigen($"Ihr habt keine Truppen in {Name} stationiert,\n für die sich ein Moral-Bonus lohnen würde.");
+                return false;
+            }
+
+            if (MoralBonusBezahlt > 0)
+            {
+                SW.Dynamisch.BelTextAnzeigen($"Für die Truppen in {Name} habt Ihr\n bereits einen Moral-Bonus bezahlt.");
+                return false;
+            }
+
+            int kosten = BerechneKostenMoralBonus();
+
+            if (await SW.UI.YesNoQuestion.ShowDialogText(
+                    $"Wollt Ihr Euren Truppen in {Name} vor dem\n Kampf für {kosten.ToStringGeld()} einen Moral-Bonus\n von {MoralBonusWert} % gewähren?\nBei einem Sieg erhaltet Ihr den Betrag zurück.",
+                    "Ja", "Lieber nicht!") != DialogResultGame.Yes)
+                return false;
+
+            if (!SW.Dynamisch.CheckIfenoughGold(kosten))
+                return false;
+
+            SW.Dynamisch.GetSpWithID(Besitzer).ErhoeheTaler(-kosten);
+            MoralBonusBezahlt = kosten;
+
+            SW.Dynamisch.BelTextAnzeigen($"Eure Truppen in {Name} sind hochmotiviert\n in die kommende Schlacht (Moral-Bonus +{MoralBonusWert} %).");
+            return true;
         }
         #endregion
 

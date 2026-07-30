@@ -74,5 +74,14 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             get => _stuetzpunkt.ZumVerkaufAngeboten;
             set => _stuetzpunkt.ZumVerkaufAngeboten = value;
         }
+
+        /// <summary>Ob für die Truppen dieses Stützpunkts bereits ein Moral-Bonus vor dem Kampf bezahlt wurde.</summary>
+        public bool MoralBonusBezahlt => _stuetzpunkt.MoralBonusBezahlt > 0;
+
+        /// <summary>Kosten für einen einmaligen Moral-Bonus vor dem Kampf.</summary>
+        public int KostenMoralBonus => _stuetzpunkt.BerechneKostenMoralBonus();
+
+        /// <summary>Bezahlt einen einmaligen Moral-Bonus für die kommende Schlacht (Rückerstattung bei Sieg).</summary>
+        public Task<bool> MoralBonusZahlen() => _stuetzpunkt.MoralBonusZahlen();
     }
 }

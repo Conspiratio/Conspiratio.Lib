@@ -831,7 +831,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                             {
                                 SpielerIDAngreifer = SW.Dynamisch.GetStuetzpunkte()[oAktion.StuetzpunktID - 1].Besitzer,
                                 SpielerIDVerteidiger = 0,
-                                MoralAngreifer = SW.Dynamisch.GetStuetzpunkte()[oAktion.StuetzpunktID - 1].MoralTruppeInProzent,
+                                MoralAngreifer = SW.Dynamisch.GetStuetzpunkte()[oAktion.StuetzpunktID - 1].MoralFuerKampf(),
                                 MoralVerteidiger = 0,
                                 TruppenAngreifer = oAktion.Einheiten,
                                 TruppenVerteidiger = null,
@@ -855,7 +855,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                             {
                                 SpielerIDAngreifer = SW.Dynamisch.GetStuetzpunkte()[oAktion.StuetzpunktID - 1].Besitzer,
                                 SpielerIDVerteidiger = SW.Dynamisch.GetStuetzpunkte()[verteidigungen[index].StuetzpunktID - 1].Besitzer,
-                                MoralAngreifer = SW.Dynamisch.GetStuetzpunkte()[oAktion.StuetzpunktID - 1].MoralTruppeInProzent,
+                                MoralAngreifer = SW.Dynamisch.GetStuetzpunkte()[oAktion.StuetzpunktID - 1].MoralFuerKampf(),
                                 MoralVerteidiger = SW.Dynamisch.GetStuetzpunkte()[verteidigungen[index].StuetzpunktID - 1].MoralTruppeInProzent,
                                 TruppenAngreifer = oAktion.Einheiten,
                                 TruppenVerteidiger = verteidigungen[index].Einheiten,
