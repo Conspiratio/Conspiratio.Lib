@@ -363,12 +363,15 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         }
 
         /// <summary>
-        /// Liefert für die KI die ID eines zufälligen gegnerischen Stützpunkts (anderer Besitzer) als
-        /// mögliches Angriffsziel, oder 0, wenn es kein solches Ziel gibt.
+        /// Liefert für die KI die ID eines zufälligen Angriffsziels, oder 0, wenn es kein solches Ziel gibt.
+        /// Die KI greift ausschließlich Stützpunkte menschlicher Spieler an (KI-Spieler greifen sich nicht
+        /// gegenseitig an).
         /// </summary>
         public int KiZufaelligesAngriffsziel()
         {
-            var ziele = SW.Dynamisch.GetStuetzpunkte().Where(s => s.ID != ID && s.Besitzer != Besitzer).ToList();
+            var ziele = SW.Dynamisch.GetStuetzpunkte()
+                .Where(s => s.ID != ID && s.Besitzer > 0 && s.Besitzer < SW.Statisch.GetMinKIID())
+                .ToList();
             return ziele.Count == 0 ? 0 : ziele[SW.Statisch.Rnd.Next(0, ziele.Count)].ID;
         }
         #endregion

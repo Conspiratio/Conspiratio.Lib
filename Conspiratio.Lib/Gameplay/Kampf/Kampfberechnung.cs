@@ -1029,6 +1029,11 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                     if (ziel.Besitzer == stuetzpunkt.Besitzer)
                         continue;
 
+                    // KI-Spieler greifen sich nicht gegenseitig an; Angriffe finden nur mit
+                    // menschlicher Beteiligung statt (KI gegen Mensch, Mensch gegen KI, Mensch gegen Mensch).
+                    if (stuetzpunkt.Besitzer >= SW.Statisch.GetMinKIID() && ziel.Besitzer >= SW.Statisch.GetMinKIID())
+                        continue;
+
                     kaempfe.Add(new Kampf()
                     {
                         SpielerIDAngreifer = stuetzpunkt.Besitzer,

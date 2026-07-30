@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.57.0
+
+_30.07.2026_
+
+**[DE]**
+- Räuber/Söldner-System (Issue #16): KI-Spieler greifen sich nicht mehr gegenseitig an. Die KI-Zielauswahl (`Stuetzpunkt.KiZufaelligesAngriffsziel`) berücksichtigt nur noch Stützpunkte menschlicher Besitzer, und `Kampfberechnung.ErmittleStattfindendeKaempfe` überspringt zusätzlich als Sicherung jeden Angriff, bei dem Angreifer und Verteidiger beide KI sind (schützt auch alte Spielstände). Angriffe finden damit nur noch mit menschlicher Beteiligung statt.
+
+**[EN]**
+- Robbers/mercenaries system (issue #16): AI players no longer attack each other. The AI target selection (`Stuetzpunkt.KiZufaelligesAngriffsziel`) now only considers bases owned by human players, and as a safeguard `Kampfberechnung.ErmittleStattfindendeKaempfe` additionally skips any attack where both attacker and defender are AI (also protects old savegames). Attacks therefore only occur with human participation.
+
 ## 3.56.0
 
 _30.07.2026_
