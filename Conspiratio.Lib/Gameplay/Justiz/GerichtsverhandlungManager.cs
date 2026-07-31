@@ -16,6 +16,12 @@ namespace Conspiratio.Lib.Gameplay.Justiz
     {
         public const int RichterAnzahl = 3;
 
+        // Gewicht eines Beweisstücks (tatsächlich begangenes Delikt bzw. vom Kläger erspähtes Delikt)
+        // im Urteilsfaktor. Ein einzelnes Delikt wiegt so schwer wie ein guter Teil der Richter-
+        // Sympathie (zufällig 20–80), damit echte Beweise im Schnitt zu ~80 % zu einer Verurteilung
+        // führen (2–3 Delikte ≈ 63–84 %, ein einzelnes ≈ 31 %, keine ≈ 5 %; siehe BerechneKiUrteil).
+        private const int BeweisGewicht = 10;
+
         private Gerichtsverhandlung _verhandlung;
         private int _summeVerbrechen;
         private int _deliktpunkte;
@@ -172,28 +178,40 @@ namespace Conspiratio.Lib.Gameplay.Justiz
         /// </summary>
         public void SetzeAussage(EnumAussage aussage)
         {
-            int staerke = _summeVerbrechen + _beweise;
+            int staerke = _summeVerbrechen + _beweise;   // Anzahl der Beweise (Delikte + Spionage)
 
             switch (aussage)
             {
                 case EnumAussage.Gestaendnis:
-                    _aussageUrteilsBonus = 5;
+                    // Führt fast sicher zur Verurteilung, senkt aber die Strafe deutlich.
+                    _aussageUrteilsBonus = 18;
                     _strafFaktor = 0.4;
                     break;
 
                 case EnumAussage.Teilgestaendnis:
-                    _aussageUrteilsBonus = 2;
+                    _aussageUrteilsBonus = 8;
                     _strafFaktor = 0.7;
                     break;
 
                 case EnumAussage.Leugnen:
-                    _aussageUrteilsBonus = -Math.Max(0, 5 - staerke);
+                    // Hilft nur bei schwacher Beweislage (0–1 Delikte), sonst wirkungslos; nie nachteilig.
+                    _aussageUrteilsBonus = -Math.Max(0, (2 - staerke) * 9);
                     _strafFaktor = 1.0;
                     break;
 
                 case EnumAussage.EmpoertLeugnen:
-                    _aussageUrteilsBonus = staerke <= 4 ? -(7 - staerke) : (staerke - 4);
-                    _strafFaktor = staerke > 4 ? 1.3 : 1.0;
+                    // Riskant: bei schwacher Lage überzeugender als bloßes Leugnen, bei starker Lage
+                    // nehmen die Richter die dreiste Lüge übel – härtere Strafe und eher Verurteilung.
+                    if (staerke <= 1)
+                    {
+                        _aussageUrteilsBonus = -(24 - staerke * 10);   // E=0: -24, E=1: -14
+                        _strafFaktor = 1.0;
+                    }
+                    else
+                    {
+                        _aussageUrteilsBonus = 12;
+                        _strafFaktor = 1.3;
+                    }
                     break;
             }
         }
@@ -212,10 +230,11 @@ namespace Conspiratio.Lib.Gameplay.Justiz
         {
             int sympathie = SW.Dynamisch.GetKIwithID(GetRichterId(i)).GetBeziehungZuKIX(_verhandlung.GetAngeklagterID());
 
-            // Neben der Schwere der tatsächlichen Verbrechen zählen die vom Kläger gesammelten Beweise
+            // Neben der Anzahl der tatsächlichen Verbrechen zählen die vom Kläger gesammelten Beweise
             // (mehr Beweise -> eher "schuldig") sowie die Aussage des Angeklagten (Geständnis erhöht,
-            // Leugnen senkt die Verurteilungsneigung – siehe SetzeAussage).
-            int faktor = _summeVerbrechen + _beweise + _aussageUrteilsBonus;
+            // Leugnen senkt die Verurteilungsneigung – siehe SetzeAussage). Jedes Beweisstück wird mit
+            // BeweisGewicht gewichtet, damit echte Beweise im Schnitt zur Verurteilung führen.
+            int faktor = (_summeVerbrechen + _beweise) * BeweisGewicht + _aussageUrteilsBonus;
 
             switch (SW.Dynamisch.Spielstand.Einstellungen.AggressivitaetKISpieler)
             {

@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.65.0
+
+_31.07.2026_
+
+**[DE]**
+- Gerichtsverhandlung (Issue #18): Die Verurteilungsrate wurde an echte Beweise angepasst. Bislang wog jedes Beweisstück (tatsächlich begangenes Delikt bzw. vom Kläger erspähtes Delikt) nur mit 1 gegen die zufällige Richter-Sympathie (20–80), sodass selbst bei klarer Beweislage kaum verurteilt wurde. Jedes Beweisstück wird nun mit `BeweisGewicht` (10) gewichtet: Bei echten Beweisen führt die Anklage im Schnitt zu ~80 % zur Verurteilung, gestaffelt nach Anzahl der Delikte (0 Delikte ≈ 5 %, 1 ≈ 31 %, 2 ≈ 63 %, 3 ≈ 84 %, ab 4 ≈ 95 %+). Die Aussage-Boni des Angeklagten (Geständnis/Teilgeständnis/Leugnen/empört leugnen) wurden auf denselben Maßstab angehoben, damit sie spürbar bleiben: ein Geständnis führt fast sicher zur Verurteilung (senkt aber die Strafe), Leugnen räumt bei falscher Anklage frei, empörtes Leugnen schlägt bei erdrückender Beweislage ins Gegenteil um.
+
+**[EN]**
+- Court trial (issue #18): the conviction rate was rebalanced against real evidence. Previously each piece of evidence (an actually committed offence or an offence spied out by the plaintiff) weighed only 1 against the random judge sympathy (20–80), so even a clear case rarely led to a conviction. Each piece of evidence is now weighted by `BeweisGewicht` (10): with real evidence the charge leads to a conviction ~80 % of the time on average, graduated by the number of offences (0 offences ≈ 5 %, 1 ≈ 31 %, 2 ≈ 63 %, 3 ≈ 84 %, 4+ ≈ 95 %+). The defendant's statement bonuses (confession/partial confession/denial/indignant denial) were raised to the same scale so they stay meaningful: a confession makes conviction almost certain (but lowers the penalty), denial clears a false accusation, indignant denial backfires with overwhelming evidence.
+
 ## 3.64.0
 
 _31.07.2026_
