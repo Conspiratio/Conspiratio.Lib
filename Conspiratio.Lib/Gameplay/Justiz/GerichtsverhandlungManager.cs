@@ -83,38 +83,18 @@ namespace Conspiratio.Lib.Gameplay.Justiz
                     .GetAktiveSpionage(_verhandlung.GetAngeklagterID()).GetDelikte();
             }
 
-            if (_verhandlung.GetAngeklagterID() >= SW.Statisch.GetMinKIID())
+            // Die tatsächlich begangenen Verbrechen des Angeklagten werden herangezogen und mit der
+            // Verhandlung gesühnt – für menschliche wie für KI-Angeklagte gleichermaßen (KI begehen ihre
+            // Delikte zum Rundenende, siehe RundenEndeManager.FuehreKiStraftatenDurch).
+            for (int i = 0; i < SW.Statisch.GetMaxGesetze(); i++)
             {
-                // KI-Angeklagter: die Delikte werden zufällig ermittelt.
-                for (int i = 0; i < SW.Statisch.GetMaxGesetze(); i++)
+                int begangen = angeklagter.GetBegingVerbrechenX(i);
+
+                if (begangen > 0)
                 {
-                    string vorwurf = SW.Statisch.GetGerichtsGesetzesvorwurf()[i];
-
-                    if (!string.IsNullOrEmpty(vorwurf) && SW.Statisch.Rnd.Next(0, 10) > 3)
-                    {
-                        _delikte[i] = 1;
-                        _deliktpunkte -= 2;
-
-                        if (_deliktpunkte <= 0)
-                            break;
-                    }
-                }
-            }
-            else
-            {
-                // Menschlicher Angeklagter: die tatsächlich begangenen Verbrechen werden herangezogen und gesühnt.
-                var humAngeklagter = SW.Dynamisch.GetHumWithID(_verhandlung.GetAngeklagterID());
-
-                for (int i = 0; i < SW.Statisch.GetMaxGesetze(); i++)
-                {
-                    int begangen = humAngeklagter.GetBegingVerbrechenX(i);
-
-                    if (begangen > 0)
-                    {
-                        _summeVerbrechen += begangen;
-                        _delikte[i] = begangen;
-                        humAngeklagter.SetBegingVerbrechenX(i, 0);
-                    }
+                    _summeVerbrechen += begangen;
+                    _delikte[i] = begangen;
+                    angeklagter.SetBegingVerbrechenX(i, 0);
                 }
             }
 

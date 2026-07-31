@@ -60,7 +60,6 @@ namespace Conspiratio.Lib.Gameplay.Personen
         private int _erbeSpielerID;
         private bool[] _rohstoffrechte = new bool[SW.Statisch.GetMaxRohID()];  // Welche Handelsrechte der Spieler von welchem Rohstoff schon besitzt
         private int[] _karawaneInStadt = new int[SW.Statisch.GetMaxStadtID()];
-        private int[] _begingVerbrechenX;
         private bool _privilegKaufmannBenutzt;
         private List<string> _handelsNachrichten;
 
@@ -89,7 +88,6 @@ namespace Conspiratio.Lib.Gameplay.Personen
             _erbeSpielerID = 0;
             _bannerID = 0;
             _spielerStatistik = new SpielerStatistik();
-            _begingVerbrechenX = new int[SW.Statisch.GetMaxGesetze()];
             _hatInStadtXMengeYRohstoffe = new int[SW.Statisch.GetMaxStadtID(), SW.Statisch.GetMaxRohID()];
             _umsatzInStadt = new int[SW.Statisch.GetMaxStadtID()];  // Umsatz pro Stadt
             _rohstoffeEinVerkaeufeInStadt = new int[SW.Statisch.GetMaxStadtID(), SW.Statisch.GetMaxRohID()];
@@ -574,31 +572,6 @@ namespace Conspiratio.Lib.Gameplay.Personen
             return _sitztImKerker;
         }
 
-        public int GetBegingVerbrechenX(int x)
-        {
-            return _begingVerbrechenX[x];
-        }
-
-        public void SetBegingVerbrechenX(int x, int y)
-        {
-            _begingVerbrechenX[x] = y;
-        }
-
-        public void ErhoeheGesetzXUmEins(int x)
-        {
-            _begingVerbrechenX[x]++;
-        }
-
-        public void HalbiereDelikte()
-        {
-            for (int i = 0; i < SW.Statisch.GetMaxGesetze(); i++)
-                _begingVerbrechenX[i] /= 2;
-        }
-
-        public int[] GetBegingVerbrechenX()
-        {
-            return _begingVerbrechenX;
-        }
         #endregion
 
         #region GetFirstStadtIDMitWohnsitz

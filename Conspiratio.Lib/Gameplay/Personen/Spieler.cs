@@ -27,6 +27,7 @@ namespace Conspiratio.Lib.Gameplay.Personen
         private int _ansehen;
         private int _titel;
         private bool[] _privilegien = new bool[SW.Statisch.GetMaxPriv()];
+        private int[] _begingVerbrechenX;
 
         #endregion
 
@@ -40,6 +41,7 @@ namespace Conspiratio.Lib.Gameplay.Personen
             VerheiratetMit = verheiratetMit;
             VerbleibendeJahre = verbleibendeJahre;
             _gesundheit = SW.Statisch.GetMaxGesundheit();
+            _begingVerbrechenX = new int[SW.Statisch.GetMaxGesetze()];
         }
         #endregion
 
@@ -209,6 +211,38 @@ namespace Conspiratio.Lib.Gameplay.Personen
         {
             Deliktpunkte = punkte;
         }
+
+        #region Begangene Verbrechen (je Gesetz)
+        // Zählt die tatsächlich begangenen Verbrechen je Gesetz. Menschen füllen sie über ihre illegalen
+        // Aktionen; KI-Spieler zusätzlich durch die zufällige Straftatenermittlung zum Rundenende
+        // (RundenEndeManager.FuehreKiStraftatenDurch). Bei einer Gerichtsverhandlung werden sie herangezogen.
+
+        public int GetBegingVerbrechenX(int x)
+        {
+            return _begingVerbrechenX[x];
+        }
+
+        public void SetBegingVerbrechenX(int x, int y)
+        {
+            _begingVerbrechenX[x] = y;
+        }
+
+        public void ErhoeheGesetzXUmEins(int x)
+        {
+            _begingVerbrechenX[x]++;
+        }
+
+        public void HalbiereDelikte()
+        {
+            for (int i = 0; i < SW.Statisch.GetMaxGesetze(); i++)
+                _begingVerbrechenX[i] /= 2;
+        }
+
+        public int[] GetBegingVerbrechenX()
+        {
+            return _begingVerbrechenX;
+        }
+        #endregion
 
         public int GetAlter()
         {

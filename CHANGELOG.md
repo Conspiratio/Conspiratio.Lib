@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.63.0
+
+_31.07.2026_
+
+**[DE]**
+- Gerichtsverhandlung (Issue #18): KI-Spieler führen jetzt eine echte Straftaten-Verwaltung. Zum Rundenende begehen sie zufällige Delikte, deren Häufigkeit mit ihrer Bosheit steigt (`RundenEndeManager.FuehreKiStraftatenDurch`); die begangenen Verbrechen werden je Gesetz gespeichert (der Delikt-Speicher `begingVerbrechenX` wurde von `HumSpieler` in die Basisklasse `Spieler` gehoben, sodass ihn KI und Menschen teilen) und verblassen jährlich. Bei einer Anklage nutzt `GerichtsverhandlungManager.StarteVerhandlung` diese tatsächlich begangenen Delikte – für KI wie für Menschen gleichermaßen, statt sie für KI wie bisher zufällig zu würfeln; nach der Verhandlung sind sie gesühnt. Der Speicher ist additiv, sodass künftige real begangene illegale KI-Aktionen direkt hineinzählen.
+
+**[EN]**
+- Court trial (issue #18): AI players now keep a real record of their offences. At round end they commit random crimes whose frequency scales with their malice (`RundenEndeManager.FuehreKiStraftatenDurch`); the committed crimes are stored per law (the offence store `begingVerbrechenX` was moved from `HumSpieler` up into the base class `Spieler`, so AI and humans share it) and fade each year. When accused, `GerichtsverhandlungManager.StarteVerhandlung` uses these actually committed offences – for AI and humans alike, instead of rolling them randomly for AI as before; after the trial they are atoned. The store is additive so that future real illegal AI actions feed straight into it.
+
 ## 3.62.0
 
 _31.07.2026_
