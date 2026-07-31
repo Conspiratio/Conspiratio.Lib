@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.66.0
+
+_31.07.2026_
+
+**[DE]**
+- Gerichtsverhandlung (Issue #18): Bestechung mit zwei Töpfen (Richter und Zeugen). Ist der aktive Spieler Partei, kann er vor dem Urteil einen Betrag für die Richter einsetzen (`KannBestechen`, `GetRichterBestechungsOptionen`, `SetzeRichterBestechung`): Als Angeklagter besticht er auf Freispruch, als Kläger auf Verurteilung. Die Wirkung ist „ab Schwelle sicher" – erreicht der auf einen Richter entfallende Anteil dessen Schwelle (halbes Barvermögen, mind. 3000), stimmt der Richter sicher im Sinne des Bestechers, darunter nur anteilig (`BerechneKiUrteil`). Die Bestechungsstufen sind auf das Barvermögen des Spielers begrenzt und werden sofort abgebucht. Vor dem Urteil legt `WurdeBestochen`/`GetBestechungsOffenlegung` offen, dass Gelder geflossen sind. Der Zeugen-Topf (`GetZeugenBestechungsOptionen`, `SetzeZeugenBestechung`) ist bereits angelegt, bleibt aber wirkungslos, bis Schritt 5 echte Zeugen liefert (`GetZeugenAnzahl` noch 0).
+
+**[EN]**
+- Court trial (issue #18): bribery with two pots (judges and witnesses). If the active player is a party, they can put up an amount for the judges before the verdict (`KannBestechen`, `GetRichterBestechungsOptionen`, `SetzeRichterBestechung`): as the defendant they bribe for acquittal, as the plaintiff for conviction. The effect is "certain above a threshold" – if the share falling to a judge reaches that judge's threshold (half their cash, min 3000), the judge surely votes the briber's way, below it only proportionally (`BerechneKiUrteil`). The bribe tiers are capped by the player's cash and are debited immediately. Before the verdict `WurdeBestochen`/`GetBestechungsOffenlegung` disclose that money changed hands. The witness pot (`GetZeugenBestechungsOptionen`, `SetzeZeugenBestechung`) is already in place but stays ineffective until step 5 provides real witnesses (`GetZeugenAnzahl` still 0).
+
 ## 3.65.0
 
 _31.07.2026_

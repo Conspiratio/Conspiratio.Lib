@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 
+using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Einstellungen;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
@@ -22,12 +23,23 @@ namespace Conspiratio.Lib.Gameplay.Justiz
         // führen (2–3 Delikte ≈ 63–84 %, ein einzelnes ≈ 31 %, keine ≈ 5 %; siehe BerechneKiUrteil).
         private const int BeweisGewicht = 10;
 
+        // Bestechung (Issue #18): Um einen Richter (bzw. später Zeugen) sicher auf die Seite des Bestechers
+        // zu ziehen, muss der auf ihn entfallende Anteil seine Schwelle erreichen; darunter überzeugt die
+        // Bestechung nur anteilig. Als Schwelle dient sein halbes Barvermögen (mind. MinBestechungsSchwelle) –
+        // reiche Richter sind teurer zu kaufen.
+        private const double BestechungsSchwelleFaktor = 0.5;
+        private const int MinBestechungsSchwelle = 3000;
+
         private Gerichtsverhandlung _verhandlung;
         private int _summeVerbrechen;
         private int _deliktpunkte;
         private int _beweise;
         private int _aussageUrteilsBonus;
         private double _strafFaktor;
+        private int _bestechungRichter;
+        private int _bestechungZeugen;
+        private bool _aktivIstAngeklagter;
+        private bool _aktivIstKlaeger;
         private int[] _delikte;
         private readonly bool[] _schuldig = new bool[RichterAnzahl];
 
@@ -81,6 +93,10 @@ namespace Conspiratio.Lib.Gameplay.Justiz
             _deliktpunkte = angeklagter.GetDeliktpunkte();
             _aussageUrteilsBonus = 0;
             _strafFaktor = 1.0;
+            _bestechungRichter = 0;
+            _bestechungZeugen = 0;
+            _aktivIstAngeklagter = _verhandlung.GetAngeklagterID() == aktiverSpieler;
+            _aktivIstKlaeger = _verhandlung.GetKlaegerID() == aktiverSpieler;
             _delikte = new int[SW.Statisch.GetMaxGesetze()];
 
             // Vom (menschlichen) Kläger über seine Spione gegen den KI-Angeklagten gesammelte Beweise.
@@ -219,6 +235,97 @@ namespace Conspiratio.Lib.Gameplay.Justiz
         /// <summary>Stärke der vom Kläger gegen den Angeklagten gesammelten Beweise (0, wenn keine vorliegen).</summary>
         public int GetBeweise() => _beweise;
 
+        #region Bestechung (Issue #18)
+
+        /// <summary>Ob der aktive Spieler als Partei (Angeklagter oder Kläger) bestechen darf.</summary>
+        public bool KannBestechen() => _aktivIstAngeklagter || _aktivIstKlaeger;
+
+        /// <summary>Anzahl der aussagenden Zeugen. Noch 0 – echte Zeugen (mit Bestechungswirkung) folgen in Schritt 5.</summary>
+        public int GetZeugenAnzahl() => 0;
+
+        private int RichterSchwelle(int richterIndex)
+        {
+            int taler = SW.Dynamisch.GetSpWithID(_verhandlung.GetRichterXID(richterIndex)).GetTaler();
+            return Math.Max(MinBestechungsSchwelle, (int)(taler * BestechungsSchwelleFaktor));
+        }
+
+        /// <summary>Betrag, der alle drei Richter sicher überzeugt (Summe ihrer Einzelschwellen).</summary>
+        public int GetRichterBestechungSchwelleGesamt()
+        {
+            int summe = 0;
+
+            for (int i = 0; i < RichterAnzahl; i++)
+                summe += RichterSchwelle(i);
+
+            return summe;
+        }
+
+        /// <summary>
+        /// Die wählbaren Bestechungsstufen für die Richter, gestaffelt bis zum sicheren Betrag und auf das
+        /// Barvermögen des Spielers begrenzt (nur bezahlbare Stufen erscheinen). "Nicht bestechen" ist immer dabei.
+        /// </summary>
+        public List<BestechungOption> GetRichterBestechungsOptionen()
+        {
+            return ErzeugeBestechungsOptionen(GetRichterBestechungSchwelleGesamt());
+        }
+
+        /// <summary>
+        /// Summe der Zeugen-Einzelschwellen. Noch 0 – echte Zeugen (mit Bestechungswirkung) folgen in Schritt 5;
+        /// bis dahin bietet <see cref="GetZeugenBestechungsOptionen"/> nur die Nulloption an.
+        /// </summary>
+        public int GetZeugenBestechungSchwelleGesamt() => 0;
+
+        /// <summary>Die wählbaren Bestechungsstufen für die Zeugen (siehe <see cref="GetRichterBestechungsOptionen"/>).</summary>
+        public List<BestechungOption> GetZeugenBestechungsOptionen()
+        {
+            return ErzeugeBestechungsOptionen(GetZeugenBestechungSchwelleGesamt());
+        }
+
+        private List<BestechungOption> ErzeugeBestechungsOptionen(int sichererBetrag)
+        {
+            var optionen = new List<BestechungOption> { new BestechungOption("Nicht bestechen", 0) };
+            int taler = SW.Dynamisch.GetSpWithID(SW.Dynamisch.GetAktiverSpieler()).GetTaler();
+
+            AddBestechungsStufe(optionen, "Gering", (int)Math.Round(sichererBetrag * 0.35), taler);
+            AddBestechungsStufe(optionen, "Mittel", (int)Math.Round(sichererBetrag * 0.70), taler);
+            AddBestechungsStufe(optionen, "Hoch", sichererBetrag, taler);
+
+            return optionen;
+        }
+
+        private static void AddBestechungsStufe(List<BestechungOption> optionen, string name, int betrag, int taler)
+        {
+            if (betrag > 0 && betrag <= taler)
+                optionen.Add(new BestechungOption(name + " (" + betrag.ToStringGeld() + ")", betrag));
+        }
+
+        /// <summary>Bezahlt die Richter-Bestechung (Betrag wird sofort vom Spieler abgezogen, kein Rückgeld).</summary>
+        public void SetzeRichterBestechung(int betrag) => _bestechungRichter = ZieheBestechungAb(betrag);
+
+        /// <summary>Bezahlt die Zeugen-Bestechung (wirkt erst mit echten Zeugen, Schritt 5).</summary>
+        public void SetzeZeugenBestechung(int betrag) => _bestechungZeugen = ZieheBestechungAb(betrag);
+
+        private int ZieheBestechungAb(int betrag)
+        {
+            if (betrag <= 0)
+                return 0;
+
+            var spieler = SW.Dynamisch.GetSpWithID(SW.Dynamisch.GetAktiverSpieler());
+            betrag = Math.Min(betrag, spieler.GetTaler());
+            spieler.ErhoeheTaler(-betrag);
+
+            return betrag;
+        }
+
+        /// <summary>Ob in diesem Verfahren bestochen wurde (für die Offenlegung vor dem Urteil).</summary>
+        public bool WurdeBestochen() => _bestechungRichter > 0 || _bestechungZeugen > 0;
+
+        /// <summary>Die Offenlegung vor dem Urteil, dass in diesem Verfahren Bestechungsgelder geflossen sind.</summary>
+        public string GetBestechungsOffenlegung()
+            => "Hinter vorgehaltener Hand munkelt man, dass in diesem\nVerfahren Bestechungsgelder geflossen sind.";
+
+        #endregion
+
         public int GetRichterId(int i) => _verhandlung.GetRichterXID(i);
 
         public string GetRichterName(int i) => SW.Dynamisch.GetSpWithID(GetRichterId(i)).GetKompletterName();
@@ -252,7 +359,21 @@ namespace Conspiratio.Lib.Gameplay.Justiz
             // Rnd.Next verlangt eine positive Obergrenze; bei nicht-positiver Sympathie neigt der Richter zu "schuldig".
             int obergrenze = Math.Max(1, sympathie);
 
-            return !(SW.Statisch.Rnd.Next(0, obergrenze) > faktor);
+            bool schuldig = !(SW.Statisch.Rnd.Next(0, obergrenze) > faktor);
+
+            // Bestechung (Issue #18): Mit der Wahrscheinlichkeit Anteil/Schwelle stimmt der Richter im Sinne
+            // des Bestechers (ab der Schwelle sicher). Der Angeklagte besticht auf Freispruch, der Kläger auf
+            // Verurteilung. Die Bestechung überschreibt nur zugunsten des Bestechers – nie zu seinem Nachteil.
+            if (_bestechungRichter > 0)
+            {
+                int anteil = _bestechungRichter / RichterAnzahl;
+                double wahrscheinlichkeit = Math.Min(1.0, (double)anteil / RichterSchwelle(i));
+
+                if (SW.Statisch.Rnd.NextDouble() < wahrscheinlichkeit)
+                    return !_aktivIstAngeklagter;   // Angeklagter -> nicht schuldig (false), Kläger -> schuldig (true)
+            }
+
+            return schuldig;
         }
 
         /// <summary>Legt das Urteil des Richters i fest (true = schuldig).</summary>
@@ -358,6 +479,19 @@ namespace Conspiratio.Lib.Gameplay.Justiz
             Typ = typ;
             ButtonText = buttonText;
             Spruch = spruch;
+        }
+    }
+
+    /// <summary>Eine wählbare Bestechungsstufe mit Anzeigetext (inkl. Betrag) und dem Taler-Betrag.</summary>
+    public class BestechungOption
+    {
+        public string ButtonText { get; }
+        public int Betrag { get; }
+
+        public BestechungOption(string buttonText, int betrag)
+        {
+            ButtonText = buttonText;
+            Betrag = betrag;
         }
     }
 }
