@@ -19,6 +19,7 @@ namespace Conspiratio.Lib.Gameplay.Justiz
         private Gerichtsverhandlung _verhandlung;
         private int _summeVerbrechen;
         private int _deliktpunkte;
+        private int _beweise;
         private int[] _delikte;
         private readonly bool[] _schuldig = new bool[RichterAnzahl];
 
@@ -71,6 +72,16 @@ namespace Conspiratio.Lib.Gameplay.Justiz
             _summeVerbrechen = 0;
             _deliktpunkte = angeklagter.GetDeliktpunkte();
             _delikte = new int[SW.Statisch.GetMaxGesetze()];
+
+            // Vom (menschlichen) Kläger über seine Spione gegen den KI-Angeklagten gesammelte Beweise.
+            // Sie fließen in die Entscheidung der Richter ein (siehe BerechneKiUrteil).
+            _beweise = 0;
+            if (_verhandlung.GetAngeklagterID() >= SW.Statisch.GetMinKIID()
+                && _verhandlung.GetKlaegerID() < SW.Statisch.GetMinKIID())
+            {
+                _beweise = SW.Dynamisch.GetHumWithID(_verhandlung.GetKlaegerID())
+                    .GetAktiveSpionage(_verhandlung.GetAngeklagterID()).GetDelikte();
+            }
 
             if (_verhandlung.GetAngeklagterID() >= SW.Statisch.GetMinKIID())
             {
@@ -147,6 +158,9 @@ namespace Conspiratio.Lib.Gameplay.Justiz
                 : "Angeklagte: \"Nichts von all dem habe ich getan!\"";
         }
 
+        /// <summary>Stärke der vom Kläger gegen den Angeklagten gesammelten Beweise (0, wenn keine vorliegen).</summary>
+        public int GetBeweise() => _beweise;
+
         public int GetRichterId(int i) => _verhandlung.GetRichterXID(i);
 
         public string GetRichterName(int i) => SW.Dynamisch.GetSpWithID(GetRichterId(i)).GetKompletterName();
@@ -157,7 +171,10 @@ namespace Conspiratio.Lib.Gameplay.Justiz
         public bool BerechneKiUrteil(int i)
         {
             int sympathie = SW.Dynamisch.GetKIwithID(GetRichterId(i)).GetBeziehungZuKIX(_verhandlung.GetAngeklagterID());
-            int faktor = _summeVerbrechen;
+
+            // Neben der Schwere der tatsächlichen Verbrechen zählen die vom Kläger gesammelten Beweise:
+            // Je mehr Beweise vorliegen, desto eher entscheidet ein Richter auf "schuldig".
+            int faktor = _summeVerbrechen + _beweise;
 
             switch (SW.Dynamisch.Spielstand.Einstellungen.AggressivitaetKISpieler)
             {

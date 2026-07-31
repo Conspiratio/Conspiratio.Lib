@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.62.0
+
+_31.07.2026_
+
+**[DE]**
+- Gerichtsverhandlung (Issue #18): Klagt ein menschlicher Spieler einen KI-Spieler an, fließen jetzt die von seinen Spionen gesammelten Beweise in die Entscheidung der Richter ein – je mehr Beweise gegen den Angeklagten vorliegen, desto eher entscheiden die KI-Richter auf „schuldig" (`GerichtsverhandlungManager.BerechneKiUrteil` berücksichtigt neben der Schwere der Verbrechen nun auch die Beweisstärke; `StarteVerhandlung` ermittelt sie aus den Spionage-Delikten des Klägers gegen den Angeklagten, abrufbar über `GetBeweise`).
+
+**[EN]**
+- Court trial (issue #18): when a human player accuses an AI player, the evidence gathered by their spies now feeds into the judges' decision – the more evidence against the defendant, the more likely the AI judges decide "guilty" (`GerichtsverhandlungManager.BerechneKiUrteil` now considers the strength of the evidence in addition to the severity of the crimes; `StarteVerhandlung` derives it from the plaintiff's espionage offences against the defendant, retrievable via `GetBeweise`).
+
 ## 3.61.0
 
 _30.07.2026_
