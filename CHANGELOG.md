@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.64.0
+
+_31.07.2026_
+
+**[DE]**
+- Gerichtsverhandlung (Issue #18): Ist der Spieler selbst angeklagt, kann er nun eine Aussage wählen (`GetAussageOptionen`, `SetzeAussage`): Leugnen, empört leugnen, Teilgeständnis oder Geständnis. Die Wirkung ist gestaffelt und hängt von der Beweislage ab: Ein Geständnis führt eher zur Verurteilung, senkt aber die Strafe deutlich; ein Teilgeständnis mildert moderat. Leugnen hilft nur bei schwacher Beweislage und ist bei starker wirkungslos; empörtes Leugnen hilft bei schwacher Lage stärker, schlägt bei starker Lage aber ins Gegenteil um (härtere Strafe). `BerechneKiUrteil` berücksichtigt den Aussage-Bonus, die Auswertung skaliert das Strafmaß mit dem Aussage-Faktor. `IstAngeklagterAktiverSpieler` sagt dem Client, wann die Auswahl anzubieten ist.
+
+**[EN]**
+- Court trial (issue #18): if the player themselves is the defendant, they can now choose a statement (`GetAussageOptionen`, `SetzeAussage`): deny, indignantly deny, partial confession or full confession. The effect is graduated and depends on the strength of the case: a confession makes conviction more likely but noticeably lowers the penalty; a partial confession mitigates moderately. Denial only helps with a weak case and is ineffective with a strong one; indignant denial helps more with a weak case but backfires with a strong one (harsher penalty). `BerechneKiUrteil` factors in the statement bonus, the evaluation scales the penalty by the statement factor. `IstAngeklagterAktiverSpieler` tells the client when to offer the choice.
+
 ## 3.63.1
 
 _31.07.2026_
