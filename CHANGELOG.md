@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.67.0
+
+_31.07.2026_
+
+**[DE]**
+- Gerichtsverhandlung (Issue #18): Echte Zeugen. In jeder Verhandlung sagen bis zu zwei KI-Zeugen (weder Partei noch Richter) aus. Ob ein Zeuge für oder gegen den Angeklagten aussagt, ergibt sich aus seinem Verhältnis: Steht er dem Angeklagten näher als dem Kläger, spricht er für ihn, sonst gegen ihn – bei großem Beziehungsunterschied überzeugend, sonst schwach. Die Aussagen fließen als `_zeugenBonus` in das Urteil ein (`BerechneKiUrteil`). Der in 3.66.0 angelegte Zeugen-Topf wirkt nun: Eine Zeugen-Bestechung zieht einen Zeugen (ab Schwelle sicher) auf die Seite des Bestechers und lässt ihn überzeugend auftreten. `GetZeugenAnzahl`, `ErmittleZeugenAussagen` (nach der Bestechung aufzurufen) und die neue Klasse `ZeugenAussage` liefern dem Client die Aussagetexte.
+
+**[EN]**
+- Court trial (issue #18): real witnesses. In every trial up to two AI witnesses (neither a party nor a judge) testify. Whether a witness testifies for or against the defendant follows from their relationship: if they are closer to the defendant than to the plaintiff they speak for them, otherwise against – convincingly when the relationship gap is large, weakly otherwise. The testimonies feed into the verdict as `_zeugenBonus` (`BerechneKiUrteil`). The witness pot introduced in 3.66.0 now takes effect: bribing a witness pulls them (certain above a threshold) to the briber's side and makes them testify convincingly. `GetZeugenAnzahl`, `ErmittleZeugenAussagen` (to be called after the bribery) and the new `ZeugenAussage` class provide the testimony texts to the client.
+
 ## 3.66.0
 
 _31.07.2026_

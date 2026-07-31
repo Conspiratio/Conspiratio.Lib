@@ -30,6 +30,14 @@ namespace Conspiratio.Lib.Gameplay.Justiz
         private const double BestechungsSchwelleFaktor = 0.5;
         private const int MinBestechungsSchwelle = 3000;
 
+        // Zeugen (Issue #18): Anzahl der geladenen Zeugen und ihr Gewicht im Urteilsfaktor. Ein Zeuge sagt
+        // je nach Verhältnis zu Angeklagtem und Kläger für oder gegen den Angeklagten aus – überzeugend (großer
+        // Beziehungsunterschied) oder schwach; Bestechung zieht ihn auf die Seite des Bestechers.
+        private const int ZeugenAnzahlMax = 2;
+        private const int ZeugeUeberzeugend = 8;
+        private const int ZeugeSchwach = 4;
+        private const int ZeugeUeberzeugungsGrenze = 20;
+
         private Gerichtsverhandlung _verhandlung;
         private int _summeVerbrechen;
         private int _deliktpunkte;
@@ -40,6 +48,8 @@ namespace Conspiratio.Lib.Gameplay.Justiz
         private int _bestechungZeugen;
         private bool _aktivIstAngeklagter;
         private bool _aktivIstKlaeger;
+        private List<int> _zeugen = new List<int>();
+        private int _zeugenBonus;
         private int[] _delikte;
         private readonly bool[] _schuldig = new bool[RichterAnzahl];
 
@@ -97,6 +107,8 @@ namespace Conspiratio.Lib.Gameplay.Justiz
             _bestechungZeugen = 0;
             _aktivIstAngeklagter = _verhandlung.GetAngeklagterID() == aktiverSpieler;
             _aktivIstKlaeger = _verhandlung.GetKlaegerID() == aktiverSpieler;
+            _zeugenBonus = 0;
+            WaehleZeugen();
             _delikte = new int[SW.Statisch.GetMaxGesetze()];
 
             // Vom (menschlichen) Kläger über seine Spione gegen den KI-Angeklagten gesammelte Beweise.
@@ -240,8 +252,8 @@ namespace Conspiratio.Lib.Gameplay.Justiz
         /// <summary>Ob der aktive Spieler als Partei (Angeklagter oder Kläger) bestechen darf.</summary>
         public bool KannBestechen() => _aktivIstAngeklagter || _aktivIstKlaeger;
 
-        /// <summary>Anzahl der aussagenden Zeugen. Noch 0 – echte Zeugen (mit Bestechungswirkung) folgen in Schritt 5.</summary>
-        public int GetZeugenAnzahl() => 0;
+        /// <summary>Anzahl der in dieser Verhandlung aussagenden Zeugen.</summary>
+        public int GetZeugenAnzahl() => _zeugen.Count;
 
         private int RichterSchwelle(int richterIndex)
         {
@@ -269,11 +281,22 @@ namespace Conspiratio.Lib.Gameplay.Justiz
             return ErzeugeBestechungsOptionen(GetRichterBestechungSchwelleGesamt());
         }
 
-        /// <summary>
-        /// Summe der Zeugen-Einzelschwellen. Noch 0 – echte Zeugen (mit Bestechungswirkung) folgen in Schritt 5;
-        /// bis dahin bietet <see cref="GetZeugenBestechungsOptionen"/> nur die Nulloption an.
-        /// </summary>
-        public int GetZeugenBestechungSchwelleGesamt() => 0;
+        private int ZeugeSchwelle(int zeugeIndex)
+        {
+            int taler = SW.Dynamisch.GetKIwithID(_zeugen[zeugeIndex]).GetTaler();
+            return Math.Max(MinBestechungsSchwelle, (int)(taler * BestechungsSchwelleFaktor));
+        }
+
+        /// <summary>Betrag, der alle Zeugen sicher überzeugt (Summe ihrer Einzelschwellen).</summary>
+        public int GetZeugenBestechungSchwelleGesamt()
+        {
+            int summe = 0;
+
+            for (int i = 0; i < _zeugen.Count; i++)
+                summe += ZeugeSchwelle(i);
+
+            return summe;
+        }
 
         /// <summary>Die wählbaren Bestechungsstufen für die Zeugen (siehe <see cref="GetRichterBestechungsOptionen"/>).</summary>
         public List<BestechungOption> GetZeugenBestechungsOptionen()
@@ -302,7 +325,7 @@ namespace Conspiratio.Lib.Gameplay.Justiz
         /// <summary>Bezahlt die Richter-Bestechung (Betrag wird sofort vom Spieler abgezogen, kein Rückgeld).</summary>
         public void SetzeRichterBestechung(int betrag) => _bestechungRichter = ZieheBestechungAb(betrag);
 
-        /// <summary>Bezahlt die Zeugen-Bestechung (wirkt erst mit echten Zeugen, Schritt 5).</summary>
+        /// <summary>Bezahlt die Zeugen-Bestechung (Betrag wird sofort vom Spieler abgezogen, kein Rückgeld).</summary>
         public void SetzeZeugenBestechung(int betrag) => _bestechungZeugen = ZieheBestechungAb(betrag);
 
         private int ZieheBestechungAb(int betrag)
@@ -326,6 +349,95 @@ namespace Conspiratio.Lib.Gameplay.Justiz
 
         #endregion
 
+        #region Zeugen (Issue #18)
+
+        /// <summary>Wählt bis zu <see cref="ZeugenAnzahlMax"/> KI-Zeugen aus (weder Partei noch Richter).</summary>
+        private void WaehleZeugen()
+        {
+            _zeugen = new List<int>();
+
+            for (int id = SW.Statisch.GetMinKIID(); id < SW.Statisch.GetMaxKIID() && _zeugen.Count < ZeugenAnzahlMax; id++)
+            {
+                if (id == _verhandlung.GetAngeklagterID() || id == _verhandlung.GetKlaegerID())
+                    continue;
+
+                if (id == _verhandlung.GetRichterXID(0) || id == _verhandlung.GetRichterXID(1) || id == _verhandlung.GetRichterXID(2))
+                    continue;
+
+                if (SW.Dynamisch.GetKIwithID(id) == null)
+                    continue;
+
+                _zeugen.Add(id);
+            }
+        }
+
+        /// <summary>
+        /// Ermittelt die Aussagen aller Zeugen und legt damit ihren Beitrag zum Urteil (<c>_zeugenBonus</c>) fest:
+        /// Jeder Zeuge sagt je nach Verhältnis für den (ihm näheren) Angeklagten oder gegen ihn aus – überzeugend
+        /// bei großem Beziehungsunterschied, sonst schwach. Eine Bestechung zieht ihn (ab Schwelle sicher) auf die
+        /// Seite des Bestechers und lässt ihn überzeugend auftreten. Muss nach der Bestechung aufgerufen werden.
+        /// </summary>
+        public List<ZeugenAussage> ErmittleZeugenAussagen()
+        {
+            var aussagen = new List<ZeugenAussage>();
+            bool maennlich = SW.Dynamisch.GetSpWithID(_verhandlung.GetAngeklagterID()).GetMaennlich();
+
+            _zeugenBonus = 0;
+
+            for (int i = 0; i < _zeugen.Count; i++)
+            {
+                var zeuge = SW.Dynamisch.GetKIwithID(_zeugen[i]);
+
+                int zuAngeklagter = zeuge.GetBeziehungZuKIX(_verhandlung.GetAngeklagterID());
+                int zuKlaeger = zeuge.GetBeziehungZuKIX(_verhandlung.GetKlaegerID());
+                int differenz = zuAngeklagter - zuKlaeger;
+
+                bool fuerAngeklagten = differenz >= 0;
+                bool ueberzeugend = Math.Abs(differenz) >= ZeugeUeberzeugungsGrenze;
+
+                // Bestechung zieht den Zeugen auf die Seite des Bestechers (ab Schwelle sicher).
+                if (_bestechungZeugen > 0)
+                {
+                    int anteil = _bestechungZeugen / _zeugen.Count;
+                    double wahrscheinlichkeit = Math.Min(1.0, (double)anteil / ZeugeSchwelle(i));
+
+                    if (SW.Statisch.Rnd.NextDouble() < wahrscheinlichkeit)
+                    {
+                        fuerAngeklagten = _aktivIstAngeklagter;   // Bestecher-Seite
+                        ueberzeugend = true;
+                    }
+                }
+
+                int staerke = ueberzeugend ? ZeugeUeberzeugend : ZeugeSchwach;
+                _zeugenBonus += fuerAngeklagten ? -staerke : staerke;   // für Angeklagten -> weniger schuldig
+
+                aussagen.Add(new ZeugenAussage(ZeugenText(zeuge.GetKompletterName(), fuerAngeklagten, ueberzeugend, maennlich)));
+            }
+
+            return aussagen;
+        }
+
+        private static string ZeugenText(string name, bool fuerAngeklagten, bool ueberzeugend, bool maennlich)
+        {
+            if (fuerAngeklagten)
+            {
+                string desAngeklagten = maennlich ? "des Angeklagten" : "der Angeklagten";
+
+                return ueberzeugend
+                    ? name + "\nbeteuert mit Nachdruck die Unschuld " + desAngeklagten + "."
+                    : name + "\nspricht zögerlich zugunsten " + desAngeklagten + ".";
+            }
+
+            string denAngeklagten = maennlich ? "den Angeklagten" : "die Angeklagte";
+            string demAngeklagten = maennlich ? "dem Angeklagten" : "der Angeklagten";
+
+            return ueberzeugend
+                ? name + "\nbelastet " + denAngeklagten + " mit einer schweren Aussage."
+                : name + "\näußert vage Zweifel an " + demAngeklagten + ".";
+        }
+
+        #endregion
+
         public int GetRichterId(int i) => _verhandlung.GetRichterXID(i);
 
         public string GetRichterName(int i) => SW.Dynamisch.GetSpWithID(GetRichterId(i)).GetKompletterName();
@@ -341,7 +453,7 @@ namespace Conspiratio.Lib.Gameplay.Justiz
             // (mehr Beweise -> eher "schuldig") sowie die Aussage des Angeklagten (Geständnis erhöht,
             // Leugnen senkt die Verurteilungsneigung – siehe SetzeAussage). Jedes Beweisstück wird mit
             // BeweisGewicht gewichtet, damit echte Beweise im Schnitt zur Verurteilung führen.
-            int faktor = (_summeVerbrechen + _beweise) * BeweisGewicht + _aussageUrteilsBonus;
+            int faktor = (_summeVerbrechen + _beweise) * BeweisGewicht + _aussageUrteilsBonus + _zeugenBonus;
 
             switch (SW.Dynamisch.Spielstand.Einstellungen.AggressivitaetKISpieler)
             {
@@ -492,6 +604,17 @@ namespace Conspiratio.Lib.Gameplay.Justiz
         {
             ButtonText = buttonText;
             Betrag = betrag;
+        }
+    }
+
+    /// <summary>Die vor Gericht vorgetragene Aussage eines Zeugen (fertig formulierter Anzeigetext).</summary>
+    public class ZeugenAussage
+    {
+        public string Text { get; }
+
+        public ZeugenAussage(string text)
+        {
+            Text = text;
         }
     }
 }
