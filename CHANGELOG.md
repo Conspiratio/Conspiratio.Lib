@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.63.1
+
+_31.07.2026_
+
+**[DE]**
+- Fehlerbehebung: `RundenEndeManager.FuehreKiStraftatenDurch` konnte zum Rundenende mit einer `NullReferenceException` in `Spieler.HalbiereDelikte` abstürzen (das Jahr blieb dann stehen, keine Spielerankündigung). Ursache war der in 3.63.0 in die Basisklasse gehobene Delikt-Speicher, der bei per Deserialisierung geladenen Spielern (der Konstruktor wird dabei umgangen) noch `null` war. Der Zugriff legt das Feld jetzt bei Bedarf sicher an (Lazy-Init).
+
+**[EN]**
+- Bugfix: `RundenEndeManager.FuehreKiStraftatenDurch` could crash at round end with a `NullReferenceException` in `Spieler.HalbiereDelikte` (the year then stopped advancing and no player announcement appeared). The cause was the offence store moved into the base class in 3.63.0, which was still `null` for players loaded via deserialization (which bypasses the constructor). Access now creates the field safely on demand (lazy init).
+
 ## 3.63.0
 
 _31.07.2026_

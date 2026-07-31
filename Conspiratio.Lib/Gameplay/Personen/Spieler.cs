@@ -217,30 +217,45 @@ namespace Conspiratio.Lib.Gameplay.Personen
         // Aktionen; KI-Spieler zusätzlich durch die zufällige Straftatenermittlung zum Rundenende
         // (RundenEndeManager.FuehreKiStraftatenDurch). Bei einer Gerichtsverhandlung werden sie herangezogen.
 
+        /// <summary>
+        /// Liefert den Delikt-Speicher und legt ihn bei Bedarf an. Das ist nötig, weil die feldbasierte
+        /// Deserialisierung den Konstruktor umgeht und ältere Spielstände das Feld noch nicht enthalten –
+        /// dort wäre es sonst null.
+        /// </summary>
+        private int[] BegingVerbrechenSicher()
+        {
+            if (_begingVerbrechenX == null)
+                _begingVerbrechenX = new int[SW.Statisch.GetMaxGesetze()];
+
+            return _begingVerbrechenX;
+        }
+
         public int GetBegingVerbrechenX(int x)
         {
-            return _begingVerbrechenX[x];
+            return BegingVerbrechenSicher()[x];
         }
 
         public void SetBegingVerbrechenX(int x, int y)
         {
-            _begingVerbrechenX[x] = y;
+            BegingVerbrechenSicher()[x] = y;
         }
 
         public void ErhoeheGesetzXUmEins(int x)
         {
-            _begingVerbrechenX[x]++;
+            BegingVerbrechenSicher()[x]++;
         }
 
         public void HalbiereDelikte()
         {
+            int[] delikte = BegingVerbrechenSicher();
+
             for (int i = 0; i < SW.Statisch.GetMaxGesetze(); i++)
-                _begingVerbrechenX[i] /= 2;
+                delikte[i] /= 2;
         }
 
         public int[] GetBegingVerbrechenX()
         {
-            return _begingVerbrechenX;
+            return BegingVerbrechenSicher();
         }
         #endregion
 
