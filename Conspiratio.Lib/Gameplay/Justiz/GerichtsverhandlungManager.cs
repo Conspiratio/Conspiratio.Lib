@@ -38,6 +38,14 @@ namespace Conspiratio.Lib.Gameplay.Justiz
         private const int ZeugeSchwach = 4;
         private const int ZeugeUeberzeugungsGrenze = 20;
 
+        // Plädoyers (Issue #18): Das Anklageplädoyer stellt die Beweislast dar (nur Text), das
+        // Verteidigungsplädoyer gewichtet das Ansehen des Angeklagten – hohes Ansehen zieht die Richter
+        // etwas Richtung Freispruch (_plaedoyerBonus, negativ = weniger schuldig).
+        private const int AnsehenHoch = 80;
+        private const int AnsehenMittel = 30;
+        private const int PlaedoyerBonusHoch = -6;
+        private const int PlaedoyerBonusMittel = -3;
+
         private Gerichtsverhandlung _verhandlung;
         private int _summeVerbrechen;
         private int _deliktpunkte;
@@ -50,6 +58,7 @@ namespace Conspiratio.Lib.Gameplay.Justiz
         private bool _aktivIstKlaeger;
         private List<int> _zeugen = new List<int>();
         private int _zeugenBonus;
+        private int _plaedoyerBonus;
         private int[] _delikte;
         private readonly bool[] _schuldig = new bool[RichterAnzahl];
 
@@ -109,6 +118,11 @@ namespace Conspiratio.Lib.Gameplay.Justiz
             _aktivIstKlaeger = _verhandlung.GetKlaegerID() == aktiverSpieler;
             _zeugenBonus = 0;
             WaehleZeugen();
+
+            // Verteidigungsplädoyer: hohes Ansehen des Angeklagten zieht die Richter Richtung Freispruch.
+            int ansehen = angeklagter.GetAnsehen();
+            _plaedoyerBonus = ansehen >= AnsehenHoch ? PlaedoyerBonusHoch : ansehen >= AnsehenMittel ? PlaedoyerBonusMittel : 0;
+
             _delikte = new int[SW.Statisch.GetMaxGesetze()];
 
             // Vom (menschlichen) Kläger über seine Spione gegen den KI-Angeklagten gesammelte Beweise.
@@ -489,6 +503,56 @@ namespace Conspiratio.Lib.Gameplay.Justiz
 
         #endregion
 
+        #region Plädoyers (Issue #18)
+
+        /// <summary>
+        /// Das Schlussplädoyer der Anklage. Der Ton richtet sich nach der Beweislast (tatsächliche Delikte
+        /// plus gesammelte Beweise): von erdrückend über deutlich und dünn bis haltlos. Reine Darstellung.
+        /// </summary>
+        public string GetAnklageplaedoyer()
+        {
+            int staerke = _summeVerbrechen + _beweise;
+
+            if (staerke >= 5)
+                return "Der Ankläger erhebt sich:\n\"Die Beweise sind erdrückend! Solches Treiben\nschreit zum Himmel und verlangt eine harte Strafe!\"";
+
+            if (staerke >= 2)
+                return "Der Ankläger führt aus:\n\"Die Vorwürfe wiegen schwer, und die Indizien\nsprechen eine deutliche Sprache.\"";
+
+            if (staerke >= 1)
+                return "Der Ankläger mahnt:\n\"Auch wenn die Beweislage dünn ist, darf ein\nsolcher Verdacht nicht ungeprüft bleiben.\"";
+
+            return "Der Ankläger windet sich:\n\"Handfeste Beweise fehlen wohl, doch mein\nGefühl trügt mich nur selten...\"";
+        }
+
+        /// <summary>
+        /// Das Schlussplädoyer der Verteidigung. Der Ton richtet sich nach dem Ansehen des Angeklagten;
+        /// ein hohes Ansehen wurde beim Start der Verhandlung bereits als <c>_plaedoyerBonus</c> zugunsten
+        /// des Angeklagten verbucht (siehe StarteVerhandlung).
+        /// </summary>
+        public string GetVerteidigungsplaedoyer()
+        {
+            var angeklagter = SW.Dynamisch.GetSpWithID(_verhandlung.GetAngeklagterID());
+            bool maennlich = angeklagter.GetMaennlich();
+            int ansehen = angeklagter.GetAnsehen();
+
+            string meinMandant = maennlich ? "meines Mandanten" : "meiner Mandantin";
+            string derMandant = maennlich ? "Mein Mandant" : "Meine Mandantin";
+
+            if (ansehen >= AnsehenHoch)
+                return "Der Verteidiger erhebt die Stimme:\n\"Seht das makellose Ansehen " + meinMandant + "!\nWer solchen Leumund genießt, tut derlei nicht.\"";
+
+            if (ansehen >= AnsehenMittel)
+            {
+                string geachtet = maennlich ? "ein geachteter Bürger" : "eine geachtete Bürgerin";
+                return "Der Verteidiger bittet:\n\"" + derMandant + " ist " + geachtet + " –\ngebt dem guten Ruf das gebührende Gewicht.\"";
+            }
+
+            return "Der Verteidiger beteuert:\n\"" + derMandant + " beteuert die Unschuld.\nVerurteilt nicht auf bloßen Verdacht hin.\"";
+        }
+
+        #endregion
+
         public int GetRichterId(int i) => _verhandlung.GetRichterXID(i);
 
         public string GetRichterName(int i) => SW.Dynamisch.GetSpWithID(GetRichterId(i)).GetKompletterName();
@@ -504,7 +568,7 @@ namespace Conspiratio.Lib.Gameplay.Justiz
             // (mehr Beweise -> eher "schuldig") sowie die Aussage des Angeklagten (Geständnis erhöht,
             // Leugnen senkt die Verurteilungsneigung – siehe SetzeAussage). Jedes Beweisstück wird mit
             // BeweisGewicht gewichtet, damit echte Beweise im Schnitt zur Verurteilung führen.
-            int faktor = (_summeVerbrechen + _beweise) * BeweisGewicht + _aussageUrteilsBonus + _zeugenBonus;
+            int faktor = (_summeVerbrechen + _beweise) * BeweisGewicht + _aussageUrteilsBonus + _zeugenBonus + _plaedoyerBonus;
 
             switch (SW.Dynamisch.Spielstand.Einstellungen.AggressivitaetKISpieler)
             {

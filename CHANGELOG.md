@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.68.0
+
+_01.08.2026_
+
+**[DE]**
+- Gerichtsverhandlung (Issue #18): Variable Plädoyers von Anklage und Verteidigung (`GetAnklageplaedoyer`, `GetVerteidigungsplaedoyer`). Das Anklageplädoyer richtet sich im Ton nach der Beweislast (tatsächliche Delikte plus gesammelte Beweise): von haltlos über dünn und deutlich bis erdrückend. Das Verteidigungsplädoyer richtet sich nach dem Ansehen des Angeklagten; ein hohes Ansehen zieht die Richter zudem etwas Richtung Freispruch (in `StarteVerhandlung` als `_plaedoyerBonus` verbucht, fließt in `BerechneKiUrteil` ein: Ansehen ≥ 80 → −6, ≥ 30 → −3). Damit ist die Erweiterung der Gerichtsverhandlung (Issue #18) vollständig.
+
+**[EN]**
+- Court trial (issue #18): variable pleas by the prosecution and the defence (`GetAnklageplaedoyer`, `GetVerteidigungsplaedoyer`). The prosecution's plea varies in tone with the strength of the case (actual offences plus collected evidence): from baseless through thin and clear to overwhelming. The defence's plea varies with the defendant's reputation (Ansehen); a high reputation also nudges the judges towards acquittal (recorded in `StarteVerhandlung` as `_plaedoyerBonus`, applied in `BerechneKiUrteil`: reputation ≥ 80 → −6, ≥ 30 → −3). This completes the court-trial extension (issue #18).
+
 ## 3.67.2
 
 _01.08.2026_
