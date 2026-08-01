@@ -74,17 +74,34 @@ namespace Conspiratio.Lib.Allgemein
     }
 
     /// <summary>
-    /// Erlaubt beim Laden von Spielständen nur Typen aus der Conspiratio.Lib — Spielstände sind
+    /// Erlaubt beim Laden von Spielständen nur Typen aus der Conspiratio.Lib-Assembly — Spielstände sind
     /// von Hand editierbare JSON-Dateien und dürfen keine fremden Typen instanziieren können.
     /// </summary>
     internal sealed class SpielstandJsonTypBinder : ISerializationBinder
     {
         public Type BindToType(string assemblyName, string typeName)
         {
-            if (!typeName.StartsWith("Conspiratio.Lib.", StringComparison.Ordinal))
+            var assembly = typeof(SpeicherManager).Assembly;
+
+            // Direkt in der Lib-Assembly auflösen. Deckt sowohl die "Conspiratio.Lib.*"-Typen ab als auch
+            // jene, die aus Kompatibilitätsgründen bewusst im alten Namespace "Conspiratio.Kampf" verblieben
+            // sind (z. B. die Stützpunkt-Einheiten wie ZollSoeldner) und deren Namen so im Spielstand steht.
+            var typ = assembly.GetType(typeName, false);
+
+            // Sonst über die Tabelle den aktuellen Namen ermitteln (für tatsächlich umbenannte/verschobene
+            // Typen aus sehr alten Spielständen, z. B. "Conspiratio.Spieler").
+            if (typ == null && SpielstandDeserializationBinder.TypeMappings.TryGetValue(typeName, out string neuerTypname))
+                typ = assembly.GetType(neuerTypname, false);
+
+            if (typ == null)
+                throw new SerializationException($"Unbekannter Typ im Spielstand: {typeName}");
+
+            // Sicherheit: nur die eigenen Spieltypen zulassen (die Auflösung ist ohnehin auf die
+            // Conspiratio.Lib-Assembly beschränkt, dieser Prüfschritt schließt fremde Namespaces zusätzlich aus).
+            if (typ.FullName == null || !typ.FullName.StartsWith("Conspiratio.", StringComparison.Ordinal))
                 throw new SerializationException($"Unerlaubter Typ im Spielstand: {typeName}");
 
-            return typeof(SpeicherManager).Assembly.GetType(typeName, true);
+            return typ;
         }
 
         public void BindToName(Type serializedType, out string assemblyName, out string typeName)

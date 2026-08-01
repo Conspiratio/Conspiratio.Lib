@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.67.2
+
+_01.08.2026_
+
+**[DE]**
+- Fehlerbehebung: Spielstände mit Stützpunkt-Einheiten (z. B. `ZollSoeldner`, `RaubRaeuber`) ließen sich nicht mehr laden („Error resolving type specified in JSON 'Conspiratio.Kampf.ZollSoeldner'"). Diese Einheiten-Typen liegen aus Kompatibilitätsgründen bewusst noch im alten Namespace `Conspiratio.Kampf`; der JSON-Typ-Binder ließ beim Laden aber nur `Conspiratio.Lib.*`-Typen zu und wies sie ab. Der Binder löst Typen jetzt direkt in der Conspiratio.Lib-Assembly auf (deckt den Kompatibilitäts-Namespace mit ab) und nutzt die Übersetzungstabelle nur noch als Fallback für tatsächlich umbenannte Typen. Die Sicherheitsprüfung (nur eigene Spieltypen) bleibt bestehen.
+
+**[EN]**
+- Bugfix: savegames containing base units (e.g. `ZollSoeldner`, `RaubRaeuber`) could no longer be loaded ("Error resolving type specified in JSON 'Conspiratio.Kampf.ZollSoeldner'"). For compatibility these unit types deliberately remain in the old `Conspiratio.Kampf` namespace; the JSON type binder only allowed `Conspiratio.Lib.*` types on load and rejected them. The binder now resolves types directly in the Conspiratio.Lib assembly (which also covers the compatibility namespace) and only uses the translation table as a fallback for genuinely renamed types. The safety check (only the game's own types) remains in place.
+
 ## 3.67.1
 
 _31.07.2026_
