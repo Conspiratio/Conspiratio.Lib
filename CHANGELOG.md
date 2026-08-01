@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.69.0
+
+_01.08.2026_
+
+**[DE]**
+- Ämter: Neue Methode `AemterManager.GetFreieAemterAnkuendigung()` liefert die zu Zugbeginn neu zu besetzenden Ämter des aktiven Spielers als fertigen Ankündigungstext (mit Ort je Amt) bzw. `null`, wenn es keine für ihn bewerbbaren freien Ämter gibt. Grundlage sind die bereits vorhandenen Bewerbungsangebote.
+
+**[EN]**
+- Offices: new method `AemterManager.GetFreieAemterAnkuendigung()` returns the offices to be newly filled at the start of the active player's turn as a ready-made announcement text (with the location per office), or `null` if there are no vacant offices they could apply for. It is based on the existing application offers.
+
 ## 3.68.1
 
 _01.08.2026_

@@ -55,6 +55,29 @@ namespace Conspiratio.Lib.Allgemein
         }
 
         /// <summary>
+        /// Die Ankündigung der zu Zugbeginn neu zu besetzenden Ämter für den aktiven Spieler (wie im
+        /// Original). Liefert <c>null</c>, wenn es aktuell keine freien Ämter gibt, auf die er sich
+        /// bewerben könnte. Die Ämter werden mit ihrem Ort aufgelistet.
+        /// </summary>
+        [PublicAPI]
+        public string GetFreieAemterAnkuendigung()
+        {
+            var angebote = GetBewerbungsangebote();
+
+            if (angebote.Count == 0)
+                return null;
+
+            string text = "Folgende Ämter sind neu zu besetzen:\n";
+
+            foreach (var angebot in angebote)
+                text += "\n" + angebot.AmtName + " in " + angebot.GebietName;
+
+            text += "\n\nBewerbt Euch in der Schreibstube um ein Amt.";
+
+            return text;
+        }
+
+        /// <summary>
         /// Meldet den aktiven Spieler für die angegebene Wahl an oder – falls er dort bereits aufgestellt ist –
         /// wieder ab. Ein Spieler kann sich für mehrere freie Ämter gleichzeitig bewerben; gewinnt er später
         /// eines, werden seine übrigen Bewerbungen automatisch zurückgezogen (siehe <see cref="VergebeAmt"/>).
