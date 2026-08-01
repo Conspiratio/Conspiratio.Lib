@@ -417,23 +417,74 @@ namespace Conspiratio.Lib.Gameplay.Justiz
             return aussagen;
         }
 
+        // Gesprochene Zeugen-Zitate für etwas Atmosphäre, je nach Richtung und Überzeugungskraft. Platzhalter
+        // {er}/{ihn}/{ihm} werden je nach Geschlecht des Angeklagten ersetzt (siehe FuellePronomen).
+        private static readonly string[] ZitateFuerUeberzeugend =
+        {
+            "Ich schwöre, dass {er} nicht {der_taeter} ist!",
+            "Zur fraglichen Zeit war {er} nachweislich bei mir.",
+            "Einen ehrbareren Menschen gibt es in der ganzen Stadt nicht!",
+            "Diese Anschuldigungen sind frei erfunden, das sage ich Euch!"
+        };
+
+        private static readonly string[] ZitateFuerSchwach =
+        {
+            "Ich… ich glaube kaum, dass {er} so etwas täte.",
+            "Mir schien {er} stets rechtschaffen, doch wer weiß…",
+            "So recht vorstellen kann ich mir die Tat bei {ihm} nicht."
+        };
+
+        private static readonly string[] ZitateGegenUeberzeugend =
+        {
+            "Ich habe {ihn} genau gesehen!",
+            "Mit eigenen Augen sah ich die Tat geschehen!",
+            "Ein reines Gewissen hat {er} gewiss nicht, das sieht man {ihm} an!"
+        };
+
+        private static readonly string[] ZitateGegenSchwach =
+        {
+            "Ja, und mit einer schwarzen Katze habe ich {ihn} auch schon gesehen!",
+            "Ganz geheuer war {er} mir noch nie…",
+            "Man munkelt so einiges über {ihn}."
+        };
+
         private static string ZeugenText(string name, bool fuerAngeklagten, bool ueberzeugend, bool maennlich)
         {
+            string aussage;
+            string[] zitate;
+
             if (fuerAngeklagten)
             {
                 string desAngeklagten = maennlich ? "des Angeklagten" : "der Angeklagten";
 
-                return ueberzeugend
-                    ? name + "\nbeteuert mit Nachdruck die Unschuld " + desAngeklagten + "."
-                    : name + "\nspricht zögerlich zugunsten " + desAngeklagten + ".";
+                aussage = ueberzeugend
+                    ? "beteuert mit Nachdruck die Unschuld " + desAngeklagten + "."
+                    : "spricht zögerlich zugunsten " + desAngeklagten + ".";
+                zitate = ueberzeugend ? ZitateFuerUeberzeugend : ZitateFuerSchwach;
+            }
+            else
+            {
+                string denAngeklagten = maennlich ? "den Angeklagten" : "die Angeklagte";
+                string demAngeklagten = maennlich ? "dem Angeklagten" : "der Angeklagten";
+
+                aussage = ueberzeugend
+                    ? "belastet " + denAngeklagten + " mit einer schweren Aussage."
+                    : "äußert vage Zweifel an " + demAngeklagten + ".";
+                zitate = ueberzeugend ? ZitateGegenUeberzeugend : ZitateGegenSchwach;
             }
 
-            string denAngeklagten = maennlich ? "den Angeklagten" : "die Angeklagte";
-            string demAngeklagten = maennlich ? "dem Angeklagten" : "der Angeklagten";
+            string zitat = FuellePronomen(zitate[SW.Statisch.Rnd.Next(zitate.Length)], maennlich);
 
-            return ueberzeugend
-                ? name + "\nbelastet " + denAngeklagten + " mit einer schweren Aussage."
-                : name + "\näußert vage Zweifel an " + demAngeklagten + ".";
+            return name + "\n" + aussage + "\n„" + zitat + "“";
+        }
+
+        private static string FuellePronomen(string zitat, bool maennlich)
+        {
+            return zitat
+                .Replace("{er}", maennlich ? "er" : "sie")
+                .Replace("{ihn}", maennlich ? "ihn" : "sie")
+                .Replace("{ihm}", maennlich ? "ihm" : "ihr")
+                .Replace("{der_taeter}", maennlich ? "der Täter" : "die Täterin");
         }
 
         #endregion

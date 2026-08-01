@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.67.1
+
+_31.07.2026_
+
+**[DE]**
+- Gerichtsverhandlung (Issue #18): Die Zeugen tragen jetzt zusätzlich zu ihrer Einordnung einen gesprochenen Satz vor – passend zu Richtung (für/gegen) und Überzeugungskraft (überzeugend/zögerlich), z. B. „Ich habe ihn genau gesehen!" oder „Ich schwöre, dass er nicht der Täter ist!". Pronomen und „der Täter"/„die Täterin" richten sich nach dem Geschlecht des Angeklagten.
+
+**[EN]**
+- Court trial (issue #18): witnesses now also deliver a spoken line in addition to their classification – matching direction (for/against) and persuasiveness (convincing/hesitant), e.g. "I saw him clearly!" or "I swear he is not the culprit!". Pronouns and "the culprit" (m/f) follow the defendant's gender.
+
 ## 3.67.0
 
 _31.07.2026_
