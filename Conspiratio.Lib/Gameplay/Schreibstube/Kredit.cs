@@ -10,6 +10,9 @@ namespace Conspiratio.Lib.Gameplay.Schreibstube
         private int _taler;
         private int _zinsen;
         private int _KIID;
+        // Festes Jahr, bis zu dem der Kredit zurückzuzahlen ist – wird bei der Aufnahme einmalig gesetzt
+        // (aktuelles Jahr + Laufzeit) und wandert danach nicht mehr mit dem fortschreitenden Jahr mit.
+        private int _rueckzahlungsjahr;
 
         public Kredit(int taler, int dauer, int zinsen)
         {
@@ -32,6 +35,17 @@ namespace Conspiratio.Lib.Gameplay.Schreibstube
             _taler = 0;
             _zinsen = 0;
             _KIID = 0;
+            _rueckzahlungsjahr = 0;
+        }
+
+        public int GetRueckzahlungsjahr()
+        {
+            return _rueckzahlungsjahr;
+        }
+
+        public void SetRueckzahlungsjahr(int jahr)
+        {
+            _rueckzahlungsjahr = jahr;
         }
 
         public int GetDauer()

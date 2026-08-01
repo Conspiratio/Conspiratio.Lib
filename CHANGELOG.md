@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.68.1
+
+_01.08.2026_
+
+**[DE]**
+- Fehlerbehebung: Im Kreditbuch wanderte das Rückzahlungsjahr eines Kredits jedes Jahr mit (es wurde als Restlaufzeit + aktuelles Jahr berechnet, die Restlaufzeit aber nie heruntergezählt) – nach einem übersprungenen Jahr (Schuldturm) sprang es sogar um zwei Jahre. Das Rückzahlungsjahr wird jetzt bei der Kreditaufnahme fest verankert (`Kredit.SetRueckzahlungsjahr`, gesetzt in `SchreibstubeManager.NimmKredit` = aktuelles Jahr + Laufzeit) und bleibt konstant. Bestehende Kredite aus älteren Spielständen werden beim ersten Öffnen des Kreditbuchs einmalig aus ihrer Restlaufzeit festgeschrieben.
+
+**[EN]**
+- Bugfix: in the credit book a loan's repayment year drifted forward every year (it was computed as remaining term + current year, but the remaining term was never counted down) – after a skipped year (debtors' prison) it even jumped by two years. The repayment year is now fixed when the loan is taken (`Kredit.SetRueckzahlungsjahr`, set in `SchreibstubeManager.NimmKredit` = current year + term) and stays constant. Existing loans from older savegames are frozen once from their remaining term the first time the credit book is opened.
+
 ## 3.68.0
 
 _01.08.2026_
