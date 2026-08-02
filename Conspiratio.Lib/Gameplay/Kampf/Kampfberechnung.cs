@@ -646,6 +646,10 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             {
                 SW.Dynamisch.GetSpWithID(ergebnis.SpielerIDGewinner).ErhoeheTaler(ergebnis.Karawane.Warenwert);  // Sieger erhält den Wert der Ware, die Ware verschwindet aus dem System
 
+                // Statistik (Issue #19-Erweiterung): erfolgreicher Karawanen-Überfall durch einen menschlichen Angreifer.
+                if (ergebnis.SpielerIDAngreifer > 0 && ergebnis.SpielerIDAngreifer < SW.Statisch.GetMinKIID())
+                    SW.Dynamisch.GetHumWithID(ergebnis.SpielerIDAngreifer).GetSpielerStatistik().MiUeberfalleneKarawanen++;
+
                 if (ergebnis.Karawane.Menge > 0)   // Handelt es sich beim Opfer um einen menschlichen Spieler mit einer "echten" Warenladung? (bei einem KI-Spieler wird nur ein prozentaler Warenwert berechnet und die Menge ist immer 0)
                 {
                     int VerkAnzahl = SW.Dynamisch.GetHumWithID(ergebnis.Karawane.SpielerID).GetProduktionsslot(ergebnis.Karawane.StadtID, ergebnis.Karawane.ProduktionsslotNr).GetVerkaufAnzahl() - ergebnis.Karawane.Menge;  // Gestohlene Menge von geplanter Verkaufsmenge abziehen
@@ -695,6 +699,11 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             bool verteidigerAusgeloescht = ziel.Einheiten.Count == 0;
             int ueberlebendeGesendet = angriffsaktion.Einheiten.Count;
 
+            // Statistik (Issue #19-Erweiterung): Sieg/Niederlage für die menschlichen Beteiligten dieses Stützpunkt-Kampfes zählen.
+            ZaehleKampfausgang(ergebnis.SpielerIDAngreifer, angreiferGewonnen);
+            if (ergebnis.SpielerIDVerteidiger > 0)
+                ZaehleKampfausgang(ergebnis.SpielerIDVerteidiger, !angreiferGewonnen);
+
             if (angreiferGewonnen && verteidigerAusgeloescht && ueberlebendeGesendet > 0)
             {
                 // Einnahme: die überlebenden gesendeten Truppen verlassen den Heimatstützpunkt und besetzen das Ziel.
@@ -709,6 +718,10 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 }
 
                 ziel.Besitzer = ergebnis.SpielerIDAngreifer;
+
+                // Statistik (Issue #19-Erweiterung): eingenommener Stützpunkt durch einen menschlichen Angreifer.
+                if (ergebnis.SpielerIDAngreifer > 0 && ergebnis.SpielerIDAngreifer < SW.Statisch.GetMinKIID())
+                    SW.Dynamisch.GetHumWithID(ergebnis.SpielerIDAngreifer).GetSpielerStatistik().MiEroberteStuetzpunkte++;
 
                 // Offene Angebote/Flags des eroberten Stützpunkts verfallen.
                 ziel.ZumVerkaufAngeboten = false;
@@ -735,6 +748,22 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             return stuetzpunkt.Art == EnumStuetzpunktArt.Zollburg
                 ? new[] { typeof(ZollSoeldner), typeof(ZollMusketier), typeof(ZollKanonier), typeof(ZollOffizier) }
                 : new[] { typeof(RaubRaeuber), typeof(RaubBombenleger), typeof(RaubKanonier), typeof(RaubSchuetze) };
+        }
+
+        /// <summary>
+        /// Verbucht den Ausgang eines Stützpunkt-Kampfes in der Statistik – aber nur für menschliche Spieler.
+        /// </summary>
+        private static void ZaehleKampfausgang(int spielerId, bool gewonnen)
+        {
+            if (spielerId <= 0 || spielerId >= SW.Statisch.GetMinKIID())
+                return;
+
+            var stat = SW.Dynamisch.GetHumWithID(spielerId).GetSpielerStatistik();
+
+            if (gewonnen)
+                stat.MiKaempfeGewonnen++;
+            else
+                stat.MiKaempfeVerloren++;
         }
 
         #endregion

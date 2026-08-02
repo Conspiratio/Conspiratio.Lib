@@ -33,6 +33,12 @@ namespace Conspiratio.Lib.Gameplay.Personen
         public int HaentrichteteZoelle { get; set; }
         public int HaDurchschnProfitProVerkWare { get; set; }
 
+        // Militär (Stützpunkte / Räuber & Söldner)
+        public int MiKaempfeGewonnen { get; set; }
+        public int MiKaempfeVerloren { get; set; }
+        public int MiEroberteStuetzpunkte { get; set; }
+        public int MiUeberfalleneKarawanen { get; set; }
+
         // Sonstiges
         public int SogebrocheneGesetze { get; set; }
         public int Soangeklagt { get; set; }
@@ -41,6 +47,7 @@ namespace Conspiratio.Lib.Gameplay.Personen
         public int SoGesamtumsatz { get; set; }
         public int SogezeugteKinder { get; set; }
         public int SoAmtseinkommen { get; set; }
+        public int SoGebauteHaeuser { get; set; }
 
         //Muss erst wegen der Arraylaenge durchdacht werden...
         ////ProRunde

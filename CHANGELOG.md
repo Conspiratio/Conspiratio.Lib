@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.72.0
+
+_02.08.2026_
+
+**[DE]**
+- Spielerstatistik erweitert: Neue Militär-Kennzahlen für das Stützpunkt-/Söldner-System, das bislang gar nicht in der Statistik auftauchte – gewonnene und verlorene Kämpfe, eroberte Stützpunkte und überfallene Karawanen (getrackt in `Kampfberechnung`, nur für menschliche Beteiligte). Dazu die Kennzahl „Gebaute Häuser" (`AnwesenManager.BaueHaus`). Der `StatistikManager` zeigt die neuen Werte an (Militär-Block links, „Gebaute Häuser" bei Sonstiges).
+
+**[EN]**
+- Player statistics extended: new military figures for the base/mercenary system, which was not represented in the statistics at all before – battles won and lost, bases captured and caravans raided (tracked in `Kampfberechnung`, human participants only). Plus a "houses built" figure (`AnwesenManager.BaueHaus`). The `StatistikManager` displays the new values (military block on the left, "houses built" under miscellaneous).
+
 ## 3.71.0
 
 _02.08.2026_

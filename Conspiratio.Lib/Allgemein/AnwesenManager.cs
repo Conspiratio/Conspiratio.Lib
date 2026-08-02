@@ -145,6 +145,8 @@ namespace Conspiratio.Lib.Allgemein
             haus.SetRestlicheBauzeit(SW.Statisch.GetHaus(angebot.HausId).Bauzeit);
             haus.HausErweiterungen = null;
             haus.ZustandInProzent = 100;  // Falls an diesem Slot vorher ein heruntergekommener Wohnsitz stand
+
+            spieler.GetSpielerStatistik().SoGebauteHaeuser++;  // Statistik (Issue #19-Erweiterung)
         }
 
         #endregion

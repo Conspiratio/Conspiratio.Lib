@@ -55,6 +55,11 @@ namespace Conspiratio.Lib.Allgemein
             seite.Links.Add(new StatistikEintrag("Kredite genommen", stat.SgenommeneKredite.ToString()));
             seite.Links.Add(new StatistikEintrag("Wahlen teilgenommen", stat.SWahlenTeilgenommen.ToString()));
             seite.Links.Add(new StatistikEintrag("Wahlen gewonnen", stat.SWahlenGewonnen.ToString()));
+            seite.Links.Add(StatistikEintrag.Leer);
+            seite.Links.Add(new StatistikEintrag("Kämpfe gewonnen", stat.MiKaempfeGewonnen.ToString()));
+            seite.Links.Add(new StatistikEintrag("Kämpfe verloren", stat.MiKaempfeVerloren.ToString()));
+            seite.Links.Add(new StatistikEintrag("Eroberte Stützpunkte", stat.MiEroberteStuetzpunkte.ToString()));
+            seite.Links.Add(new StatistikEintrag("Überfallene Karawanen", stat.MiUeberfalleneKarawanen.ToString()));
 
             seite.Rechts.Add(new StatistikEintrag("Waren verkauft", stat.HaWarenVerkauft.ToString()));
             seite.Rechts.Add(new StatistikEintrag("Waren eingekauft", stat.HaWarenEingekauft.ToString()));
@@ -68,6 +73,7 @@ namespace Conspiratio.Lib.Allgemein
             seite.Rechts.Add(new StatistikEintrag("Gesamtumsatz", stat.SoGesamtumsatz.ToStringGeld()));
             seite.Rechts.Add(new StatistikEintrag("Gezeugte Kinder", stat.SogezeugteKinder.ToString()));
             seite.Rechts.Add(new StatistikEintrag("Amtseinkommen", stat.SoAmtseinkommen.ToStringGeld()));
+            seite.Rechts.Add(new StatistikEintrag("Gebaute Häuser", stat.SoGebauteHaeuser.ToString()));
             seite.Rechts.Add(StatistikEintrag.Leer);
             seite.Rechts.Add(new StatistikEintrag("Gesamtvermögen", spieler.GetGesamtVermoegen(spielerId).ToStringGeld()));
             seite.Rechts.Add(new StatistikEintrag("Taler", spieler.GetTaler().ToStringGeld()));
