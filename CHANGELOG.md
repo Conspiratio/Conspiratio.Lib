@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.73.0
+
+_02.08.2026_
+
+**[DE]**
+- Spielübergreifende Statistik – Phase 1 (Fundament): Neue Modelle `Profil` und `ProfilMeta` sowie ein `ProfilManager`, der lokale Spielerprofile in `profile.json` im Spielstand-Verzeichnis verwaltet (Anlegen, Umbenennen, Löschen, aktives Profil; sofortiges Speichern, robust gegen beschädigte Dateien). Ein Profil bündelt die aufsummierte `SpielerStatistik` mehrerer Spiele plus spielübergreifende Kennzahlen (Spiele, Jahre, Höchstvermögen, Höchstamt). `HumSpieler` erhält ein Feld `ProfilId` zur Verknüpfung eines menschlichen Spielers mit seinem Profil (v2: ein Profil pro Spieler-Slot). Die eigentliche Wertung (Delta-Fold beim Speichern) und die UI folgen in späteren Phasen.
+
+**[EN]**
+- Cross-game statistics – phase 1 (foundation): new models `Profil` and `ProfilMeta` plus a `ProfilManager` that manages local player profiles in `profile.json` in the savegame directory (create, rename, delete, active profile; immediate saving, robust against corrupt files). A profile bundles the summed `SpielerStatistik` of several games plus cross-game figures (games, years, highest net worth, highest office). `HumSpieler` gains a `ProfilId` field to link a human player to their profile (v2: one profile per player slot). The actual folding (delta on save) and the UI follow in later phases.
+
 ## 3.72.0
 
 _02.08.2026_

@@ -20,6 +20,12 @@ namespace Conspiratio.Lib.Gameplay.Personen
         public bool HatAngebotFuerStuetzpunktAbgegeben { get; set; }
 
         /// <summary>
+        /// Verknüpfung zum spielübergreifenden Profil (GUID). Leer/null = „ohne Profil", wird dann nicht
+        /// in ein Profil gewertet. Alte Spielstände starten ohne Zuordnung (null).
+        /// </summary>
+        public string ProfilId { get; set; }
+
+        /// <summary>
         /// Seit dem letzten Zug dieses Spielers eingenommene Zölle aus seinen Zollburgen (wird ihm zu
         /// Zugbeginn gemeldet und danach zurückgesetzt). Alte Spielstände starten mit 0.
         /// </summary>
