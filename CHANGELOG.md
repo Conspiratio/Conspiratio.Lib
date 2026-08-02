@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.70.0
+
+_02.08.2026_
+
+**[DE]**
+- Neuer `CheatManager` für die komplexeren Cheats der WinForms-Cheatbox (die einfachen laufen weiter direkt über die Spieler-Setter): `UebernehmeAmt(stufe, gebiet, amt)` nimmt dem bisherigen KI-Inhaber ein Amt ab und tauscht das alte Amt des Spielers zu ihr; `BaueHaus(stadt, haustyp)` errichtet ein Haus; `LasseVerklagen()` bucht ein Delikt, wählt einen missgünstigen KI-Kläger und drei Richter und setzt eine Gerichtsverhandlung fürs Folgejahr auf. Dazu Combobox-Daten (`GetAmtsstufen`, `GetGebiete`, `GetAemter`, `GetStaedte`, `GetHaustypen`). Alle Aktionen betreffen den aktiven Spieler.
+
+**[EN]**
+- New `CheatManager` for the more complex cheats of the WinForms cheat box (the simple ones still go directly through the player setters): `UebernehmeAmt(level, region, office)` takes an office from its current AI holder and swaps the player's old office to them; `BaueHaus(town, houseType)` builds a house; `LasseVerklagen()` books an offence, picks a hostile AI plaintiff and three judges and sets up a court trial for the next year. Plus combo-box data (`GetAmtsstufen`, `GetGebiete`, `GetAemter`, `GetStaedte`, `GetHaustypen`). All actions concern the active player.
+
 ## 3.69.0
 
 _01.08.2026_
