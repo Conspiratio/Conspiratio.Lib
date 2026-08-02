@@ -363,6 +363,17 @@ namespace Conspiratio.Lib.Allgemein
             string gebietName = SW.Dynamisch.GetGebietwithID(wahl.GebietID, wahl.Stufe).GetGebietsName();
             string gewinnerName = SW.Dynamisch.GetSpWithID(gewinnerId).GetKompletterName();
 
+            // Statistik (Issue #19): Wahlteilnahmen der menschlichen Kandidaten und den Sieg zählen
+            // (vor VergebeAmt, das die Kandidatenliste der Wahl abräumt).
+            foreach (int kandidatId in kandidaten)
+            {
+                if (kandidatId != 0 && kandidatId < SW.Statisch.GetMinKIID())
+                    SW.Dynamisch.GetHumWithID(kandidatId).GetSpielerStatistik().SWahlenTeilgenommen++;
+            }
+
+            if (gewinnerId != 0 && gewinnerId < SW.Statisch.GetMinKIID())
+                SW.Dynamisch.GetHumWithID(gewinnerId).GetSpielerStatistik().SWahlenGewonnen++;
+
             VergebeAmt(wahl, gewinnerId);
 
             return new WahlErgebnis(gewinnerId, gewinnerName, amtName, gebietName, warLoswahl);

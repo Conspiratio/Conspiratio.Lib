@@ -272,6 +272,7 @@ namespace Conspiratio.Lib.Allgemein
         {
             AktHum.SetKindX(AktHum.GetEmptyKindSlot(), maennlich, name);
             AktHum.SetKindBekommen(false);
+            AktHum.GetSpielerStatistik().SogezeugteKinder++;  // Statistik (Issue #19)
         }
 
         /// <summary>

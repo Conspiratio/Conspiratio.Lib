@@ -46,6 +46,7 @@ namespace Conspiratio.Lib.Allgemein
         [PublicAPI]
         public void KerkerAufenthaltAbschliessen()
         {
+            SW.Dynamisch.GetAktHum().GetSpielerStatistik().SoSchuldturmaufenthalte++;  // Statistik (Issue #19)
             SW.Dynamisch.GetAktHum().SetSitztImKerker(false);
         }
 

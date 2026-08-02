@@ -102,6 +102,7 @@ namespace Conspiratio.Lib.Allgemein
 
             int einkommen = SW.Statisch.GetAmtwithID(spieler.GetAmtID()).GetEinkommen();
             spieler.ErhoeheTaler(einkommen);
+            spieler.GetSpielerStatistik().SoAmtseinkommen += einkommen;  // Statistik (Issue #19)
 
             return einkommen;
         }

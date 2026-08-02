@@ -82,7 +82,8 @@ namespace Conspiratio.Lib.Allgemein
             if (spieler.CheckPrivilegX(29))
                 steuerhinterziehung = 0.6;
 
-            ergebnis.Gesamtkosten += Convert.ToInt32(ergebnis.Verkaufssteuern * (1 - steuerhinterziehung));
+            int gezahlteVerkaufssteuern = Convert.ToInt32(ergebnis.Verkaufssteuern * (1 - steuerhinterziehung));
+            ergebnis.Gesamtkosten += gezahlteVerkaufssteuern;
 
             #endregion
 
@@ -194,9 +195,18 @@ namespace Conspiratio.Lib.Allgemein
 
             spieler.ErhoeheTaler(-ergebnis.Gesamtkosten);
 
-            // Umsätze des Spielers wieder auf 0 setzen
+            // Statistik (Issue #19): entrichtete Steuern (Verkaufssteuern + Kirchenzehnt) und Zölle mitzählen
+            // sowie den Gesamtumsatz dieses Jahres aufsummieren, bevor die Umsätze zurückgesetzt werden.
+            var statistik = spieler.GetSpielerStatistik();
+            statistik.HaentrichteteSteuern += gezahlteVerkaufssteuern + ergebnis.Kirchenzehnt;
+            statistik.HaentrichteteZoelle += ergebnis.Zollkosten;
+
+            // Umsätze des Spielers aufsummieren und wieder auf 0 setzen
             for (int stadtId = 1; stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
+            {
+                statistik.SoGesamtumsatz += spieler.GetUmsatzInStadtX(stadtId);
                 spieler.SetUmsatzInStadtX(0, stadtId);
+            }
 
             return ergebnis;
         }

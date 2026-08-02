@@ -60,6 +60,10 @@ namespace Conspiratio.Lib.Gameplay.Personen
         public void SetAmt(int amtsID, int slrid)
         {
             Amtsinformationen.SetAll(amtsID, slrid);
+
+            // Statistik (Issue #19): das höchste je gehaltene Amt des menschlichen Spielers merken.
+            if (this is HumSpieler mensch && amtsID > mensch.GetSpielerStatistik().SoHoechstesAmt)
+                mensch.GetSpielerStatistik().SoHoechstesAmt = amtsID;
         }
 
         public int GetAmtID()
@@ -243,6 +247,10 @@ namespace Conspiratio.Lib.Gameplay.Personen
         public void ErhoeheGesetzXUmEins(int x)
         {
             BegingVerbrechenSicher()[x]++;
+
+            // Statistik (Issue #19): begangene Gesetzesverstöße des menschlichen Spielers mitzählen.
+            if (this is HumSpieler mensch)
+                mensch.GetSpielerStatistik().SogebrocheneGesetze++;
         }
 
         public void HalbiereDelikte()

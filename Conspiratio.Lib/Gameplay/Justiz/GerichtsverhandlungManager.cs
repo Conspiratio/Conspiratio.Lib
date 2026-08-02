@@ -91,6 +91,10 @@ namespace Conspiratio.Lib.Gameplay.Justiz
             var angeklagter = SW.Dynamisch.GetSpWithID(_verhandlung.GetAngeklagterID());
             var klaeger = SW.Dynamisch.GetSpWithID(_verhandlung.GetKlaegerID());
 
+            // Statistik (Issue #19): Ist der Angeklagte ein menschlicher Spieler, zählt der Prozess als „angeklagt".
+            if (_verhandlung.GetAngeklagterID() < SW.Statisch.GetMinKIID())
+                SW.Dynamisch.GetHumWithID(_verhandlung.GetAngeklagterID()).GetSpielerStatistik().Soangeklagt++;
+
             var info = new VerhandlungInfo
             {
                 KlaegerName = klaeger.GetKompletterName(),

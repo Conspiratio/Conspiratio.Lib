@@ -182,6 +182,7 @@ namespace Conspiratio.Lib.Allgemein
 
             spieler.SetStadtRohstoffAnzahl(stadtId, rohstoffId, vorhanden - anzahl);
             spieler.ErhoeheEinVerkaeufeInStadtXVonRohstoffIDYUmZ(stadtId, rohstoffId, anzahl);
+            spieler.GetSpielerStatistik().HaWarenVerkauft += anzahl;  // Statistik (Issue #19)
 
             int erloes = SW.Dynamisch.GetStadtwithID(stadtId).GetRohstoffPreisVonIDX(rohstoffId) * anzahl;
             spieler.ErhoeheTaler(erloes);
@@ -235,6 +236,7 @@ namespace Conspiratio.Lib.Allgemein
                 fehler = "Ihr besitzt für diesen Rohstoff nicht genügend Lagerraum. Es konnte nur eine Menge von " + gekauft + " eingelagert werden.";
 
             spieler.ErhoeheEinVerkaeufeInStadtXVonRohstoffIDYUmZ(stadtId, rohstoffId, -gekauft);
+            spieler.GetSpielerStatistik().HaWarenEingekauft += gekauft;  // Statistik (Issue #19)
             spieler.ErhoeheTaler(-(preis * gekauft));
 
             return gekauft;

@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.71.0
+
+_02.08.2026_
+
+**[DE]**
+- Spielerstatistik (Issue #19): Die bislang nur angezeigten, aber nie befüllten Kennzahlen werden jetzt während des Spiels mitgezählt. Erfasst werden verkaufte und eingekaufte Waren sowie der Gesamtumsatz (`HandelsManager`, `AbrechnungsManager`), entrichtete Steuern (Verkaufssteuer + Kirchenzehnt) und Zölle (`AbrechnungsManager`), das Amtseinkommen (`ZugNachrichtenManager`), das höchste je gehaltene Amt und die begangenen Gesetzesverstöße (`Spieler`), Wahlteilnahmen und -siege (`AemterManager`), Anklagen (`GerichtsverhandlungManager`), gezeugte Kinder (`FamilieManager`) und Schuldturm-Aufenthalte (`RundenManager`). Alle Zähler betreffen nur menschliche Spieler.
+
+**[EN]**
+- Player statistics (Issue #19): the figures that were shown but never populated are now tracked during play. Recorded are goods sold and bought as well as total turnover (`HandelsManager`, `AbrechnungsManager`), taxes paid (sales tax + church tithe) and tariffs (`AbrechnungsManager`), office income (`ZugNachrichtenManager`), the highest office ever held and the number of laws broken (`Spieler`), election participations and wins (`AemterManager`), indictments (`GerichtsverhandlungManager`), children fathered (`FamilieManager`) and debtors'-tower stays (`RundenManager`). All counters apply to human players only.
+
 ## 3.70.0
 
 _02.08.2026_
