@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 using Conspiratio.Lib.Gameplay.Personen;
+using Conspiratio.Lib.Gameplay.Spielwelt;
 
 using JetBrains.Annotations;
 
@@ -98,6 +100,104 @@ namespace Conspiratio.Lib.Allgemein
         {
             return string.IsNullOrEmpty(profilId) ? null : _ablage.Profile.FirstOrDefault(p => p.Id == profilId);
         }
+
+        #region Wertung (Delta-Fold beim Speichern)
+
+        /// <summary>Die additiven Int-Kennzahlen der <see cref="SpielerStatistik"/> – alle außer dem Max-Feld <c>SoHoechstesAmt</c>.</summary>
+        private static readonly PropertyInfo[] AdditiveStatFelder =
+            typeof(SpielerStatistik).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .Where(p => p.PropertyType == typeof(int) && p.CanRead && p.CanWrite && p.Name != nameof(SpielerStatistik.SoHoechstesAmt))
+                .ToArray();
+
+        /// <summary>
+        /// Faltet den Statistik-Zuwachs aller menschlichen Spieler mit Profil-Zuordnung in ihr jeweiliges
+        /// Profil (Delta seit der letzten Wertung) und speichert. Bei jedem Speichern des Spiels aufzurufen.
+        /// Mehrfachaufrufe zählen dank der gespeicherten Snapshots nicht doppelt.
+        /// </summary>
+        [PublicAPI]
+        public void WerteLaufendesSpiel()
+        {
+            bool geaendert = false;
+
+            for (int id = 1; id < SW.Statisch.GetMinKIID(); id++)
+            {
+                var mensch = SW.Dynamisch.GetHumWithID(id);
+
+                if (mensch == null || string.IsNullOrEmpty(mensch.GetName()) || string.IsNullOrEmpty(mensch.ProfilId))
+                    continue;
+
+                var profil = FindeProfil(mensch.ProfilId);
+
+                if (profil == null)
+                    continue;
+
+                FalteSpielerInProfil(mensch, id, profil);
+                geaendert = true;
+            }
+
+            if (geaendert)
+                Speichere();
+        }
+
+        private static void FalteSpielerInProfil(HumSpieler mensch, int spielerId, Profil profil)
+        {
+            var aktuell = mensch.GetSpielerStatistik();
+            var basis = mensch.GewerteteStatistik;
+
+            // Additive Zähler: nur den Zuwachs seit der letzten Wertung aufaddieren.
+            foreach (var feld in AdditiveStatFelder)
+            {
+                int neu = (int)feld.GetValue(aktuell);
+                int alt = basis != null ? (int)feld.GetValue(basis) : 0;
+                int delta = neu - alt;
+
+                if (delta != 0)
+                    feld.SetValue(profil.Gesamt, (int)feld.GetValue(profil.Gesamt) + delta);
+            }
+
+            // Max-Werte (nicht additiv).
+            if (aktuell.SoHoechstesAmt > profil.Meta.HoechstesAmt)
+                profil.Meta.HoechstesAmt = aktuell.SoHoechstesAmt;
+
+            int vermoegen = mensch.GetGesamtVermoegen(spielerId);
+
+            if (vermoegen > profil.Meta.HoechstesVermoegen)
+                profil.Meta.HoechstesVermoegen = vermoegen;
+
+            // Gespielte Jahre (Delta gegenüber dem festen Startjahr).
+            int jahre = SW.Dynamisch.GetAktuellesJahr() - SW.Statisch.StartJahr;
+
+            if (jahre > mensch.GewerteteJahre)
+            {
+                profil.Meta.GespielteJahre += jahre - mensch.GewerteteJahre;
+                mensch.GewerteteJahre = jahre;
+            }
+
+            // Das Spiel einmalig als gespielt zählen.
+            if (!mensch.WurdeGezaehlt)
+            {
+                profil.Meta.SpieleGesamt++;
+                mensch.WurdeGezaehlt = true;
+            }
+
+            mensch.GewerteteStatistik = KopiereStatistik(aktuell);
+            profil.ZuletztGespielt = DateTime.Now;
+        }
+
+        private static SpielerStatistik KopiereStatistik(SpielerStatistik quelle)
+        {
+            var kopie = new SpielerStatistik();
+
+            foreach (var feld in typeof(SpielerStatistik).GetProperties(BindingFlags.Instance | BindingFlags.Public))
+            {
+                if (feld.PropertyType == typeof(int) && feld.CanRead && feld.CanWrite)
+                    feld.SetValue(kopie, feld.GetValue(quelle));
+            }
+
+            return kopie;
+        }
+
+        #endregion
 
         private string KuerzeName(string name)
         {

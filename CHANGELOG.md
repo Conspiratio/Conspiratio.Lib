@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.74.0
+
+_02.08.2026_
+
+**[DE]**
+- Spielübergreifende Statistik – Wertung & Anzeige (Lib-Anteil der Phasen 3–5): `PlayerSetupManager.ErstelleSpieler` nimmt optional eine `profilId` entgegen und verknüpft den Spieler mit seinem Profil. `HumSpieler` erhält die Wertungs-Snapshotfelder `GewerteteStatistik`, `GewerteteJahre` und `WurdeGezaehlt`. Neu `ProfilManager.WerteLaufendesSpiel()`: faltet beim Speichern den Statistik-Zuwachs jedes menschlichen Spielers als Delta in sein Profil – additive Zähler werden aufsummiert, `SoHoechstesAmt` und das Höchstvermögen als Maximum, die Spieljahre als Delta gegenüber dem Startjahr, und das Spiel wird einmalig als „gespielt" gezählt (doppelzähl-sicher über die Snapshots). Neuer `ProfilStatistikManager` bereitet die Profilwerte im selben Zwei-Spalten-Format wie der `StatistikManager` auf (Militär-Block, Meta-Block mit Spielen/Jahren/Höchstamt/Höchstvermögen statt Live-Vermögen).
+
+**[EN]**
+- Cross-game statistics – folding & display (Lib part of phases 3–5): `PlayerSetupManager.ErstelleSpieler` optionally takes a `profilId` and links the player to their profile. `HumSpieler` gains the folding snapshot fields `GewerteteStatistik`, `GewerteteJahre` and `WurdeGezaehlt`. New `ProfilManager.WerteLaufendesSpiel()`: on saving, folds each human player's statistics growth into their profile as a delta – additive counters are summed, `SoHoechstesAmt` and net worth as a maximum, the years played as a delta from the start year, and the game is counted once as "played" (double-count-safe via the snapshots). New `ProfilStatistikManager` formats the profile values in the same two-column layout as the `StatistikManager` (military block, meta block with games/years/highest office/highest net worth instead of live net worth).
+
 ## 3.73.0
 
 _02.08.2026_

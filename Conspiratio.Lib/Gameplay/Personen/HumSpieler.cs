@@ -26,6 +26,18 @@ namespace Conspiratio.Lib.Gameplay.Personen
         public string ProfilId { get; set; }
 
         /// <summary>
+        /// Snapshot der zuletzt ins Profil gewerteten Statistik (Basis für die Delta-Wertung beim Speichern).
+        /// Null = für dieses Spiel wurde noch nichts gewertet. Nur für die spielübergreifende Statistik.
+        /// </summary>
+        public SpielerStatistik GewerteteStatistik { get; set; }
+
+        /// <summary>Bereits ins Profil gutgeschriebene Spieljahre dieses Spiels (Delta-Basis).</summary>
+        public int GewerteteJahre { get; set; }
+
+        /// <summary>Ob dieses Spiel bereits als „gespielt" im Profil (SpieleGesamt) gezählt wurde.</summary>
+        public bool WurdeGezaehlt { get; set; }
+
+        /// <summary>
         /// Seit dem letzten Zug dieses Spielers eingenommene Zölle aus seinen Zollburgen (wird ihm zu
         /// Zugbeginn gemeldet und danach zurückgesetzt). Alte Spielstände starten mit 0.
         /// </summary>
