@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.77.0
+
+_03.08.2026_
+
+**[DE]**
+- Ahnentafel: `AhnPerson` trägt jetzt zusätzlich den `Titel` einer Person. Beim Erbfall und für die lebende Generation werden Oberhaupt und Ehepartner mit ihrem gegenderten Titel (`GetTitelGegendert`) erfasst; Kinder tragen mangels Amt/Titel keinen.
+
+**[EN]**
+- Ancestral table: `AhnPerson` now also carries a person's `Titel` (title). On inheritance and for the living generation, the head and spouse are recorded with their gendered title (`GetTitelGegendert`); children carry none (they hold no office/title).
+
 ## 3.76.0
 
 _03.08.2026_

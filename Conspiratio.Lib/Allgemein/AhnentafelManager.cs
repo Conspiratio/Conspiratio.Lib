@@ -28,13 +28,13 @@ namespace Conspiratio.Lib.Allgemein
 
             var lebend = new Dynastiegeneration
             {
-                Oberhaupt = new AhnPerson(spieler.GetName(), jahr - spieler.GetAlter(), 0, spieler.GetMaennlich())
+                Oberhaupt = new AhnPerson(spieler.GetName(), spieler.GetTitelGegendert(), jahr - spieler.GetAlter(), 0, spieler.GetMaennlich())
             };
 
             if (spieler.GetVerheiratet() != 0)
             {
                 var partner = SW.Dynamisch.GetSpWithID(spieler.GetVerheiratet());
-                lebend.Ehepartner = new AhnPerson(partner.GetName(), jahr - partner.GetAlter(), 0, partner.GetMaennlich());
+                lebend.Ehepartner = new AhnPerson(partner.GetName(), partner.GetTitelGegendert(), jahr - partner.GetAlter(), 0, partner.GetMaennlich());
             }
 
             for (int slot = SW.Statisch.GetMinKindSlotNr(); slot < SW.Statisch.GetMaxKinderAnzahl(); slot++)
@@ -42,7 +42,7 @@ namespace Conspiratio.Lib.Allgemein
                 var kind = spieler.GetKindX(slot);
 
                 if (!string.IsNullOrEmpty(kind.GetKindName()))
-                    lebend.Kinder.Add(new AhnPerson(kind.GetKindName(), kind.Geburtsjahr, 0, kind.GetMaennlich()));
+                    lebend.Kinder.Add(new AhnPerson(kind.GetKindName(), "", kind.Geburtsjahr, 0, kind.GetMaennlich()));
             }
 
             generationen.Add(lebend);

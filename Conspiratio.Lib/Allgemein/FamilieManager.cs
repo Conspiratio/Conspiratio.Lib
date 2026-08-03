@@ -428,14 +428,14 @@ namespace Conspiratio.Lib.Allgemein
 
             var generation = new Dynastiegeneration
             {
-                Oberhaupt = new AhnPerson(spieler.GetName(), jahr - spieler.GetAlter(), jahr, spieler.GetMaennlich()),
+                Oberhaupt = new AhnPerson(spieler.GetName(), spieler.GetTitelGegendert(), jahr - spieler.GetAlter(), jahr, spieler.GetMaennlich()),
                 EhepartnerErbte = erbe >= SW.Statisch.GetMinKIID()
             };
 
             if (spieler.GetVerheiratet() != 0)
             {
                 var partner = SW.Dynamisch.GetSpWithID(spieler.GetVerheiratet());
-                generation.Ehepartner = new AhnPerson(partner.GetName(), jahr - partner.GetAlter(), 0, partner.GetMaennlich());
+                generation.Ehepartner = new AhnPerson(partner.GetName(), partner.GetTitelGegendert(), jahr - partner.GetAlter(), 0, partner.GetMaennlich());
             }
 
             for (int slot = SW.Statisch.GetMinKindSlotNr(); slot < SW.Statisch.GetMaxKinderAnzahl(); slot++)
@@ -445,7 +445,8 @@ namespace Conspiratio.Lib.Allgemein
                 if (string.IsNullOrEmpty(kind.GetKindName()))
                     continue;
 
-                generation.Kinder.Add(new AhnPerson(kind.GetKindName(), kind.Geburtsjahr, 0, kind.GetMaennlich()));
+                // Kinder tragen (mangels Amt/Titel im Kind-Modell) keinen Titel.
+                generation.Kinder.Add(new AhnPerson(kind.GetKindName(), "", kind.Geburtsjahr, 0, kind.GetMaennlich()));
 
                 // Erbt ein Kind (erbe = Kind-Slot), den Nachfolger in der kompakten Kinderliste markieren.
                 if (erbe < SW.Statisch.GetMinKIID() && slot == erbe)

@@ -11,6 +11,7 @@ namespace Conspiratio.Lib.Gameplay.Personen
     public class AhnPerson
     {
         public string Name { get; set; }
+        public string Titel { get; set; }
         public int Geburtsjahr { get; set; }
         public int Todesjahr { get; set; }
         public bool Maennlich { get; set; }
@@ -19,9 +20,10 @@ namespace Conspiratio.Lib.Gameplay.Personen
         {
         }
 
-        public AhnPerson(string name, int geburtsjahr, int todesjahr, bool maennlich)
+        public AhnPerson(string name, string titel, int geburtsjahr, int todesjahr, bool maennlich)
         {
             Name = name;
+            Titel = titel;
             Geburtsjahr = geburtsjahr;
             Todesjahr = todesjahr;
             Maennlich = maennlich;
