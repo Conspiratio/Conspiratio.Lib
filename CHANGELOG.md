@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.75.0
+
+_03.08.2026_
+
+**[DE]**
+- Kontrahenten-Übersicht (Issue-unabhängig, Migration von KontrahentDetails): Neue Methode `KontrahentenManager.GetKontrahentDetails(spielerId)` samt Datenklasse `KontrahentDetailInfo` liefert Name, Titel, Alter und Amt eines Kontrahenten. Vermögen, Gesundheit, die Beweislast (per Spionage aufgedeckte Delikte) und der Erhebungsstand (Jahr) werden nur mitgeliefert, wenn der aktive Spieler eine laufende Spionage gegen den Kontrahenten unterhält (`HatSpionage`) – exakt wie im WinForms-Original.
+
+**[EN]**
+- Contenders overview (independent of an issue, migration of KontrahentDetails): new method `KontrahentenManager.GetKontrahentDetails(playerId)` plus the data class `KontrahentDetailInfo` returns a contender's name, title, age and office. Net worth, health, the burden of proof (crimes uncovered via espionage) and the report year are only included if the active player runs an active espionage against the contender (`HatSpionage`) – exactly as in the WinForms original.
+
 ## 3.74.0
 
 _02.08.2026_

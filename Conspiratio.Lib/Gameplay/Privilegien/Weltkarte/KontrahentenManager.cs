@@ -21,6 +21,40 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
     }
 
     /// <summary>
+    /// Die Detailangaben eines Kontrahenten für die reine Übersicht (Migration von KontrahentDetails).
+    /// Name, Titel, Alter und Amt sind immer bekannt; Vermögen, Gesundheit, Beweislast (aufgedeckte Delikte)
+    /// und der Erhebungs­stand liegen nur vor, wenn der aktive Spieler eine laufende Spionage gegen den
+    /// Kontrahenten unterhält (<see cref="HatSpionage"/>).
+    /// </summary>
+    public class KontrahentDetailInfo
+    {
+        public string Name { get; }
+        public string Titel { get; }
+        public int Alter { get; }
+        public string Amt { get; }
+
+        public bool HatSpionage { get; }
+        public int Vermoegen { get; }
+        public string Gesundheit { get; }
+        public int Delikte { get; }
+        public int StandJahr { get; }
+
+        public KontrahentDetailInfo(string name, string titel, int alter, string amt,
+            bool hatSpionage, int vermoegen, string gesundheit, int delikte, int standJahr)
+        {
+            Name = name;
+            Titel = titel;
+            Alter = alter;
+            Amt = amt;
+            HatSpionage = hatSpionage;
+            Vermoegen = vermoegen;
+            Gesundheit = gesundheit;
+            Delikte = delikte;
+            StandJahr = standJahr;
+        }
+    }
+
+    /// <summary>
     /// Kapselt die Logik von KontrahentenForm/UI.PersonWasMachen für die Privilegien-Modi der Weltkarte:
     /// liefert die wählbaren Kontrahenten (menschliche Mitspieler zuerst, dann die KI) und führt die
     /// zielgerichtete Aktion aus – Modus 8 = Prozess initiieren, Modus 13 = Hand des Henkers.
@@ -45,6 +79,30 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
                 list.Add(new KontrahentInfo(i, SW.Dynamisch.GetSpWithID(i).GetCompleteNameOhneTitel(), false));
 
             return list;
+        }
+
+        /// <summary>
+        /// Liefert die Detailangaben eines Kontrahenten für die Übersicht. Die Beweislast (aufgedeckte
+        /// Delikte), Vermögen, Gesundheit und der Erhebungsstand werden nur mitgeliefert, wenn der aktive
+        /// Spieler eine laufende Spionage gegen den Kontrahenten unterhält (wie im WinForms-Original).
+        /// </summary>
+        public KontrahentDetailInfo GetKontrahentDetails(int spielerId)
+        {
+            var kontrahent = SW.Dynamisch.GetSpWithID(spielerId);
+            var spionage = SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler()).GetAktiveSpionage(spielerId);
+
+            bool hatSpionage = spionage.GetKosten() > 0 && spionage.GetDauer() > 1;
+
+            return new KontrahentDetailInfo(
+                kontrahent.GetName(),
+                kontrahent.GetTitelGegendert(),
+                kontrahent.GetAlter(),
+                kontrahent.GetAmtNameUndOrt(),
+                hatSpionage,
+                hatSpionage ? kontrahent.GetGesamtVermoegen(spielerId) : 0,
+                hatSpionage ? kontrahent.BeurteileGesundheitString() : "",
+                hatSpionage ? spionage.GetDelikte() : 0,
+                hatSpionage ? spionage.GetJahr() : 0);
         }
 
         /// <summary>
