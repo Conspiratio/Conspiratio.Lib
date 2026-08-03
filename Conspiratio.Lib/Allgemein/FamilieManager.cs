@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 
 using Conspiratio.Lib.Gameplay.Kirche;
+using Conspiratio.Lib.Gameplay.Personen;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
 using JetBrains.Annotations;
@@ -398,6 +399,10 @@ namespace Conspiratio.Lib.Allgemein
                 return new TestamentErgebnis(false, spielVorbei, bezeichnung);
             }
 
+            // Vor der Erbübernahme die aktuelle Generation in der Ahnentafel festhalten – sonst gingen die
+            // Daten des Verstorbenen (und der überschriebenen Angehörigen) bei TestamentVollstrecken verloren.
+            ErfasseGenerationInAhnentafel(erbe);
+
             // Das Amt des Verstorbenen wird nicht vererbt: vor der Erbübernahme freigeben (erzeugt eine Wahl).
             if (AktHum.GetAmtID() != 0)
                 SW.Dynamisch.AmtVonXfreigeben(SW.Dynamisch.GetAktiverSpieler());
@@ -410,6 +415,44 @@ namespace Conspiratio.Lib.Allgemein
                 SW.Dynamisch.AmtVonXfreigeben(SW.Dynamisch.GetAktiverSpieler());
 
             return new TestamentErgebnis(true, false, bezeichnung);
+        }
+
+        /// <summary>
+        /// Hält die aktuelle Generation (verstorbenes Oberhaupt, Ehepartner und Kinder) in der Ahnentafel des
+        /// Spielers fest. Muss vor <see cref="Spielwelt.DynamischeSpieldaten.TestamentVollstrecken"/> laufen.
+        /// </summary>
+        private void ErfasseGenerationInAhnentafel(int erbe)
+        {
+            int jahr = SW.Dynamisch.GetAktuellesJahr();
+            var spieler = AktHum;
+
+            var generation = new Dynastiegeneration
+            {
+                Oberhaupt = new AhnPerson(spieler.GetName(), jahr - spieler.GetAlter(), jahr, spieler.GetMaennlich()),
+                EhepartnerErbte = erbe >= SW.Statisch.GetMinKIID()
+            };
+
+            if (spieler.GetVerheiratet() != 0)
+            {
+                var partner = SW.Dynamisch.GetSpWithID(spieler.GetVerheiratet());
+                generation.Ehepartner = new AhnPerson(partner.GetName(), jahr - partner.GetAlter(), 0, partner.GetMaennlich());
+            }
+
+            for (int slot = SW.Statisch.GetMinKindSlotNr(); slot < SW.Statisch.GetMaxKinderAnzahl(); slot++)
+            {
+                var kind = spieler.GetKindX(slot);
+
+                if (string.IsNullOrEmpty(kind.GetKindName()))
+                    continue;
+
+                generation.Kinder.Add(new AhnPerson(kind.GetKindName(), kind.Geburtsjahr, 0, kind.GetMaennlich()));
+
+                // Erbt ein Kind (erbe = Kind-Slot), den Nachfolger in der kompakten Kinderliste markieren.
+                if (erbe < SW.Statisch.GetMinKIID() && slot == erbe)
+                    generation.ErbeKindIndex = generation.Kinder.Count - 1;
+            }
+
+            spieler.GetAhnentafelListe().Add(generation);
         }
 
         #endregion

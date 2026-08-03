@@ -38,6 +38,22 @@ namespace Conspiratio.Lib.Gameplay.Personen
         public bool WurdeGezaehlt { get; set; }
 
         /// <summary>
+        /// Die Ahnentafel der Dynastie: je Generation das verstorbene Oberhaupt samt Ehepartner und Kindern,
+        /// festgehalten beim Erbfall (sonst gingen diese Daten bei der Erbübernahme verloren). Übersteht den
+        /// Erbfall, da sie am fortbestehenden Spielerobjekt hängt. Alte Spielstände starten mit null (leer).
+        /// </summary>
+        public List<Dynastiegeneration> Ahnentafel { get; set; }
+
+        /// <summary>Liefert die Ahnentafel-Liste und legt sie bei Bedarf an (kompatibel mit alten Spielständen).</summary>
+        public List<Dynastiegeneration> GetAhnentafelListe()
+        {
+            if (Ahnentafel == null)
+                Ahnentafel = new List<Dynastiegeneration>();
+
+            return Ahnentafel;
+        }
+
+        /// <summary>
         /// Seit dem letzten Zug dieses Spielers eingenommene Zölle aus seinen Zollburgen (wird ihm zu
         /// Zugbeginn gemeldet und danach zurückgesetzt). Alte Spielstände starten mit 0.
         /// </summary>

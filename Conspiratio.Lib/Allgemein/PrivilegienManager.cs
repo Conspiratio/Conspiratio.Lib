@@ -15,6 +15,13 @@ namespace Conspiratio.Lib.Allgemein
     public class PrivilegienManager
     {
         /// <summary>
+        /// Kennung des immer verfügbaren „Ahnentafel"-Eintrags. Kein echtes Lib-Privileg, sondern ein
+        /// synthetischer Listeneintrag – der Client fängt diese ID ab und öffnet die Ahnentafel-Anzeige.
+        /// Liegt bewusst weit über den echten Privileg-IDs (< <see cref="Spielwelt.StatischeSpieldaten.GetMaxPriv"/>).
+        /// </summary>
+        public const int AhnentafelPrivilegId = 10000;
+
+        /// <summary>
         /// Aktualisiert die Privilegien des Spielers (abhängig von Amt, Titel und Familienstand).
         /// </summary>
         [PublicAPI]
@@ -24,12 +31,17 @@ namespace Conspiratio.Lib.Allgemein
         }
 
         /// <summary>
-        /// Liefert die Privilegien, die der aktive Spieler derzeit besitzt.
+        /// Liefert die Privilegien, die der aktive Spieler derzeit besitzt. Die Ahnentafel steht als
+        /// immer verfügbarer Eintrag (ab Spielstart) stets an erster Stelle.
         /// </summary>
         [PublicAPI]
         public List<PrivilegInfo> GetPrivilegien()
         {
-            var privilegien = new List<PrivilegInfo>();
+            var privilegien = new List<PrivilegInfo>
+            {
+                new PrivilegInfo(AhnentafelPrivilegId, "Ahnentafel einsehen")
+            };
+
             var spieler = SW.Dynamisch.GetAktHum();
 
             for (int i = 1; i < SW.Statisch.GetMaxPriv(); i++)

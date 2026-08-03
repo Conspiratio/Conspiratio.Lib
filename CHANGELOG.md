@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.76.0
+
+_03.08.2026_
+
+**[DE]**
+- Ahnentafel (Issue #9): Neues Datenmodell `Dynastiegeneration`/`AhnPerson` und eine Ahnentafel-Liste am `HumSpieler`, die die Generationen der Dynastie festhält. Beim Erbfall (`FamilieManager.FuehreTestamentAus`, vor `TestamentVollstrecken`) wird die aktuelle Generation – verstorbenes Oberhaupt, Ehepartner und Kinder mit Geburts-/Todesjahren sowie der Erbe – gesichert, bevor der Erbe die Identität übernimmt und diese Daten sonst verloren gingen. Neuer `AhnentafelManager.GetGenerationen()` liefert alle Generationen (älteste zuerst, aktuell lebende zuletzt) für die Anzeige. Der `PrivilegienManager` führt die Ahnentafel als immer verfügbaren Eintrag (`AhnentafelPrivilegId`) an erster Stelle der Privilegienliste. Die neuen Felder sind savegame-kompatibel (alte Stände starten mit leerer Ahnentafel).
+
+**[EN]**
+- Ancestral table (issue #9): new data model `Dynastiegeneration`/`AhnPerson` and an ancestral-table list on `HumSpieler` that records the dynasty's generations. On inheritance (`FamilieManager.FuehreTestamentAus`, before `TestamentVollstrecken`) the current generation – the deceased head, spouse and children with birth/death years plus the heir – is captured before the heir takes over the identity and this data would otherwise be lost. New `AhnentafelManager.GetGenerationen()` returns all generations (oldest first, currently living last) for display. The `PrivilegienManager` lists the ancestral table as an always-available entry (`AhnentafelPrivilegId`) at the top of the privileges list. The new fields are savegame-compatible (old saves start with an empty ancestral table).
+
 ## 3.75.0
 
 _03.08.2026_
