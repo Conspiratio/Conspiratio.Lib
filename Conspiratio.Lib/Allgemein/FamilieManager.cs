@@ -253,7 +253,12 @@ namespace Conspiratio.Lib.Allgemein
             if (AktHum.GetKindBekommen())
                 return true;
 
-            return IstVerheiratet() && SW.Statisch.Rnd.Next(0, SW.Statisch.GetChanceFuerKind()) == 0;
+            // Eine Mätresse senkt die Wahrscheinlichkeit auf ehelichen Nachwuchs (Issue #8).
+            int chance = SW.Statisch.GetChanceFuerKind();
+            if (AktHum.HatMaetresse())
+                chance *= MaetresseManager.KinderChanceFaktor;
+
+            return IstVerheiratet() && SW.Statisch.Rnd.Next(0, chance) == 0;
         }
 
         /// <summary>

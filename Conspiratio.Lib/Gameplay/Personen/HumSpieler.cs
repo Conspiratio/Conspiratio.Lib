@@ -81,6 +81,7 @@ namespace Conspiratio.Lib.Gameplay.Personen
         private int _bekamTitelX;
         private int _permaAnsehen;
         private bool _kindBekommen;  // nur mit Cheats
+        private bool _hatMaetresse;  // Privileg „Mätresse nehmen" (Issue #8); alte Spielstände starten mit false
         private int[] _umsatzInStadt;
         private int _klagtSpielerMitIDXAn;
         private bool _gebeichtet;
@@ -436,6 +437,17 @@ namespace Conspiratio.Lib.Gameplay.Personen
         public bool GetKindBekommen()
         {
             return _kindBekommen;
+        }
+
+        /// <summary>Ob der Spieler eine Mätresse unterhält (Privileg „Mätresse nehmen", Issue #8).</summary>
+        public bool HatMaetresse()
+        {
+            return _hatMaetresse;
+        }
+
+        public void SetHatMaetresse(bool wert)
+        {
+            _hatMaetresse = wert;
         }
 
         public int GetUmsatzInStadtX(int X)

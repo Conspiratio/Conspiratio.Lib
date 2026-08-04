@@ -22,6 +22,13 @@ namespace Conspiratio.Lib.Allgemein
         public const int AhnentafelPrivilegId = 10000;
 
         /// <summary>
+        /// Kennung des Eintrags „Mätresse nehmen" (Issue #8). Kein echtes Lib-Privileg, sondern ein
+        /// synthetischer Listeneintrag – der Client fängt die ID ab und wickelt die Aktion über den
+        /// <see cref="MaetresseManager"/> ab. Nur sichtbar, solange der Spieler noch keine Mätresse hat.
+        /// </summary>
+        public const int MaetressePrivilegId = 10001;
+
+        /// <summary>
         /// Aktualisiert die Privilegien des Spielers (abhängig von Amt, Titel und Familienstand).
         /// </summary>
         [PublicAPI]
@@ -43,6 +50,10 @@ namespace Conspiratio.Lib.Allgemein
             };
 
             var spieler = SW.Dynamisch.GetAktHum();
+
+            // „Mätresse nehmen" (Issue #8): immer wählbar, solange der Spieler noch keine unterhält.
+            if (!spieler.HatMaetresse())
+                privilegien.Add(new PrivilegInfo(MaetressePrivilegId, "Mätresse nehmen"));
 
             for (int i = 1; i < SW.Statisch.GetMaxPriv(); i++)
             {

@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.79.0
+
+_03.08.2026_
+
+**[DE]**
+- Neues Privileg „Mätresse nehmen" (Issue #8, Vorbild „Die Fugger 2"): Neuer `MaetresseManager` und das Feld `HumSpieler.HatMaetresse`. Ein verheirateter Spieler mit genügend Talern kann sich gegen einmalige Kosten eine Mätresse nehmen; das mehrt sein Ansehen (dauerhaft) und seine verbleibenden Lebensjahre, senkt aber über einen Faktor die Wahrscheinlichkeit auf ehelichen Nachwuchs (`FamilieManager.StehtGeburtAn`). Jährlich fällt Unterhalt an, und es droht ein Skandal (Ansehensverlust). `PrivilegienManager` führt „Mätresse nehmen" als synthetischen Eintrag, solange der Spieler noch keine Mätresse hat.
+
+**[EN]**
+- New privilege "take a mistress" (issue #8, inspired by "Die Fugger 2"): new `MaetresseManager` and the field `HumSpieler.HatMaetresse`. A married player with enough taler can take a mistress for a one-off cost; this permanently raises his reputation and his remaining years of life, but lowers the chance of legitimate offspring by a factor (`FamilieManager.StehtGeburtAn`). There is a yearly upkeep, and a scandal may occur (reputation loss). `PrivilegienManager` lists "take a mistress" as a synthetic entry as long as the player has no mistress yet.
+
 ## 3.78.0
 
 _03.08.2026_
