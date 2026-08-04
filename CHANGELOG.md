@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.80.0
+
+_04.08.2026_
+
+**[DE]**
+- Überfällige Kredite: Neue Methode `SchreibstubeManager.TilgeUeberfaelligeKredite()` tilgt am Rundenende alle Kredite des aktiven Spielers, deren Rückzahlungsjahr erreicht oder überschritten ist, zwangsweise – notfalls rutscht das Vermögen dabei ins Minus. Der Betrag wird dem Gläubiger gutgeschrieben, der Kredit-Slot geleert, und pro getilgtem Kredit wird eine Hinweismeldung zurückgegeben (mit gesondertem Hinweis, falls das Vermögen dadurch negativ wird). Fehlte ein Rückzahlungsjahr (Altspielstände), wird es aus Dauer + aktuellem Jahr nachgetragen.
+
+**[EN]**
+- Overdue credits: new method `SchreibstubeManager.TilgeUeberfaelligeKredite()` forcibly repays, at the end of the round, every credit of the active player whose repayment year has been reached or passed – letting the balance go negative if necessary. The amount is credited to the lender, the credit slot is cleared, and one hint message is returned per repaid credit (with an extra note if the balance turns negative as a result). If a repayment year was missing (legacy savegames) it is derived from duration + current year.
+
 ## 3.79.0
 
 _03.08.2026_

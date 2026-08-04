@@ -133,6 +133,58 @@ namespace Conspiratio.Lib.Allgemein
             return true;
         }
 
+        /// <summary>
+        /// Tilgt am Rundenende alle Kredite des aktiven Spielers, deren Rückzahlungsjahr erreicht oder
+        /// überschritten ist, zwangsweise – notfalls rutscht das Vermögen dabei ins Minus. Je getilgtem
+        /// Kredit wird eine Hinweismeldung zurückgeliefert.
+        /// </summary>
+        [PublicAPI]
+        public List<string> TilgeUeberfaelligeKredite()
+        {
+            var meldungen = new List<string>();
+            var spieler = SW.Dynamisch.GetAktHum();
+            int jahr = SW.Dynamisch.GetAktuellesJahr();
+
+            for (int i = 0; i < SW.Statisch.GetMaxKredite(); i++)
+            {
+                var kredit = spieler.GetKreditMitID(i);
+
+                if (kredit.GetDauer() <= 0)
+                    continue;
+
+                int endjahr = kredit.GetRueckzahlungsjahr();
+
+                // Alter Kredit ohne festes Rückzahlungsjahr: einmalig aus der Restlaufzeit festschreiben.
+                if (endjahr <= 0)
+                {
+                    endjahr = kredit.GetDauer() + jahr;
+                    kredit.SetRueckzahlungsjahr(endjahr);
+                }
+
+                if (jahr < endjahr)
+                    continue;
+
+                int betrag = kredit.GetTaler();
+                var glaeubiger = SW.Dynamisch.GetKIwithID(kredit.GetKIID());
+                string name = glaeubiger.GetKompletterName();
+
+                spieler.ErhoeheTaler(-betrag);   // notfalls ins Minus
+                glaeubiger.ErhoeheTaler(betrag);
+
+                kredit.SetDauer(0);
+                kredit.SetTaler(0);
+                kredit.SetKIID(0);
+                kredit.SetZinsen(0);
+                kredit.SetRueckzahlungsjahr(0);
+
+                meldungen.Add("Euer Kredit über " + betrag.ToStringGeld() + " bei " + name +
+                              " ist fällig geworden und wurde automatisch getilgt." +
+                              (spieler.GetTaler() < 0 ? "\nEuer Vermögen ist dadurch ins Minus gerutscht." : ""));
+            }
+
+            return meldungen;
+        }
+
         #endregion
 
         #region Gesetze
