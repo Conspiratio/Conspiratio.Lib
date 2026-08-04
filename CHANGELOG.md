@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.81.0
+
+_04.08.2026_
+
+**[DE]**
+- Debug-Symbole (PDB) werden jetzt über `<DebugType>embedded</DebugType>` direkt in die Assembly eingebettet – auch im Release. Dadurch enthalten Stacktraces bei den Endnutzern Datei- und Zeilennummern, und die Symbole reisen im NuGet-Paket mit (Grundlage für aussagekräftige Fehlerberichte). Keine Code-Änderung, nur Build-Einstellung.
+
+**[EN]**
+- Debug symbols (PDB) are now embedded directly into the assembly via `<DebugType>embedded</DebugType>` – including in Release. This makes end-user stack traces carry file and line numbers, and the symbols travel inside the NuGet package (the basis for meaningful bug reports). No code change, just a build setting.
+
 ## 3.80.0
 
 _04.08.2026_

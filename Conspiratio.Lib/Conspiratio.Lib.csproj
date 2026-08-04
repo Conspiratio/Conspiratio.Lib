@@ -6,6 +6,10 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWindowsForms>true</UseWindowsForms>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <!-- Debug-Symbole (PDB) in die DLL einbetten – auch im Release. So enthalten Stacktraces bei den
+         Endnutzern Datei- und Zeilennummern, und die Symbole reisen im NuGet-Paket mit. -->
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <None Update="icon.png">
@@ -35,7 +39,7 @@
     <FileVersion>3.46.0</FileVersion>
     <Description>A library with gameplay logic for the free and open-source game Conspiratio</Description>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>3.80.0</Version>
+    <Version>3.81.0</Version>
     <Title>$(AssemblyName)</Title>
     <Authors>Conspiratio</Authors>
     <Copyright>Copyright © 2011-2025</Copyright>
