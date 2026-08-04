@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.78.0
+
+_03.08.2026_
+
+**[DE]**
+- Grabsteinaufschrift (Issue #15, Vorbild „Die Fugger 2"): Neuer `GrabsteinManager.ErmittleGrabspruch(SpielerStatistik)` schätzt aus der Pro-Spiel-Statistik den prägendsten „Typ" des verstorbenen Charakters (Kriegsherr, Intrigant, Kaufmann, Kirchenmann, Staatsmann, Patriarch, Gesetzloser) und liefert einen dazu passenden kurzen Grabspruch. Sticht keine Spielweise deutlich heraus, kommt ein allgemeiner Spruch. Je Typ stehen mehrere Sprüche zur Auswahl (zufällig).
+
+**[EN]**
+- Gravestone inscription (issue #15, inspired by "Die Fugger 2"): new `GrabsteinManager.ErmittleGrabspruch(SpielerStatistik)` estimates the deceased character's most defining "type" from the per-game statistics (warlord, schemer, merchant, churchman, statesman, patriarch, outlaw) and returns a fitting short epitaph. If no play style stands out clearly, a generic epitaph is used. Each type has several epitaphs to choose from (random).
+
 ## 3.77.0
 
 _03.08.2026_
