@@ -1,415 +1,93 @@
 # Changelog Conspiratio.Lib
 
-## 3.83.0
-
-_05.08.2026_
+## [Unreleased]
 
 **[DE]**
 - Spiel-Aufträge erweitert (Issue #15): sechs weitere Aufträge im `AuftragManager` – leicht: „Kaufmann" (200.000 Taler Gesamtumsatz), „Familienvater" (3 Kinder); mittel: „Wahlsieger" (3 Wahlen gewinnen), „Kriegsheld" (10 Kämpfe gewinnen); schwer: „Karawanenschreck" (8 Karawanen überfallen), „Meuchelmörder" (3 erfolgreiche Anschläge). Alle nutzen bereits geführte Statistik-Kennzahlen; kein neues Tracking nötig. Die neuen Enum-Werte sind ans Ende angehängt, sodass bestehende Spielstände unverändert bleiben. Damit gibt es 13 Aufträge (4 leicht, 5 mittel, 4 schwer).
-
-**[EN]**
-- Game missions extended (issue #15): six more missions in `AuftragManager` – easy: "Kaufmann" (200,000 taler total turnover), "Familienvater" (3 children); medium: "Wahlsieger" (win 3 elections), "Kriegsheld" (win 10 battles); hard: "Karawanenschreck" (raid 8 caravans), "Meuchelmörder" (3 successful assassinations). All use already-tracked statistics; no new tracking needed. The new enum values are appended at the end so existing savegames stay unchanged. This brings the total to 13 missions (4 easy, 5 medium, 4 hard).
-
-## 3.82.0
-
-_05.08.2026_
-
-**[DE]**
 - Spiel-Aufträge (Missionen, Issue #15, Vorbild „Die Fugger 2"): Neues `EnumAuftrag` und das Feld `Spieleinstellungen.Auftrag` (Standard `KeinAuftrag` = freies/endloses Spiel; savegame-sicher). Neuer `AuftragManager` mit sieben Aufträgen in drei Schwierigkeitsstufen (leicht: Aufsteiger, Kleiner Wohlstand; mittel: Herr des Doms, Mäzen, Baumeister; schwer: Talerrennen, Kriegsherr), samt Fortschritts-/Erfüllungsprüfung (`AktualisiereFortschrittUndPruefe`) und Fortschrittstext. Neuer `HighscoreManager` für die lokale Bestenliste (`highscores.json`, sortiert nach Schnelligkeit). `HumSpieler` führt dafür zwei neue Zähler (`DomherrJahreInFolge`, `GestifteterBauwert`); `BauwerkStiftenManager.FuehreStiftungAus` addiert den gestifteten Wert mit (für „Mäzen"). Alte Spielstände starten ohne Auftrag und mit Zählern auf 0.
-
-**[EN]**
-- Game missions (issue #15, inspired by "Die Fugger 2"): new `EnumAuftrag` and the field `Spieleinstellungen.Auftrag` (default `KeinAuftrag` = free/endless game; savegame-safe). New `AuftragManager` with seven missions across three difficulties (easy: Aufsteiger, Kleiner Wohlstand; medium: Herr des Doms, Mäzen, Baumeister; hard: Talerrennen, Kriegsherr), including progress/fulfilment checking (`AktualisiereFortschrittUndPruefe`) and progress text. New `HighscoreManager` for the local leaderboard (`highscores.json`, sorted by speed). `HumSpieler` gains two counters for this (`DomherrJahreInFolge`, `GestifteterBauwert`); `BauwerkStiftenManager.FuehreStiftungAus` also adds up the donated value (for "Mäzen"). Old savegames start without a mission and with counters at 0.
-
-## 3.81.0
-
-_04.08.2026_
-
-**[DE]**
 - Debug-Symbole (PDB) werden jetzt über `<DebugType>embedded</DebugType>` direkt in die Assembly eingebettet – auch im Release. Dadurch enthalten Stacktraces bei den Endnutzern Datei- und Zeilennummern, und die Symbole reisen im NuGet-Paket mit (Grundlage für aussagekräftige Fehlerberichte). Keine Code-Änderung, nur Build-Einstellung.
-
-**[EN]**
-- Debug symbols (PDB) are now embedded directly into the assembly via `<DebugType>embedded</DebugType>` – including in Release. This makes end-user stack traces carry file and line numbers, and the symbols travel inside the NuGet package (the basis for meaningful bug reports). No code change, just a build setting.
-
-## 3.80.0
-
-_04.08.2026_
-
-**[DE]**
 - Überfällige Kredite: Neue Methode `SchreibstubeManager.TilgeUeberfaelligeKredite()` tilgt am Rundenende alle Kredite des aktiven Spielers, deren Rückzahlungsjahr erreicht oder überschritten ist, zwangsweise – notfalls rutscht das Vermögen dabei ins Minus. Der Betrag wird dem Gläubiger gutgeschrieben, der Kredit-Slot geleert, und pro getilgtem Kredit wird eine Hinweismeldung zurückgegeben (mit gesondertem Hinweis, falls das Vermögen dadurch negativ wird). Fehlte ein Rückzahlungsjahr (Altspielstände), wird es aus Dauer + aktuellem Jahr nachgetragen.
-
-**[EN]**
-- Overdue credits: new method `SchreibstubeManager.TilgeUeberfaelligeKredite()` forcibly repays, at the end of the round, every credit of the active player whose repayment year has been reached or passed – letting the balance go negative if necessary. The amount is credited to the lender, the credit slot is cleared, and one hint message is returned per repaid credit (with an extra note if the balance turns negative as a result). If a repayment year was missing (legacy savegames) it is derived from duration + current year.
-
-## 3.79.0
-
-_03.08.2026_
-
-**[DE]**
 - Neues Privileg „Mätresse nehmen" (Issue #8, Vorbild „Die Fugger 2"): Neuer `MaetresseManager` und das Feld `HumSpieler.HatMaetresse`. Ein verheirateter Spieler mit genügend Talern kann sich gegen einmalige Kosten eine Mätresse nehmen; das mehrt sein Ansehen (dauerhaft) und seine verbleibenden Lebensjahre, senkt aber über einen Faktor die Wahrscheinlichkeit auf ehelichen Nachwuchs (`FamilieManager.StehtGeburtAn`). Jährlich fällt Unterhalt an, und es droht ein Skandal (Ansehensverlust). `PrivilegienManager` führt „Mätresse nehmen" als synthetischen Eintrag, solange der Spieler noch keine Mätresse hat.
-
-**[EN]**
-- New privilege "take a mistress" (issue #8, inspired by "Die Fugger 2"): new `MaetresseManager` and the field `HumSpieler.HatMaetresse`. A married player with enough taler can take a mistress for a one-off cost; this permanently raises his reputation and his remaining years of life, but lowers the chance of legitimate offspring by a factor (`FamilieManager.StehtGeburtAn`). There is a yearly upkeep, and a scandal may occur (reputation loss). `PrivilegienManager` lists "take a mistress" as a synthetic entry as long as the player has no mistress yet.
-
-## 3.78.0
-
-_03.08.2026_
-
-**[DE]**
 - Grabsteinaufschrift (Issue #15, Vorbild „Die Fugger 2"): Neuer `GrabsteinManager.ErmittleGrabspruch(SpielerStatistik)` schätzt aus der Pro-Spiel-Statistik den prägendsten „Typ" des verstorbenen Charakters (Kriegsherr, Intrigant, Kaufmann, Kirchenmann, Staatsmann, Patriarch, Gesetzloser) und liefert einen dazu passenden kurzen Grabspruch. Sticht keine Spielweise deutlich heraus, kommt ein allgemeiner Spruch. Je Typ stehen mehrere Sprüche zur Auswahl (zufällig).
-
-**[EN]**
-- Gravestone inscription (issue #15, inspired by "Die Fugger 2"): new `GrabsteinManager.ErmittleGrabspruch(SpielerStatistik)` estimates the deceased character's most defining "type" from the per-game statistics (warlord, schemer, merchant, churchman, statesman, patriarch, outlaw) and returns a fitting short epitaph. If no play style stands out clearly, a generic epitaph is used. Each type has several epitaphs to choose from (random).
-
-## 3.77.0
-
-_03.08.2026_
-
-**[DE]**
 - Ahnentafel: `AhnPerson` trägt jetzt zusätzlich den `Titel` einer Person. Beim Erbfall und für die lebende Generation werden Oberhaupt und Ehepartner mit ihrem gegenderten Titel (`GetTitelGegendert`) erfasst; Kinder tragen mangels Amt/Titel keinen.
-
-**[EN]**
-- Ancestral table: `AhnPerson` now also carries a person's `Titel` (title). On inheritance and for the living generation, the head and spouse are recorded with their gendered title (`GetTitelGegendert`); children carry none (they hold no office/title).
-
-## 3.76.0
-
-_03.08.2026_
-
-**[DE]**
 - Ahnentafel (Issue #9): Neues Datenmodell `Dynastiegeneration`/`AhnPerson` und eine Ahnentafel-Liste am `HumSpieler`, die die Generationen der Dynastie festhält. Beim Erbfall (`FamilieManager.FuehreTestamentAus`, vor `TestamentVollstrecken`) wird die aktuelle Generation – verstorbenes Oberhaupt, Ehepartner und Kinder mit Geburts-/Todesjahren sowie der Erbe – gesichert, bevor der Erbe die Identität übernimmt und diese Daten sonst verloren gingen. Neuer `AhnentafelManager.GetGenerationen()` liefert alle Generationen (älteste zuerst, aktuell lebende zuletzt) für die Anzeige. Der `PrivilegienManager` führt die Ahnentafel als immer verfügbaren Eintrag (`AhnentafelPrivilegId`) an erster Stelle der Privilegienliste. Die neuen Felder sind savegame-kompatibel (alte Stände starten mit leerer Ahnentafel).
-
-**[EN]**
-- Ancestral table (issue #9): new data model `Dynastiegeneration`/`AhnPerson` and an ancestral-table list on `HumSpieler` that records the dynasty's generations. On inheritance (`FamilieManager.FuehreTestamentAus`, before `TestamentVollstrecken`) the current generation – the deceased head, spouse and children with birth/death years plus the heir – is captured before the heir takes over the identity and this data would otherwise be lost. New `AhnentafelManager.GetGenerationen()` returns all generations (oldest first, currently living last) for display. The `PrivilegienManager` lists the ancestral table as an always-available entry (`AhnentafelPrivilegId`) at the top of the privileges list. The new fields are savegame-compatible (old saves start with an empty ancestral table).
-
-## 3.75.0
-
-_03.08.2026_
-
-**[DE]**
 - Kontrahenten-Übersicht (Issue-unabhängig, Migration von KontrahentDetails): Neue Methode `KontrahentenManager.GetKontrahentDetails(spielerId)` samt Datenklasse `KontrahentDetailInfo` liefert Name, Titel, Alter und Amt eines Kontrahenten. Vermögen, Gesundheit, die Beweislast (per Spionage aufgedeckte Delikte) und der Erhebungsstand (Jahr) werden nur mitgeliefert, wenn der aktive Spieler eine laufende Spionage gegen den Kontrahenten unterhält (`HatSpionage`) – exakt wie im WinForms-Original.
-
-**[EN]**
-- Contenders overview (independent of an issue, migration of KontrahentDetails): new method `KontrahentenManager.GetKontrahentDetails(playerId)` plus the data class `KontrahentDetailInfo` returns a contender's name, title, age and office. Net worth, health, the burden of proof (crimes uncovered via espionage) and the report year are only included if the active player runs an active espionage against the contender (`HatSpionage`) – exactly as in the WinForms original.
-
-## 3.74.0
-
-_02.08.2026_
-
-**[DE]**
 - Spielübergreifende Statistik – Wertung & Anzeige (Lib-Anteil der Phasen 3–5): `PlayerSetupManager.ErstelleSpieler` nimmt optional eine `profilId` entgegen und verknüpft den Spieler mit seinem Profil. `HumSpieler` erhält die Wertungs-Snapshotfelder `GewerteteStatistik`, `GewerteteJahre` und `WurdeGezaehlt`. Neu `ProfilManager.WerteLaufendesSpiel()`: faltet beim Speichern den Statistik-Zuwachs jedes menschlichen Spielers als Delta in sein Profil – additive Zähler werden aufsummiert, `SoHoechstesAmt` und das Höchstvermögen als Maximum, die Spieljahre als Delta gegenüber dem Startjahr, und das Spiel wird einmalig als „gespielt" gezählt (doppelzähl-sicher über die Snapshots). Neuer `ProfilStatistikManager` bereitet die Profilwerte im selben Zwei-Spalten-Format wie der `StatistikManager` auf (Militär-Block, Meta-Block mit Spielen/Jahren/Höchstamt/Höchstvermögen statt Live-Vermögen).
-
-**[EN]**
-- Cross-game statistics – folding & display (Lib part of phases 3–5): `PlayerSetupManager.ErstelleSpieler` optionally takes a `profilId` and links the player to their profile. `HumSpieler` gains the folding snapshot fields `GewerteteStatistik`, `GewerteteJahre` and `WurdeGezaehlt`. New `ProfilManager.WerteLaufendesSpiel()`: on saving, folds each human player's statistics growth into their profile as a delta – additive counters are summed, `SoHoechstesAmt` and net worth as a maximum, the years played as a delta from the start year, and the game is counted once as "played" (double-count-safe via the snapshots). New `ProfilStatistikManager` formats the profile values in the same two-column layout as the `StatistikManager` (military block, meta block with games/years/highest office/highest net worth instead of live net worth).
-
-## 3.73.0
-
-_02.08.2026_
-
-**[DE]**
 - Spielübergreifende Statistik – Phase 1 (Fundament): Neue Modelle `Profil` und `ProfilMeta` sowie ein `ProfilManager`, der lokale Spielerprofile in `profile.json` im Spielstand-Verzeichnis verwaltet (Anlegen, Umbenennen, Löschen, aktives Profil; sofortiges Speichern, robust gegen beschädigte Dateien). Ein Profil bündelt die aufsummierte `SpielerStatistik` mehrerer Spiele plus spielübergreifende Kennzahlen (Spiele, Jahre, Höchstvermögen, Höchstamt). `HumSpieler` erhält ein Feld `ProfilId` zur Verknüpfung eines menschlichen Spielers mit seinem Profil (v2: ein Profil pro Spieler-Slot). Die eigentliche Wertung (Delta-Fold beim Speichern) und die UI folgen in späteren Phasen.
-
-**[EN]**
-- Cross-game statistics – phase 1 (foundation): new models `Profil` and `ProfilMeta` plus a `ProfilManager` that manages local player profiles in `profile.json` in the savegame directory (create, rename, delete, active profile; immediate saving, robust against corrupt files). A profile bundles the summed `SpielerStatistik` of several games plus cross-game figures (games, years, highest net worth, highest office). `HumSpieler` gains a `ProfilId` field to link a human player to their profile (v2: one profile per player slot). The actual folding (delta on save) and the UI follow in later phases.
-
-## 3.72.0
-
-_02.08.2026_
-
-**[DE]**
 - Spielerstatistik erweitert: Neue Militär-Kennzahlen für das Stützpunkt-/Söldner-System, das bislang gar nicht in der Statistik auftauchte – gewonnene und verlorene Kämpfe, eroberte Stützpunkte und überfallene Karawanen (getrackt in `Kampfberechnung`, nur für menschliche Beteiligte). Dazu die Kennzahl „Gebaute Häuser" (`AnwesenManager.BaueHaus`). Der `StatistikManager` zeigt die neuen Werte an (Militär-Block links, „Gebaute Häuser" bei Sonstiges).
-
-**[EN]**
-- Player statistics extended: new military figures for the base/mercenary system, which was not represented in the statistics at all before – battles won and lost, bases captured and caravans raided (tracked in `Kampfberechnung`, human participants only). Plus a "houses built" figure (`AnwesenManager.BaueHaus`). The `StatistikManager` displays the new values (military block on the left, "houses built" under miscellaneous).
-
-## 3.71.0
-
-_02.08.2026_
-
-**[DE]**
 - Spielerstatistik (Issue #19): Die bislang nur angezeigten, aber nie befüllten Kennzahlen werden jetzt während des Spiels mitgezählt. Erfasst werden verkaufte und eingekaufte Waren sowie der Gesamtumsatz (`HandelsManager`, `AbrechnungsManager`), entrichtete Steuern (Verkaufssteuer + Kirchenzehnt) und Zölle (`AbrechnungsManager`), das Amtseinkommen (`ZugNachrichtenManager`), das höchste je gehaltene Amt und die begangenen Gesetzesverstöße (`Spieler`), Wahlteilnahmen und -siege (`AemterManager`), Anklagen (`GerichtsverhandlungManager`), gezeugte Kinder (`FamilieManager`) und Schuldturm-Aufenthalte (`RundenManager`). Alle Zähler betreffen nur menschliche Spieler.
-
-**[EN]**
-- Player statistics (Issue #19): the figures that were shown but never populated are now tracked during play. Recorded are goods sold and bought as well as total turnover (`HandelsManager`, `AbrechnungsManager`), taxes paid (sales tax + church tithe) and tariffs (`AbrechnungsManager`), office income (`ZugNachrichtenManager`), the highest office ever held and the number of laws broken (`Spieler`), election participations and wins (`AemterManager`), indictments (`GerichtsverhandlungManager`), children fathered (`FamilieManager`) and debtors'-tower stays (`RundenManager`). All counters apply to human players only.
-
-## 3.70.0
-
-_02.08.2026_
-
-**[DE]**
 - Neuer `CheatManager` für die komplexeren Cheats der WinForms-Cheatbox (die einfachen laufen weiter direkt über die Spieler-Setter): `UebernehmeAmt(stufe, gebiet, amt)` nimmt dem bisherigen KI-Inhaber ein Amt ab und tauscht das alte Amt des Spielers zu ihr; `BaueHaus(stadt, haustyp)` errichtet ein Haus; `LasseVerklagen()` bucht ein Delikt, wählt einen missgünstigen KI-Kläger und drei Richter und setzt eine Gerichtsverhandlung fürs Folgejahr auf. Dazu Combobox-Daten (`GetAmtsstufen`, `GetGebiete`, `GetAemter`, `GetStaedte`, `GetHaustypen`). Alle Aktionen betreffen den aktiven Spieler.
-
-**[EN]**
-- New `CheatManager` for the more complex cheats of the WinForms cheat box (the simple ones still go directly through the player setters): `UebernehmeAmt(level, region, office)` takes an office from its current AI holder and swaps the player's old office to them; `BaueHaus(town, houseType)` builds a house; `LasseVerklagen()` books an offence, picks a hostile AI plaintiff and three judges and sets up a court trial for the next year. Plus combo-box data (`GetAmtsstufen`, `GetGebiete`, `GetAemter`, `GetStaedte`, `GetHaustypen`). All actions concern the active player.
-
-## 3.69.0
-
-_01.08.2026_
-
-**[DE]**
 - Ämter: Neue Methode `AemterManager.GetFreieAemterAnkuendigung()` liefert die zu Zugbeginn neu zu besetzenden Ämter des aktiven Spielers als fertigen Ankündigungstext (mit Ort je Amt) bzw. `null`, wenn es keine für ihn bewerbbaren freien Ämter gibt. Grundlage sind die bereits vorhandenen Bewerbungsangebote.
-
-**[EN]**
-- Offices: new method `AemterManager.GetFreieAemterAnkuendigung()` returns the offices to be newly filled at the start of the active player's turn as a ready-made announcement text (with the location per office), or `null` if there are no vacant offices they could apply for. It is based on the existing application offers.
-
-## 3.68.1
-
-_01.08.2026_
-
-**[DE]**
 - Fehlerbehebung: Im Kreditbuch wanderte das Rückzahlungsjahr eines Kredits jedes Jahr mit (es wurde als Restlaufzeit + aktuelles Jahr berechnet, die Restlaufzeit aber nie heruntergezählt) – nach einem übersprungenen Jahr (Schuldturm) sprang es sogar um zwei Jahre. Das Rückzahlungsjahr wird jetzt bei der Kreditaufnahme fest verankert (`Kredit.SetRueckzahlungsjahr`, gesetzt in `SchreibstubeManager.NimmKredit` = aktuelles Jahr + Laufzeit) und bleibt konstant. Bestehende Kredite aus älteren Spielständen werden beim ersten Öffnen des Kreditbuchs einmalig aus ihrer Restlaufzeit festgeschrieben.
-
-**[EN]**
-- Bugfix: in the credit book a loan's repayment year drifted forward every year (it was computed as remaining term + current year, but the remaining term was never counted down) – after a skipped year (debtors' prison) it even jumped by two years. The repayment year is now fixed when the loan is taken (`Kredit.SetRueckzahlungsjahr`, set in `SchreibstubeManager.NimmKredit` = current year + term) and stays constant. Existing loans from older savegames are frozen once from their remaining term the first time the credit book is opened.
-
-## 3.68.0
-
-_01.08.2026_
-
-**[DE]**
 - Gerichtsverhandlung (Issue #18): Variable Plädoyers von Anklage und Verteidigung (`GetAnklageplaedoyer`, `GetVerteidigungsplaedoyer`). Das Anklageplädoyer richtet sich im Ton nach der Beweislast (tatsächliche Delikte plus gesammelte Beweise): von haltlos über dünn und deutlich bis erdrückend. Das Verteidigungsplädoyer richtet sich nach dem Ansehen des Angeklagten; ein hohes Ansehen zieht die Richter zudem etwas Richtung Freispruch (in `StarteVerhandlung` als `_plaedoyerBonus` verbucht, fließt in `BerechneKiUrteil` ein: Ansehen ≥ 80 → −6, ≥ 30 → −3). Damit ist die Erweiterung der Gerichtsverhandlung (Issue #18) vollständig.
-
-**[EN]**
-- Court trial (issue #18): variable pleas by the prosecution and the defence (`GetAnklageplaedoyer`, `GetVerteidigungsplaedoyer`). The prosecution's plea varies in tone with the strength of the case (actual offences plus collected evidence): from baseless through thin and clear to overwhelming. The defence's plea varies with the defendant's reputation (Ansehen); a high reputation also nudges the judges towards acquittal (recorded in `StarteVerhandlung` as `_plaedoyerBonus`, applied in `BerechneKiUrteil`: reputation ≥ 80 → −6, ≥ 30 → −3). This completes the court-trial extension (issue #18).
-
-## 3.67.2
-
-_01.08.2026_
-
-**[DE]**
 - Fehlerbehebung: Spielstände mit Stützpunkt-Einheiten (z. B. `ZollSoeldner`, `RaubRaeuber`) ließen sich nicht mehr laden („Error resolving type specified in JSON 'Conspiratio.Kampf.ZollSoeldner'"). Diese Einheiten-Typen liegen aus Kompatibilitätsgründen bewusst noch im alten Namespace `Conspiratio.Kampf`; der JSON-Typ-Binder ließ beim Laden aber nur `Conspiratio.Lib.*`-Typen zu und wies sie ab. Der Binder löst Typen jetzt direkt in der Conspiratio.Lib-Assembly auf (deckt den Kompatibilitäts-Namespace mit ab) und nutzt die Übersetzungstabelle nur noch als Fallback für tatsächlich umbenannte Typen. Die Sicherheitsprüfung (nur eigene Spieltypen) bleibt bestehen.
-
-**[EN]**
-- Bugfix: savegames containing base units (e.g. `ZollSoeldner`, `RaubRaeuber`) could no longer be loaded ("Error resolving type specified in JSON 'Conspiratio.Kampf.ZollSoeldner'"). For compatibility these unit types deliberately remain in the old `Conspiratio.Kampf` namespace; the JSON type binder only allowed `Conspiratio.Lib.*` types on load and rejected them. The binder now resolves types directly in the Conspiratio.Lib assembly (which also covers the compatibility namespace) and only uses the translation table as a fallback for genuinely renamed types. The safety check (only the game's own types) remains in place.
-
-## 3.67.1
-
-_31.07.2026_
-
-**[DE]**
 - Gerichtsverhandlung (Issue #18): Die Zeugen tragen jetzt zusätzlich zu ihrer Einordnung einen gesprochenen Satz vor – passend zu Richtung (für/gegen) und Überzeugungskraft (überzeugend/zögerlich), z. B. „Ich habe ihn genau gesehen!" oder „Ich schwöre, dass er nicht der Täter ist!". Pronomen und „der Täter"/„die Täterin" richten sich nach dem Geschlecht des Angeklagten.
-
-**[EN]**
-- Court trial (issue #18): witnesses now also deliver a spoken line in addition to their classification – matching direction (for/against) and persuasiveness (convincing/hesitant), e.g. "I saw him clearly!" or "I swear he is not the culprit!". Pronouns and "the culprit" (m/f) follow the defendant's gender.
-
-## 3.67.0
-
-_31.07.2026_
-
-**[DE]**
 - Gerichtsverhandlung (Issue #18): Echte Zeugen. In jeder Verhandlung sagen bis zu zwei KI-Zeugen (weder Partei noch Richter) aus. Ob ein Zeuge für oder gegen den Angeklagten aussagt, ergibt sich aus seinem Verhältnis: Steht er dem Angeklagten näher als dem Kläger, spricht er für ihn, sonst gegen ihn – bei großem Beziehungsunterschied überzeugend, sonst schwach. Die Aussagen fließen als `_zeugenBonus` in das Urteil ein (`BerechneKiUrteil`). Der in 3.66.0 angelegte Zeugen-Topf wirkt nun: Eine Zeugen-Bestechung zieht einen Zeugen (ab Schwelle sicher) auf die Seite des Bestechers und lässt ihn überzeugend auftreten. `GetZeugenAnzahl`, `ErmittleZeugenAussagen` (nach der Bestechung aufzurufen) und die neue Klasse `ZeugenAussage` liefern dem Client die Aussagetexte.
-
-**[EN]**
-- Court trial (issue #18): real witnesses. In every trial up to two AI witnesses (neither a party nor a judge) testify. Whether a witness testifies for or against the defendant follows from their relationship: if they are closer to the defendant than to the plaintiff they speak for them, otherwise against – convincingly when the relationship gap is large, weakly otherwise. The testimonies feed into the verdict as `_zeugenBonus` (`BerechneKiUrteil`). The witness pot introduced in 3.66.0 now takes effect: bribing a witness pulls them (certain above a threshold) to the briber's side and makes them testify convincingly. `GetZeugenAnzahl`, `ErmittleZeugenAussagen` (to be called after the bribery) and the new `ZeugenAussage` class provide the testimony texts to the client.
-
-## 3.66.0
-
-_31.07.2026_
-
-**[DE]**
 - Gerichtsverhandlung (Issue #18): Bestechung mit zwei Töpfen (Richter und Zeugen). Ist der aktive Spieler Partei, kann er vor dem Urteil einen Betrag für die Richter einsetzen (`KannBestechen`, `GetRichterBestechungsOptionen`, `SetzeRichterBestechung`): Als Angeklagter besticht er auf Freispruch, als Kläger auf Verurteilung. Die Wirkung ist „ab Schwelle sicher" – erreicht der auf einen Richter entfallende Anteil dessen Schwelle (halbes Barvermögen, mind. 3000), stimmt der Richter sicher im Sinne des Bestechers, darunter nur anteilig (`BerechneKiUrteil`). Die Bestechungsstufen sind auf das Barvermögen des Spielers begrenzt und werden sofort abgebucht. Vor dem Urteil legt `WurdeBestochen`/`GetBestechungsOffenlegung` offen, dass Gelder geflossen sind. Der Zeugen-Topf (`GetZeugenBestechungsOptionen`, `SetzeZeugenBestechung`) ist bereits angelegt, bleibt aber wirkungslos, bis Schritt 5 echte Zeugen liefert (`GetZeugenAnzahl` noch 0).
-
-**[EN]**
-- Court trial (issue #18): bribery with two pots (judges and witnesses). If the active player is a party, they can put up an amount for the judges before the verdict (`KannBestechen`, `GetRichterBestechungsOptionen`, `SetzeRichterBestechung`): as the defendant they bribe for acquittal, as the plaintiff for conviction. The effect is "certain above a threshold" – if the share falling to a judge reaches that judge's threshold (half their cash, min 3000), the judge surely votes the briber's way, below it only proportionally (`BerechneKiUrteil`). The bribe tiers are capped by the player's cash and are debited immediately. Before the verdict `WurdeBestochen`/`GetBestechungsOffenlegung` disclose that money changed hands. The witness pot (`GetZeugenBestechungsOptionen`, `SetzeZeugenBestechung`) is already in place but stays ineffective until step 5 provides real witnesses (`GetZeugenAnzahl` still 0).
-
-## 3.65.0
-
-_31.07.2026_
-
-**[DE]**
 - Gerichtsverhandlung (Issue #18): Die Verurteilungsrate wurde an echte Beweise angepasst. Bislang wog jedes Beweisstück (tatsächlich begangenes Delikt bzw. vom Kläger erspähtes Delikt) nur mit 1 gegen die zufällige Richter-Sympathie (20–80), sodass selbst bei klarer Beweislage kaum verurteilt wurde. Jedes Beweisstück wird nun mit `BeweisGewicht` (10) gewichtet: Bei echten Beweisen führt die Anklage im Schnitt zu ~80 % zur Verurteilung, gestaffelt nach Anzahl der Delikte (0 Delikte ≈ 5 %, 1 ≈ 31 %, 2 ≈ 63 %, 3 ≈ 84 %, ab 4 ≈ 95 %+). Die Aussage-Boni des Angeklagten (Geständnis/Teilgeständnis/Leugnen/empört leugnen) wurden auf denselben Maßstab angehoben, damit sie spürbar bleiben: ein Geständnis führt fast sicher zur Verurteilung (senkt aber die Strafe), Leugnen räumt bei falscher Anklage frei, empörtes Leugnen schlägt bei erdrückender Beweislage ins Gegenteil um.
-
-**[EN]**
-- Court trial (issue #18): the conviction rate was rebalanced against real evidence. Previously each piece of evidence (an actually committed offence or an offence spied out by the plaintiff) weighed only 1 against the random judge sympathy (20–80), so even a clear case rarely led to a conviction. Each piece of evidence is now weighted by `BeweisGewicht` (10): with real evidence the charge leads to a conviction ~80 % of the time on average, graduated by the number of offences (0 offences ≈ 5 %, 1 ≈ 31 %, 2 ≈ 63 %, 3 ≈ 84 %, 4+ ≈ 95 %+). The defendant's statement bonuses (confession/partial confession/denial/indignant denial) were raised to the same scale so they stay meaningful: a confession makes conviction almost certain (but lowers the penalty), denial clears a false accusation, indignant denial backfires with overwhelming evidence.
-
-## 3.64.0
-
-_31.07.2026_
-
-**[DE]**
 - Gerichtsverhandlung (Issue #18): Ist der Spieler selbst angeklagt, kann er nun eine Aussage wählen (`GetAussageOptionen`, `SetzeAussage`): Leugnen, empört leugnen, Teilgeständnis oder Geständnis. Die Wirkung ist gestaffelt und hängt von der Beweislage ab: Ein Geständnis führt eher zur Verurteilung, senkt aber die Strafe deutlich; ein Teilgeständnis mildert moderat. Leugnen hilft nur bei schwacher Beweislage und ist bei starker wirkungslos; empörtes Leugnen hilft bei schwacher Lage stärker, schlägt bei starker Lage aber ins Gegenteil um (härtere Strafe). `BerechneKiUrteil` berücksichtigt den Aussage-Bonus, die Auswertung skaliert das Strafmaß mit dem Aussage-Faktor. `IstAngeklagterAktiverSpieler` sagt dem Client, wann die Auswahl anzubieten ist.
-
-**[EN]**
-- Court trial (issue #18): if the player themselves is the defendant, they can now choose a statement (`GetAussageOptionen`, `SetzeAussage`): deny, indignantly deny, partial confession or full confession. The effect is graduated and depends on the strength of the case: a confession makes conviction more likely but noticeably lowers the penalty; a partial confession mitigates moderately. Denial only helps with a weak case and is ineffective with a strong one; indignant denial helps more with a weak case but backfires with a strong one (harsher penalty). `BerechneKiUrteil` factors in the statement bonus, the evaluation scales the penalty by the statement factor. `IstAngeklagterAktiverSpieler` tells the client when to offer the choice.
-
-## 3.63.1
-
-_31.07.2026_
-
-**[DE]**
 - Fehlerbehebung: `RundenEndeManager.FuehreKiStraftatenDurch` konnte zum Rundenende mit einer `NullReferenceException` in `Spieler.HalbiereDelikte` abstürzen (das Jahr blieb dann stehen, keine Spielerankündigung). Ursache war der in 3.63.0 in die Basisklasse gehobene Delikt-Speicher, der bei per Deserialisierung geladenen Spielern (der Konstruktor wird dabei umgangen) noch `null` war. Der Zugriff legt das Feld jetzt bei Bedarf sicher an (Lazy-Init).
-
-**[EN]**
-- Bugfix: `RundenEndeManager.FuehreKiStraftatenDurch` could crash at round end with a `NullReferenceException` in `Spieler.HalbiereDelikte` (the year then stopped advancing and no player announcement appeared). The cause was the offence store moved into the base class in 3.63.0, which was still `null` for players loaded via deserialization (which bypasses the constructor). Access now creates the field safely on demand (lazy init).
-
-## 3.63.0
-
-_31.07.2026_
-
-**[DE]**
 - Gerichtsverhandlung (Issue #18): KI-Spieler führen jetzt eine echte Straftaten-Verwaltung. Zum Rundenende begehen sie zufällige Delikte, deren Häufigkeit mit ihrer Bosheit steigt (`RundenEndeManager.FuehreKiStraftatenDurch`); die begangenen Verbrechen werden je Gesetz gespeichert (der Delikt-Speicher `begingVerbrechenX` wurde von `HumSpieler` in die Basisklasse `Spieler` gehoben, sodass ihn KI und Menschen teilen) und verblassen jährlich. Bei einer Anklage nutzt `GerichtsverhandlungManager.StarteVerhandlung` diese tatsächlich begangenen Delikte – für KI wie für Menschen gleichermaßen, statt sie für KI wie bisher zufällig zu würfeln; nach der Verhandlung sind sie gesühnt. Der Speicher ist additiv, sodass künftige real begangene illegale KI-Aktionen direkt hineinzählen.
-
-**[EN]**
-- Court trial (issue #18): AI players now keep a real record of their offences. At round end they commit random crimes whose frequency scales with their malice (`RundenEndeManager.FuehreKiStraftatenDurch`); the committed crimes are stored per law (the offence store `begingVerbrechenX` was moved from `HumSpieler` up into the base class `Spieler`, so AI and humans share it) and fade each year. When accused, `GerichtsverhandlungManager.StarteVerhandlung` uses these actually committed offences – for AI and humans alike, instead of rolling them randomly for AI as before; after the trial they are atoned. The store is additive so that future real illegal AI actions feed straight into it.
-
-## 3.62.0
-
-_31.07.2026_
-
-**[DE]**
 - Gerichtsverhandlung (Issue #18): Klagt ein menschlicher Spieler einen KI-Spieler an, fließen jetzt die von seinen Spionen gesammelten Beweise in die Entscheidung der Richter ein – je mehr Beweise gegen den Angeklagten vorliegen, desto eher entscheiden die KI-Richter auf „schuldig" (`GerichtsverhandlungManager.BerechneKiUrteil` berücksichtigt neben der Schwere der Verbrechen nun auch die Beweisstärke; `StarteVerhandlung` ermittelt sie aus den Spionage-Delikten des Klägers gegen den Angeklagten, abrufbar über `GetBeweise`).
-
-**[EN]**
-- Court trial (issue #18): when a human player accuses an AI player, the evidence gathered by their spies now feeds into the judges' decision – the more evidence against the defendant, the more likely the AI judges decide "guilty" (`GerichtsverhandlungManager.BerechneKiUrteil` now considers the strength of the evidence in addition to the severity of the crimes; `StarteVerhandlung` derives it from the plaintiff's espionage offences against the defendant, retrievable via `GetBeweise`).
-
-## 3.61.0
-
-_30.07.2026_
-
-**[DE]**
 - Ämter: Menschliche Spieler können sich jetzt gleichzeitig für mehrere freie Ämter bewerben. `WahlAnmeldungUmschalten` schaltet die Bewerbung je Wahl unabhängig um (die Kandidatenliste der Wahl ist maßgeblich, nicht mehr eine einzelne gespeicherte Teilnahme), und `GetBewerbungsangebote` markiert alle Bewerbungen. Bei der Auszählung sortiert `GetWahlenMitMenschlicherBeteiligung` die Wahlen nach Amtsstufe absteigend (höchstes Amt zuerst); gewinnt der Spieler ein Amt, zieht `VergebeAmt` über die neue `SpielerAusAllenWahlenEntfernen` alle übrigen Bewerbungen des Gewinners zurück – er behält also nur das höchste gewonnene Amt. Die Abmeldungen bei Kerkerstrafe und beim Ausscheiden aus dem Spiel entfernen den Spieler nun ebenfalls aus allen Wahlen. `HatMenschlicheBeteiligung` ist für die erneute Prüfung während der Auszählung öffentlich.
-
-**[EN]**
-- Offices: human players can now apply for several vacant offices at the same time. `WahlAnmeldungUmschalten` toggles the application per election independently (the election's candidate list is authoritative now, no longer a single stored participation), and `GetBewerbungsangebote` marks all applications. When counting, `GetWahlenMitMenschlicherBeteiligung` sorts the elections by office level in descending order (highest office first); if the player wins an office, `VergebeAmt` withdraws all of the winner's remaining applications via the new `SpielerAusAllenWahlenEntfernen` – so they keep only the highest office won. Removals on a prison sentence and on leaving the game now also remove the player from all elections. `HatMenschlicheBeteiligung` is public for the re-check during counting.
-
-## 3.60.0
-
-_30.07.2026_
-
-**[DE]**
 - Fehlerbehebung Wahlen: Bei der KI-Kandidatensuche für ein frei gewordenes Amt (`WahlAnlegen`) konnten bislang völlig unpassende Kandidaten aufgestellt werden – z. B. ein amtsloser Spieler als Kandidat für den Regenten. Grund war ein Fallback, der nach 100 erfolglosen Versuchen die Eignungsprüfung komplett ignorierte (relevant vor allem bei hohen Ämtern, für die kaum jemand die geforderte Vorstufe hält). Neu gibt es eine gelockerte Zwischenstufe: Findet sich unter der strengen Regel (genau 1–2 Amtsstufen Abstand) niemand, wird der starre Stufensprung fallengelassen – der Kandidat muss aber weiterhin unterhalb des Zielamts liegen, und Amtslose bleiben auf Einstiegsämter (Stufe 1–2) beschränkt. Erst als allerletzte Reserve wird wie zuvor die Prüfung ignoriert, damit jede Wahl garantiert zwei Kandidaten hat.
-
-**[EN]**
-- Bugfix elections: when searching AI candidates for a vacated office (`WahlAnlegen`), completely unsuitable candidates could be nominated – e.g. a player without any office running for regent. The cause was a fallback that, after 100 unsuccessful attempts, ignored the eligibility check entirely (mostly relevant for high offices, for which hardly anyone holds the required lower rank). There is now a relaxed intermediate tier: if no one qualifies under the strict rule (exactly 1–2 office levels below), the rigid level step is dropped – but the candidate must still be below the target office, and office-less players remain limited to entry-level offices (level 1–2). Only as a very last resort is the check ignored, as before, so every election is guaranteed two candidates.
-
-## 3.59.0
-
-_30.07.2026_
-
-**[DE]**
 - Kampfereignisse (Issue #16): `KampfereignisseManager.ErmittleEreignisse` entfernt die `|`-Marker um die Spielernamen nicht mehr aus den Kampf-Zusammenfassungen. Die Marker sind die Markup-Konvention der Lib und bleiben nun erhalten, damit die Ansicht die Namen hervorheben kann (fett, menschliche Spieler zusätzlich dunkelrot – wie im WinForms-Original). Ansichten ohne Formatierung können sie weiterhin selbst entfernen.
-
-**[EN]**
-- Combat events (issue #16): `KampfereignisseManager.ErmittleEreignisse` no longer strips the `|` markers around player names from the battle summaries. The markers are the Lib's markup convention and are now preserved so the view can highlight the names (bold, human players additionally in dark red – as in the WinForms original). Views without formatting can still remove them themselves.
-
-## 3.58.0
-
-_30.07.2026_
-
-**[DE]**
 - Zölle (Issue #16): Ist der handelnde Spieler zollfrei (Privileg 23 oder die 50%-Chance von Privileg 31), erhalten jetzt auch die Zollburg-Besitzer keinen Zollanteil mehr ausgezahlt. Zuvor wurde der Zoll den Besitzern gutgeschrieben, obwohl der Händler nichts zahlte (`AbrechnungsManager`: die Zollfreiheit wird nun **vor** der Auszahlung ermittelt und überspringt die gesamte Zollberechnung).
-
-**[EN]**
-- Tolls (issue #16): if the trading player is toll-free (privilege 23 or the 50 % chance of privilege 31), the toll castle owners no longer receive a toll share either. Previously the toll was credited to the owners even though the trader paid nothing (`AbrechnungsManager`: toll-freedom is now determined **before** the payout and skips the entire toll calculation).
-
-## 3.57.0
-
-_30.07.2026_
-
-**[DE]**
 - Räuber/Söldner-System (Issue #16): KI-Spieler greifen sich nicht mehr gegenseitig an. Die KI-Zielauswahl (`Stuetzpunkt.KiZufaelligesAngriffsziel`) berücksichtigt nur noch Stützpunkte menschlicher Besitzer, und `Kampfberechnung.ErmittleStattfindendeKaempfe` überspringt zusätzlich als Sicherung jeden Angriff, bei dem Angreifer und Verteidiger beide KI sind (schützt auch alte Spielstände). Angriffe finden damit nur noch mit menschlicher Beteiligung statt.
-
-**[EN]**
-- Robbers/mercenaries system (issue #16): AI players no longer attack each other. The AI target selection (`Stuetzpunkt.KiZufaelligesAngriffsziel`) now only considers bases owned by human players, and as a safeguard `Kampfberechnung.ErmittleStattfindendeKaempfe` additionally skips any attack where both attacker and defender are AI (also protects old savegames). Attacks therefore only occur with human participation.
-
-## 3.56.0
-
-_30.07.2026_
-
-**[DE]**
 - Räuber/Söldner-System (Issue #16): Stützpunkte können nun andere Stützpunkte angreifen. Die „Truppen schicken"-Aktion mit einem gegnerischen Stützpunkt als Ziel erzeugt beim Rundenende einen Kampf (`EnumKampfArt.StuetzpunktAngriff`; `Kampfberechnung.ErmittleStattfindendeKaempfe` baut die Angriffe aus den Aktionen auf, `StuetzpunktAngriffAnwenden` wickelt das Ergebnis ab). Gewinnt der Angreifer und ist die gesamte Garnison des Ziels ausgelöscht, während überlebende Truppen einrücken, wird der Stützpunkt **eingenommen** (Besitzerwechsel, offene Angebote/Boni verfallen); gewinnt der Angreifer ohne vollständige Auslöschung, wird das Ziel nur **beschädigt** (−25 Zustand). Angriffe unterliegen wie Karawanen-Überfälle der 7-Jahres-Anlaufzeit. Die KI greift abhängig von ihrer Aktivität (`kiAktivitaetsfaktor`) ebenfalls gegnerische Stützpunkte an (`Zollburg`/`Raeuberlager` `VersucheKiAngriff`, `Stuetzpunkt.KiZufaelligesAngriffsziel`).
 - Fehlerbehebung: Der `ZielStuetzpunktID`-Setter in `StuetzpunktAktion` verwarf zuvor durch eine invertierte Bereichsprüfung jedes gültige Ziel (fiel auf 0 zurück), wodurch „Truppen schicken" nie ein Ziel speichern konnte. Die Prüfung akzeptiert nun korrekt gültige Stützpunkt-IDs.
-
-**[EN]**
-- Robbers/mercenaries system (issue #16): bases can now attack other bases. The "send troops" action with an enemy base as its target creates a battle at round end (`EnumKampfArt.StuetzpunktAngriff`; `Kampfberechnung.ErmittleStattfindendeKaempfe` builds the attacks from the actions, `StuetzpunktAngriffAnwenden` applies the result). If the attacker wins and the target's entire garrison is wiped out while surviving troops move in, the base is **captured** (owner change, open offers/bonuses expire); if the attacker wins without a complete wipeout, the target is merely **damaged** (−25 condition). Like caravan raids, attacks are subject to the 7-year grace period. Depending on its activity level (`kiAktivitaetsfaktor`), the AI also attacks enemy bases (`Zollburg`/`Raeuberlager` `VersucheKiAngriff`, `Stuetzpunkt.KiZufaelligesAngriffsziel`).
-- Bugfix: the `ZielStuetzpunktID` setter in `StuetzpunktAktion` previously discarded every valid target through an inverted bounds check (fell back to 0), so "send troops" could never store a target. The check now correctly accepts valid base IDs.
-
-## 3.55.0
-
-_28.07.2026_
-
-**[DE]**
 - Räuber/Söldner-System (Issue #16): `KampfereignisseManager.ErmittleEreignisse` kennt jetzt zwei Filter (aus dem WinForms-Original übernommen): Meldungen zu KI-Stützpunkt-Aktionen (Ausbau, neue Rekruten) lassen sich ausblenden, und Kämpfe ohne menschliche Beteiligung (Angreifer, Verteidiger oder überfallene Karawane alle KI) lassen sich unterdrücken. Die Aktionen und Kämpfe werden unabhängig davon immer abgewickelt – gefiltert wird nur die Anzeige.
-
-**[EN]**
-- Robbers/mercenaries system (issue #16): `KampfereignisseManager.ErmittleEreignisse` now supports two filters (taken from the WinForms original): messages about AI base actions (expansion, new recruits) can be hidden, and battles without human participation (attacker, defender or raided caravan all AI) can be suppressed. The actions and battles are still always carried out – only the display is filtered.
-
-## 3.54.0
-
-_28.07.2026_
-
-**[DE]**
 - Räuber/Söldner-System (Issue #16): Truppen werden nun angeworben statt sofort eingestellt – der Werbe-Etat wird beim Auftrag bezahlt, die Truppen treffen erst zum nächsten Rundenende ein (`Stuetzpunkt.GeworbeneTruppen`, `TruppenAnheuern` reiht ein statt sofort `ErhoeheTruppen`; `GeworbeneTruppenEinstellen` im `KampfereignisseManager` vor den Kämpfen). Die Verwaltung zeigt stationierte plus angeworbene Truppen an (`GetAnzahlTruppenInklGeworben`); `TruppenEntlassen` storniert zunächst noch nicht eingetroffene Anwerbungen und erstattet den Werbe-Etat zurück, bevor stationierte Truppen entlassen werden. Kapazitätsprüfung inkl. angeworbener Truppen.
-
-**[EN]**
-- Robbers/mercenaries system (issue #16): troops are now recruited instead of hired immediately – the advertising budget is paid when ordering, but the troops only arrive at the next round end (`Stuetzpunkt.GeworbeneTruppen`, `TruppenAnheuern` queues them instead of calling `ErhoeheTruppen` right away; `GeworbeneTruppenEinstellen` in the `KampfereignisseManager` before the battles). The management shows stationed plus recruited troops (`GetAnzahlTruppenInklGeworben`); `TruppenEntlassen` first cancels not-yet-arrived recruits and refunds the advertising budget before dismissing stationed troops. Capacity check includes recruited troops.
-
-## 3.53.0
-
-_28.07.2026_
-
-**[DE]**
 - Räuber/Söldner-System (Issue #16): Ein vor dem Kampf bezahlter Moral-Bonus wird nun mit dem Kampf verbraucht und bei einem Sieg **nicht** zurückerstattet (zuvor gab es bei Sieg eine Rückerstattung). Nur ein ungenutzter Bonus (ohne stattgefundenen Kampf) wird weiterhin erstattet.
-
-**[EN]**
-- Robbers/mercenaries system (issue #16): a morale bonus paid before combat is now consumed with the combat and is **no longer** refunded on victory (previously victory triggered a refund). Only an unused bonus (without a combat that took place) is still refunded.
-
-## 3.52.0
-
-_28.07.2026_
-
-**[DE]**
 - Räuber/Söldner-System (Issue #16): Vor dem Kampf kann für die Truppen eines Stützpunkts ein einmaliger Moral-Bonus bezahlt werden (`Stuetzpunkt.MoralBonusZahlen`, Kosten je Truppenstärke; `MoralBonusBezahlt`, `BerechneKostenMoralBonus`). Der Bonus hebt die Kampfmoral der Angreifer um `MoralBonusWert` (15 %-Punkte, siehe `MoralFuerKampf`, im Kampfaufbau berücksichtigt) und wird bei einem Sieg zurückerstattet, sonst verfällt er; ungenutzte Boni (ohne Kampf) werden ebenfalls erstattet (`KampfereignisseManager`).
-
-**[EN]**
-- Robbers/mercenaries system (issue #16): before combat a one-time morale bonus can be paid for a base's troops (`Stuetzpunkt.MoralBonusZahlen`, cost by troop strength; `MoralBonusBezahlt`, `BerechneKostenMoralBonus`). The bonus raises the attackers' combat morale by `MoralBonusWert` (15 percentage points, see `MoralFuerKampf`, applied when building the combat) and is refunded on victory, otherwise it is forfeited; unused bonuses (without a combat) are refunded as well (`KampfereignisseManager`).
-
-## 3.51.0
-
-_28.07.2026_
-
-**[DE]**
 - Räuber/Söldner-System (Issue #16): Die Aktivität der KI-Spieler in den Militärstützpunkten wird nun über einen feinen Prozentwert gesteuert (`Spieleinstellungen.KiAktivitaetProzent`, 1–100, Standard 50) statt der bisherigen drei Stufen. Räuberlager und Zollburg leiten ihren Aktivitätsfaktor direkt daraus ab (50 % = bisheriger Normalwert); alte Spielstände (Wert 0) werden wie 50 % behandelt.
-
-**[EN]**
-- Robbers/mercenaries system (issue #16): the activity of the AI players in the military bases is now controlled via a fine percentage value (`Spieleinstellungen.KiAktivitaetProzent`, 1–100, default 50) instead of the previous three levels. Robber camps and toll castles derive their activity factor directly from it (50 % = the previous normal value); old savegames (value 0) are treated as 50 %.
-
-## 3.50.0
-
-_28.07.2026_
-
-**[DE]**
 - Räuber/Söldner-System (Issue #16): Die von menschlichen Zollburg-Besitzern eingenommenen Zölle werden nun mitgezählt (`HumSpieler.ZolleinnahmenGesammelt`, akkumuliert in der Abrechnung) und dem Spieler zu Zugbeginn als Einnahme gemeldet (`SoeldnerRaeuberManager.ZeigeZolleinnahmen`), danach zurückgesetzt.
-
-**[EN]**
-- Robbers/mercenaries system (issue #16): the tolls collected by human toll-castle owners are now tallied (`HumSpieler.ZolleinnahmenGesammelt`, accumulated during settlement) and reported to the player as income at the start of the turn (`SoeldnerRaeuberManager.ZeigeZolleinnahmen`), then reset.
-
-## 3.49.0
-
-_28.07.2026_
-
-**[DE]**
 - Räuber/Söldner-System (Issue #16): Ein eigener Stützpunkt kann nun zum Verkauf angeboten werden (`Stuetzpunkt.ZumVerkaufAngeboten`, `StuetzpunktVerwaltenManager.ZumVerkaufAngeboten`, `SoeldnerRaeuberManager.SetzeZumVerkauf`/`IstZumVerkaufAngeboten`). Zu Zugbeginn unterbreiten KI-Spieler dann gelegentlich zufällige Kaufangebote (`GeneriereKiKaufangebote`, Preis um den aktuellen Wert), die dem Besitzer vorgelegt werden. `Stuetzpunkt.AngebotVorlegen` verarbeitet jetzt auch KI-Anbieter: bei Annahme wechselt der Stützpunkt gegen Bezahlung zur KI (Verkaufs-Flag wird zurückgesetzt), bei Ablehnung bleibt er gelistet.
-
-**[EN]**
-- Robbers/mercenaries system (issue #16): an own base can now be put up for sale (`Stuetzpunkt.ZumVerkaufAngeboten`, `StuetzpunktVerwaltenManager.ZumVerkaufAngeboten`, `SoeldnerRaeuberManager.SetzeZumVerkauf`/`IstZumVerkaufAngeboten`). At the start of the turn AI players then occasionally submit random purchase offers (`GeneriereKiKaufangebote`, price around the current value) that are presented to the owner. `Stuetzpunkt.AngebotVorlegen` now also handles AI bidders: on acceptance the base changes to the AI for payment (the for-sale flag is reset), on rejection it stays listed.
-
-## 3.48.0
-
-_28.07.2026_
-
-**[DE]**
 - Räuber/Söldner-System (Issue #16): Der Anbieter eines Stützpunkt-Kaufangebots erhält nun zu Beginn seines nächsten Zuges eine eigene Meldung über das Ergebnis (Annahme durch den Besitzer inkl. Besitzwechsel bzw. Ablehnung mit Rückerstattung des reservierten Betrags). Dazu Nachrichtenliste `HumSpieler.HandelsNachrichten` (lazy initialisiert, spielstandskompatibel) und `SoeldnerRaeuberManager.ZeigeHandelsnachrichten`.
-
-**[EN]**
-- Robbers/mercenaries system (issue #16): the bidder of a base purchase offer now receives their own message about the outcome at the start of their next turn (acceptance by the owner incl. change of ownership, or rejection with refund of the reserved amount). Adds the message list `HumSpieler.HandelsNachrichten` (lazily initialized, savegame-compatible) and `SoeldnerRaeuberManager.ZeigeHandelsnachrichten`.
-
-## 3.47.0
-
-_28.07.2026_
-
-**[DE]**
 - Räuber/Söldner-System (Issue #16): Kaufangebote für Stützpunkte können nun auch an menschliche Mitspieler gerichtet werden. Das Angebot reserviert den Betrag beim Anbieter und wird dem Besitzer zu Beginn seines nächsten Zuges vorgelegt (`Stuetzpunkt.AngebotVorlegen`, `SoeldnerRaeuberManager.VerarbeiteEingehendeKaufangebote`/`StehenKaufangeboteAn`); bei Annahme wechselt der Stützpunkt gegen den Preis den Besitzer (samt Handelszertifikat der Stufe 3), bei Ablehnung wird der reservierte Betrag zurückerstattet. Nebenbei behoben: Der Besitzername im Bestätigungstext bezog sich fälschlich auf den aktiven Spieler statt auf den Stützpunkt-Besitzer.
 
 **[EN]**
+- Game missions extended (issue #15): six more missions in `AuftragManager` – easy: "Kaufmann" (200,000 taler total turnover), "Familienvater" (3 children); medium: "Wahlsieger" (win 3 elections), "Kriegsheld" (win 10 battles); hard: "Karawanenschreck" (raid 8 caravans), "Meuchelmörder" (3 successful assassinations). All use already-tracked statistics; no new tracking needed. The new enum values are appended at the end so existing savegames stay unchanged. This brings the total to 13 missions (4 easy, 5 medium, 4 hard).
+- Game missions (issue #15, inspired by "Die Fugger 2"): new `EnumAuftrag` and the field `Spieleinstellungen.Auftrag` (default `KeinAuftrag` = free/endless game; savegame-safe). New `AuftragManager` with seven missions across three difficulties (easy: Aufsteiger, Kleiner Wohlstand; medium: Herr des Doms, Mäzen, Baumeister; hard: Talerrennen, Kriegsherr), including progress/fulfilment checking (`AktualisiereFortschrittUndPruefe`) and progress text. New `HighscoreManager` for the local leaderboard (`highscores.json`, sorted by speed). `HumSpieler` gains two counters for this (`DomherrJahreInFolge`, `GestifteterBauwert`); `BauwerkStiftenManager.FuehreStiftungAus` also adds up the donated value (for "Mäzen"). Old savegames start without a mission and with counters at 0.
+- Debug symbols (PDB) are now embedded directly into the assembly via `<DebugType>embedded</DebugType>` – including in Release. This makes end-user stack traces carry file and line numbers, and the symbols travel inside the NuGet package (the basis for meaningful bug reports). No code change, just a build setting.
+- Overdue credits: new method `SchreibstubeManager.TilgeUeberfaelligeKredite()` forcibly repays, at the end of the round, every credit of the active player whose repayment year has been reached or passed – letting the balance go negative if necessary. The amount is credited to the lender, the credit slot is cleared, and one hint message is returned per repaid credit (with an extra note if the balance turns negative as a result). If a repayment year was missing (legacy savegames) it is derived from duration + current year.
+- New privilege "take a mistress" (issue #8, inspired by "Die Fugger 2"): new `MaetresseManager` and the field `HumSpieler.HatMaetresse`. A married player with enough taler can take a mistress for a one-off cost; this permanently raises his reputation and his remaining years of life, but lowers the chance of legitimate offspring by a factor (`FamilieManager.StehtGeburtAn`). There is a yearly upkeep, and a scandal may occur (reputation loss). `PrivilegienManager` lists "take a mistress" as a synthetic entry as long as the player has no mistress yet.
+- Gravestone inscription (issue #15, inspired by "Die Fugger 2"): new `GrabsteinManager.ErmittleGrabspruch(SpielerStatistik)` estimates the deceased character's most defining "type" from the per-game statistics (warlord, schemer, merchant, churchman, statesman, patriarch, outlaw) and returns a fitting short epitaph. If no play style stands out clearly, a generic epitaph is used. Each type has several epitaphs to choose from (random).
+- Ancestral table: `AhnPerson` now also carries a person's `Titel` (title). On inheritance and for the living generation, the head and spouse are recorded with their gendered title (`GetTitelGegendert`); children carry none (they hold no office/title).
+- Ancestral table (issue #9): new data model `Dynastiegeneration`/`AhnPerson` and an ancestral-table list on `HumSpieler` that records the dynasty's generations. On inheritance (`FamilieManager.FuehreTestamentAus`, before `TestamentVollstrecken`) the current generation – the deceased head, spouse and children with birth/death years plus the heir – is captured before the heir takes over the identity and this data would otherwise be lost. New `AhnentafelManager.GetGenerationen()` returns all generations (oldest first, currently living last) for display. The `PrivilegienManager` lists the ancestral table as an always-available entry (`AhnentafelPrivilegId`) at the top of the privileges list. The new fields are savegame-compatible (old saves start with an empty ancestral table).
+- Contenders overview (independent of an issue, migration of KontrahentDetails): new method `KontrahentenManager.GetKontrahentDetails(playerId)` plus the data class `KontrahentDetailInfo` returns a contender's name, title, age and office. Net worth, health, the burden of proof (crimes uncovered via espionage) and the report year are only included if the active player runs an active espionage against the contender (`HatSpionage`) – exactly as in the WinForms original.
+- Cross-game statistics – folding & display (Lib part of phases 3–5): `PlayerSetupManager.ErstelleSpieler` optionally takes a `profilId` and links the player to their profile. `HumSpieler` gains the folding snapshot fields `GewerteteStatistik`, `GewerteteJahre` and `WurdeGezaehlt`. New `ProfilManager.WerteLaufendesSpiel()`: on saving, folds each human player's statistics growth into their profile as a delta – additive counters are summed, `SoHoechstesAmt` and net worth as a maximum, the years played as a delta from the start year, and the game is counted once as "played" (double-count-safe via the snapshots). New `ProfilStatistikManager` formats the profile values in the same two-column layout as the `StatistikManager` (military block, meta block with games/years/highest office/highest net worth instead of live net worth).
+- Cross-game statistics – phase 1 (foundation): new models `Profil` and `ProfilMeta` plus a `ProfilManager` that manages local player profiles in `profile.json` in the savegame directory (create, rename, delete, active profile; immediate saving, robust against corrupt files). A profile bundles the summed `SpielerStatistik` of several games plus cross-game figures (games, years, highest net worth, highest office). `HumSpieler` gains a `ProfilId` field to link a human player to their profile (v2: one profile per player slot). The actual folding (delta on save) and the UI follow in later phases.
+- Player statistics extended: new military figures for the base/mercenary system, which was not represented in the statistics at all before – battles won and lost, bases captured and caravans raided (tracked in `Kampfberechnung`, human participants only). Plus a "houses built" figure (`AnwesenManager.BaueHaus`). The `StatistikManager` displays the new values (military block on the left, "houses built" under miscellaneous).
+- Player statistics (Issue #19): the figures that were shown but never populated are now tracked during play. Recorded are goods sold and bought as well as total turnover (`HandelsManager`, `AbrechnungsManager`), taxes paid (sales tax + church tithe) and tariffs (`AbrechnungsManager`), office income (`ZugNachrichtenManager`), the highest office ever held and the number of laws broken (`Spieler`), election participations and wins (`AemterManager`), indictments (`GerichtsverhandlungManager`), children fathered (`FamilieManager`) and debtors'-tower stays (`RundenManager`). All counters apply to human players only.
+- New `CheatManager` for the more complex cheats of the WinForms cheat box (the simple ones still go directly through the player setters): `UebernehmeAmt(level, region, office)` takes an office from its current AI holder and swaps the player's old office to them; `BaueHaus(town, houseType)` builds a house; `LasseVerklagen()` books an offence, picks a hostile AI plaintiff and three judges and sets up a court trial for the next year. Plus combo-box data (`GetAmtsstufen`, `GetGebiete`, `GetAemter`, `GetStaedte`, `GetHaustypen`). All actions concern the active player.
+- Offices: new method `AemterManager.GetFreieAemterAnkuendigung()` returns the offices to be newly filled at the start of the active player's turn as a ready-made announcement text (with the location per office), or `null` if there are no vacant offices they could apply for. It is based on the existing application offers.
+- Bugfix: in the credit book a loan's repayment year drifted forward every year (it was computed as remaining term + current year, but the remaining term was never counted down) – after a skipped year (debtors' prison) it even jumped by two years. The repayment year is now fixed when the loan is taken (`Kredit.SetRueckzahlungsjahr`, set in `SchreibstubeManager.NimmKredit` = current year + term) and stays constant. Existing loans from older savegames are frozen once from their remaining term the first time the credit book is opened.
+- Court trial (issue #18): variable pleas by the prosecution and the defence (`GetAnklageplaedoyer`, `GetVerteidigungsplaedoyer`). The prosecution's plea varies in tone with the strength of the case (actual offences plus collected evidence): from baseless through thin and clear to overwhelming. The defence's plea varies with the defendant's reputation (Ansehen); a high reputation also nudges the judges towards acquittal (recorded in `StarteVerhandlung` as `_plaedoyerBonus`, applied in `BerechneKiUrteil`: reputation ≥ 80 → −6, ≥ 30 → −3). This completes the court-trial extension (issue #18).
+- Bugfix: savegames containing base units (e.g. `ZollSoeldner`, `RaubRaeuber`) could no longer be loaded ("Error resolving type specified in JSON 'Conspiratio.Kampf.ZollSoeldner'"). For compatibility these unit types deliberately remain in the old `Conspiratio.Kampf` namespace; the JSON type binder only allowed `Conspiratio.Lib.*` types on load and rejected them. The binder now resolves types directly in the Conspiratio.Lib assembly (which also covers the compatibility namespace) and only uses the translation table as a fallback for genuinely renamed types. The safety check (only the game's own types) remains in place.
+- Court trial (issue #18): witnesses now also deliver a spoken line in addition to their classification – matching direction (for/against) and persuasiveness (convincing/hesitant), e.g. "I saw him clearly!" or "I swear he is not the culprit!". Pronouns and "the culprit" (m/f) follow the defendant's gender.
+- Court trial (issue #18): real witnesses. In every trial up to two AI witnesses (neither a party nor a judge) testify. Whether a witness testifies for or against the defendant follows from their relationship: if they are closer to the defendant than to the plaintiff they speak for them, otherwise against – convincingly when the relationship gap is large, weakly otherwise. The testimonies feed into the verdict as `_zeugenBonus` (`BerechneKiUrteil`). The witness pot introduced in 3.66.0 now takes effect: bribing a witness pulls them (certain above a threshold) to the briber's side and makes them testify convincingly. `GetZeugenAnzahl`, `ErmittleZeugenAussagen` (to be called after the bribery) and the new `ZeugenAussage` class provide the testimony texts to the client.
+- Court trial (issue #18): bribery with two pots (judges and witnesses). If the active player is a party, they can put up an amount for the judges before the verdict (`KannBestechen`, `GetRichterBestechungsOptionen`, `SetzeRichterBestechung`): as the defendant they bribe for acquittal, as the plaintiff for conviction. The effect is "certain above a threshold" – if the share falling to a judge reaches that judge's threshold (half their cash, min 3000), the judge surely votes the briber's way, below it only proportionally (`BerechneKiUrteil`). The bribe tiers are capped by the player's cash and are debited immediately. Before the verdict `WurdeBestochen`/`GetBestechungsOffenlegung` disclose that money changed hands. The witness pot (`GetZeugenBestechungsOptionen`, `SetzeZeugenBestechung`) is already in place but stays ineffective until step 5 provides real witnesses (`GetZeugenAnzahl` still 0).
+- Court trial (issue #18): the conviction rate was rebalanced against real evidence. Previously each piece of evidence (an actually committed offence or an offence spied out by the plaintiff) weighed only 1 against the random judge sympathy (20–80), so even a clear case rarely led to a conviction. Each piece of evidence is now weighted by `BeweisGewicht` (10): with real evidence the charge leads to a conviction ~80 % of the time on average, graduated by the number of offences (0 offences ≈ 5 %, 1 ≈ 31 %, 2 ≈ 63 %, 3 ≈ 84 %, 4+ ≈ 95 %+). The defendant's statement bonuses (confession/partial confession/denial/indignant denial) were raised to the same scale so they stay meaningful: a confession makes conviction almost certain (but lowers the penalty), denial clears a false accusation, indignant denial backfires with overwhelming evidence.
+- Court trial (issue #18): if the player themselves is the defendant, they can now choose a statement (`GetAussageOptionen`, `SetzeAussage`): deny, indignantly deny, partial confession or full confession. The effect is graduated and depends on the strength of the case: a confession makes conviction more likely but noticeably lowers the penalty; a partial confession mitigates moderately. Denial only helps with a weak case and is ineffective with a strong one; indignant denial helps more with a weak case but backfires with a strong one (harsher penalty). `BerechneKiUrteil` factors in the statement bonus, the evaluation scales the penalty by the statement factor. `IstAngeklagterAktiverSpieler` tells the client when to offer the choice.
+- Bugfix: `RundenEndeManager.FuehreKiStraftatenDurch` could crash at round end with a `NullReferenceException` in `Spieler.HalbiereDelikte` (the year then stopped advancing and no player announcement appeared). The cause was the offence store moved into the base class in 3.63.0, which was still `null` for players loaded via deserialization (which bypasses the constructor). Access now creates the field safely on demand (lazy init).
+- Court trial (issue #18): AI players now keep a real record of their offences. At round end they commit random crimes whose frequency scales with their malice (`RundenEndeManager.FuehreKiStraftatenDurch`); the committed crimes are stored per law (the offence store `begingVerbrechenX` was moved from `HumSpieler` up into the base class `Spieler`, so AI and humans share it) and fade each year. When accused, `GerichtsverhandlungManager.StarteVerhandlung` uses these actually committed offences – for AI and humans alike, instead of rolling them randomly for AI as before; after the trial they are atoned. The store is additive so that future real illegal AI actions feed straight into it.
+- Court trial (issue #18): when a human player accuses an AI player, the evidence gathered by their spies now feeds into the judges' decision – the more evidence against the defendant, the more likely the AI judges decide "guilty" (`GerichtsverhandlungManager.BerechneKiUrteil` now considers the strength of the evidence in addition to the severity of the crimes; `StarteVerhandlung` derives it from the plaintiff's espionage offences against the defendant, retrievable via `GetBeweise`).
+- Offices: human players can now apply for several vacant offices at the same time. `WahlAnmeldungUmschalten` toggles the application per election independently (the election's candidate list is authoritative now, no longer a single stored participation), and `GetBewerbungsangebote` marks all applications. When counting, `GetWahlenMitMenschlicherBeteiligung` sorts the elections by office level in descending order (highest office first); if the player wins an office, `VergebeAmt` withdraws all of the winner's remaining applications via the new `SpielerAusAllenWahlenEntfernen` – so they keep only the highest office won. Removals on a prison sentence and on leaving the game now also remove the player from all elections. `HatMenschlicheBeteiligung` is public for the re-check during counting.
+- Bugfix elections: when searching AI candidates for a vacated office (`WahlAnlegen`), completely unsuitable candidates could be nominated – e.g. a player without any office running for regent. The cause was a fallback that, after 100 unsuccessful attempts, ignored the eligibility check entirely (mostly relevant for high offices, for which hardly anyone holds the required lower rank). There is now a relaxed intermediate tier: if no one qualifies under the strict rule (exactly 1–2 office levels below), the rigid level step is dropped – but the candidate must still be below the target office, and office-less players remain limited to entry-level offices (level 1–2). Only as a very last resort is the check ignored, as before, so every election is guaranteed two candidates.
+- Combat events (issue #16): `KampfereignisseManager.ErmittleEreignisse` no longer strips the `|` markers around player names from the battle summaries. The markers are the Lib's markup convention and are now preserved so the view can highlight the names (bold, human players additionally in dark red – as in the WinForms original). Views without formatting can still remove them themselves.
+- Tolls (issue #16): if the trading player is toll-free (privilege 23 or the 50 % chance of privilege 31), the toll castle owners no longer receive a toll share either. Previously the toll was credited to the owners even though the trader paid nothing (`AbrechnungsManager`: toll-freedom is now determined **before** the payout and skips the entire toll calculation).
+- Robbers/mercenaries system (issue #16): AI players no longer attack each other. The AI target selection (`Stuetzpunkt.KiZufaelligesAngriffsziel`) now only considers bases owned by human players, and as a safeguard `Kampfberechnung.ErmittleStattfindendeKaempfe` additionally skips any attack where both attacker and defender are AI (also protects old savegames). Attacks therefore only occur with human participation.
+- Robbers/mercenaries system (issue #16): bases can now attack other bases. The "send troops" action with an enemy base as its target creates a battle at round end (`EnumKampfArt.StuetzpunktAngriff`; `Kampfberechnung.ErmittleStattfindendeKaempfe` builds the attacks from the actions, `StuetzpunktAngriffAnwenden` applies the result). If the attacker wins and the target's entire garrison is wiped out while surviving troops move in, the base is **captured** (owner change, open offers/bonuses expire); if the attacker wins without a complete wipeout, the target is merely **damaged** (−25 condition). Like caravan raids, attacks are subject to the 7-year grace period. Depending on its activity level (`kiAktivitaetsfaktor`), the AI also attacks enemy bases (`Zollburg`/`Raeuberlager` `VersucheKiAngriff`, `Stuetzpunkt.KiZufaelligesAngriffsziel`).
+- Bugfix: the `ZielStuetzpunktID` setter in `StuetzpunktAktion` previously discarded every valid target through an inverted bounds check (fell back to 0), so "send troops" could never store a target. The check now correctly accepts valid base IDs.
+- Robbers/mercenaries system (issue #16): `KampfereignisseManager.ErmittleEreignisse` now supports two filters (taken from the WinForms original): messages about AI base actions (expansion, new recruits) can be hidden, and battles without human participation (attacker, defender or raided caravan all AI) can be suppressed. The actions and battles are still always carried out – only the display is filtered.
+- Robbers/mercenaries system (issue #16): troops are now recruited instead of hired immediately – the advertising budget is paid when ordering, but the troops only arrive at the next round end (`Stuetzpunkt.GeworbeneTruppen`, `TruppenAnheuern` queues them instead of calling `ErhoeheTruppen` right away; `GeworbeneTruppenEinstellen` in the `KampfereignisseManager` before the battles). The management shows stationed plus recruited troops (`GetAnzahlTruppenInklGeworben`); `TruppenEntlassen` first cancels not-yet-arrived recruits and refunds the advertising budget before dismissing stationed troops. Capacity check includes recruited troops.
+- Robbers/mercenaries system (issue #16): a morale bonus paid before combat is now consumed with the combat and is **no longer** refunded on victory (previously victory triggered a refund). Only an unused bonus (without a combat that took place) is still refunded.
+- Robbers/mercenaries system (issue #16): before combat a one-time morale bonus can be paid for a base's troops (`Stuetzpunkt.MoralBonusZahlen`, cost by troop strength; `MoralBonusBezahlt`, `BerechneKostenMoralBonus`). The bonus raises the attackers' combat morale by `MoralBonusWert` (15 percentage points, see `MoralFuerKampf`, applied when building the combat) and is refunded on victory, otherwise it is forfeited; unused bonuses (without a combat) are refunded as well (`KampfereignisseManager`).
+- Robbers/mercenaries system (issue #16): the activity of the AI players in the military bases is now controlled via a fine percentage value (`Spieleinstellungen.KiAktivitaetProzent`, 1–100, default 50) instead of the previous three levels. Robber camps and toll castles derive their activity factor directly from it (50 % = the previous normal value); old savegames (value 0) are treated as 50 %.
+- Robbers/mercenaries system (issue #16): the tolls collected by human toll-castle owners are now tallied (`HumSpieler.ZolleinnahmenGesammelt`, accumulated during settlement) and reported to the player as income at the start of the turn (`SoeldnerRaeuberManager.ZeigeZolleinnahmen`), then reset.
+- Robbers/mercenaries system (issue #16): an own base can now be put up for sale (`Stuetzpunkt.ZumVerkaufAngeboten`, `StuetzpunktVerwaltenManager.ZumVerkaufAngeboten`, `SoeldnerRaeuberManager.SetzeZumVerkauf`/`IstZumVerkaufAngeboten`). At the start of the turn AI players then occasionally submit random purchase offers (`GeneriereKiKaufangebote`, price around the current value) that are presented to the owner. `Stuetzpunkt.AngebotVorlegen` now also handles AI bidders: on acceptance the base changes to the AI for payment (the for-sale flag is reset), on rejection it stays listed.
+- Robbers/mercenaries system (issue #16): the bidder of a base purchase offer now receives their own message about the outcome at the start of their next turn (acceptance by the owner incl. change of ownership, or rejection with refund of the reserved amount). Adds the message list `HumSpieler.HandelsNachrichten` (lazily initialized, savegame-compatible) and `SoeldnerRaeuberManager.ZeigeHandelsnachrichten`.
 - Robbers/mercenaries system (issue #16): purchase offers for bases can now also be directed at human fellow players. The offer reserves the amount from the bidder and is presented to the owner at the start of their next turn (`Stuetzpunkt.AngebotVorlegen`, `SoeldnerRaeuberManager.VerarbeiteEingehendeKaufangebote`/`StehenKaufangeboteAn`); if accepted, the base changes owner for the price (including a tier-3 trade certificate), if declined the reserved amount is refunded. Also fixed: the owner name in the confirmation text wrongly referred to the active player instead of the base owner.
 
 ## 3.46.0
