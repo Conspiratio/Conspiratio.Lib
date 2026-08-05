@@ -118,6 +118,8 @@ namespace Conspiratio.Lib.Allgemein
             spieler.SetName(name);
             spieler.ProfilId = profilId;
             spieler.SetVerbleibendeJahre(SW.Statisch.Rnd.Next(SW.Statisch.GetHumminVerblJahre(), SW.Statisch.GetHummaxVerblJahre()));
+            // Geburtsjahr der menschlichen Spieler zum Start = 1580 (das Alter ergibt sich aus dem Startjahr).
+            spieler.SetAlter(SW.Dynamisch.GetAktuellesJahr() - 1580);
             spieler.SetMaennlich(maennlich);
             spieler.SetBanner(banner);
             spieler.SetReligion(religionId);

@@ -130,11 +130,16 @@ namespace Conspiratio.Lib.Allgemein
             return true;
         }
 
-        /// <summary>Bestätigungsfrage vor der Beleidigung.</summary>
+        /// <summary>Bestätigungsfrage vor der Beleidigung (Pronomen nach Geschlecht des Ziels).</summary>
         [PublicAPI]
-        public string GetBeleidigungsFrage(int zielId) =>
-            "Wollt Ihr " + SW.Dynamisch.GetSpWithID(zielId).GetKompletterName() +
-            " öffentlich beleidigen?\nEr könnte Satisfaktion verlangen – dann kommt es im Morgengrauen zum Duell.";
+        public string GetBeleidigungsFrage(int zielId)
+        {
+            var ziel = SW.Dynamisch.GetSpWithID(zielId);
+            string erSie = ziel.GetMaennlich() ? "Er" : "Sie";
+
+            return "Wollt Ihr " + ziel.GetKompletterName() + " öffentlich beleidigen?\n" +
+                   erSie + " könnte Satisfaktion verlangen – dann kommt es im Morgengrauen zum Duell.";
+        }
 
         /// <summary>Frage an ein beleidigtes menschliches Ziel, ob es Satisfaktion (Duell) verlangt.</summary>
         [PublicAPI]
