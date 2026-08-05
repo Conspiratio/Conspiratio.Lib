@@ -906,19 +906,16 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         #region GetAnzahlFreieAemterFuerSpX
         public int GetAnzahlFreieAemterFuerSpX(int X)
         {
-            // TODO: Hier den BUg finden
-            // Es gibt gelegentlich einen viel zu hohen amtcounter zurück
-            // speziell wenn sabotiert wird
+            // GetFreieAemterFuerSpX füllt das Array lückenlos von vorne mit den Wahl-IDs (immer >= 1) und
+            // lässt den Rest auf 0. Bis zur ersten 0 zählen genügt daher – so kann kein Rest im Array das
+            // Ergebnis verfälschen (früherer „viel zu hoher amtcounter").
             int[] wahlids = GetFreieAemterFuerSpX(X);
 
             int amtcounter = 0;
 
-            for (int i = 0; i < wahlids.Length; i++)
+            while (amtcounter < wahlids.Length && wahlids[amtcounter] != 0)
             {
-                if (wahlids[i] != 0)
-                {
-                    amtcounter++;
-                }
+                amtcounter++;
             }
             return amtcounter;
         }
@@ -929,7 +926,11 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         {
             WahlAbhalten[] wahlab = GetWahlen();
             int maxWahlen = SW.Statisch.GetMaxAnzahlWahlen();
-            int[] wahlids = new int[50];
+            // Das Ergebnis-Array muss so groß sein wie die maximale Anzahl Wahlen: Ein Spieler kann sich
+            // theoretisch für jede offene Wahl gleichzeitig eignen. Mit einer festen Größe (früher 50)
+            // lief das Array über (IndexOutOfRange), sobald mehr als 50 Ämter gleichzeitig bewerbbar waren
+            // – z. B. wenn durch Todesfälle/Sabotage viele Ämter auf einmal frei werden.
+            int[] wahlids = new int[maxWahlen];
             int amtcounter = 0;
 
             // Alle Wahlen durchgehen
