@@ -143,6 +143,9 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
                 case 13: // Hand des Henkers
                     SW.Dynamisch.HenkersHand(id);
                     break;
+                case 12: // Vergifteter Wein (Privileg des Kellermeisters)
+                    await SW.Dynamisch.WeinVergiften(id);
+                    break;
                 default:
                     // Erpressung (5) ist bereits im Original deaktiviert und bleibt es hier.
                     SW.Dynamisch.BelTextAnzeigen("Diese Aktion ist noch nicht verfügbar.");

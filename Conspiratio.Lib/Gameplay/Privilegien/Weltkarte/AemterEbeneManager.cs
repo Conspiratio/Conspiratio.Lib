@@ -122,6 +122,7 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
             switch (modus)
             {
                 case 8: prefix = "Prozess initiieren in "; break;
+                case 12: prefix = "Wein vergiften in "; break;
                 case 13: prefix = "Hand des Henkers in "; break;
                 default: prefix = string.Empty; break;
             }

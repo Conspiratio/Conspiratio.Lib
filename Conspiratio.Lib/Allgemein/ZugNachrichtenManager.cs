@@ -509,8 +509,8 @@ namespace Conspiratio.Lib.Allgemein
             else
             {
                 ziel.ErhoeheGesundheit(-10);
-                ergebnis = "Nach kurzer Zeit erholt sich " + ziel.GetName() + " wieder. " + ziel.GetSeinerIhrer() +
-                           " Gesundheit hat gelitten.";
+                ergebnis = "Nach kurzer Zeit erholt sich " + ziel.GetName() + " wieder, doch " + ziel.GetSeinIhr() +
+                           "e Gesundheit hat gelitten.";
             }
 
             return new List<string> { andeutung, ergebnis };
