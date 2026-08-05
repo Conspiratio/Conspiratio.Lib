@@ -44,7 +44,7 @@ namespace Conspiratio.Lib.Allgemein
         public const int AmtsverlustSchwelle = 30;          // Gesundheit darunter → Amt weg
         public const int RelationsverlustBeleidigung = 25;  // Beziehungsverlust des Beleidigers beim Ziel
         public const int AnsehensverlustVerweigerung = 15;  // Ansehensverlust bei verweigerter Satisfaktion
-        private const int KiSatisfaktionsBasis = 30;        // KI verlangt Satisfaktion mit 30 % + Bosheit/2
+        private const int KiSatisfaktionsBasis = 50;        // KI verlangt Satisfaktion mit 50 % + Bosheit/2
 
         // KI-Beleidigung des Spielers: Die Chance hängt vor allem an der Beziehung der (feindseligsten)
         // KI zum Spieler und steigt erst, wenn diese unter „neutral" (50) liegt – je niedriger, desto
