@@ -181,17 +181,6 @@ namespace Conspiratio.Lib.Allgemein
         }
 
         /// <summary>
-        /// Führt den Tod des aktiven Spielers durch und entfernt ihn aus dem Spiel.
-        /// </summary>
-        /// <returns>True, wenn kein menschlicher Spieler mehr im Spiel ist (das Spiel ist vorbei).</returns>
-        [PublicAPI]
-        public bool FuehreTodDesAktivenSpielersDurch()
-        {
-            // TODO: Testament und Erbfolge migrieren (aktuell erbt immer das Erzbistum, der Spieler scheidet aus)
-            return SW.Dynamisch.EntferneAktivenSpielerAusDemSpiel();
-        }
-
-        /// <summary>
         /// Prüft, ob sich der aktive Spieler wegen zu hoher Schulden vor seinen Gläubigern
         /// verantworten muss (abhängig von Schuldenhöhe und Ansehen).
         /// </summary>
