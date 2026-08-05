@@ -20,5 +20,12 @@ namespace Conspiratio.Lib.Gameplay.Einstellungen
         /// Alte Spielstände (Wert 0) werden wie 50 % behandelt.
         /// </summary>
         public int KiAktivitaetProzent { get; set; } = 50;
+
+        /// <summary>
+        /// Der bei der Spielerstellung optional gewählte Auftrag (Mission). Standard
+        /// <see cref="EnumAuftrag.KeinAuftrag"/> = freies/endloses Spiel ohne Siegbedingung. Alte
+        /// Spielstände ohne dieses Feld deserialisieren mit dem Standard (= kein Auftrag).
+        /// </summary>
+        public EnumAuftrag Auftrag { get; set; } = EnumAuftrag.KeinAuftrag;
     }
 }

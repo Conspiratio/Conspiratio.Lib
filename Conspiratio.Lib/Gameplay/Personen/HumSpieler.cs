@@ -38,6 +38,19 @@ namespace Conspiratio.Lib.Gameplay.Personen
         public bool WurdeGezaehlt { get; set; }
 
         /// <summary>
+        /// Anzahl der Jahre in Folge, die dieser Spieler das Amt des Domherrn hält (für den Auftrag
+        /// „Herr des Doms"). Wird je Zug aktualisiert (Amt gehalten ⇒ +1, sonst zurück auf 0). Alte
+        /// Spielstände starten mit 0.
+        /// </summary>
+        public int DomherrJahreInFolge { get; set; }
+
+        /// <summary>
+        /// Gesamtwert der von diesem Spieler dem Reich gestifteten Bauwerke in Talern (für den Auftrag
+        /// „Mäzen"). Wird beim Stiften aufaddiert. Alte Spielstände starten mit 0.
+        /// </summary>
+        public int GestifteterBauwert { get; set; }
+
+        /// <summary>
         /// Die Ahnentafel der Dynastie: je Generation das verstorbene Oberhaupt samt Ehepartner und Kindern,
         /// festgehalten beim Erbfall (sonst gingen diese Daten bei der Erbübernahme verloren). Übersteht den
         /// Erbfall, da sie am fortbestehenden Spielerobjekt hängt. Alte Spielstände starten mit null (leer).

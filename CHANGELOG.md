@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.82.0
+
+_05.08.2026_
+
+**[DE]**
+- Spiel-Aufträge (Missionen, Issue #15, Vorbild „Die Fugger 2"): Neues `EnumAuftrag` und das Feld `Spieleinstellungen.Auftrag` (Standard `KeinAuftrag` = freies/endloses Spiel; savegame-sicher). Neuer `AuftragManager` mit sieben Aufträgen in drei Schwierigkeitsstufen (leicht: Aufsteiger, Kleiner Wohlstand; mittel: Herr des Doms, Mäzen, Baumeister; schwer: Talerrennen, Kriegsherr), samt Fortschritts-/Erfüllungsprüfung (`AktualisiereFortschrittUndPruefe`) und Fortschrittstext. Neuer `HighscoreManager` für die lokale Bestenliste (`highscores.json`, sortiert nach Schnelligkeit). `HumSpieler` führt dafür zwei neue Zähler (`DomherrJahreInFolge`, `GestifteterBauwert`); `BauwerkStiftenManager.FuehreStiftungAus` addiert den gestifteten Wert mit (für „Mäzen"). Alte Spielstände starten ohne Auftrag und mit Zählern auf 0.
+
+**[EN]**
+- Game missions (issue #15, inspired by "Die Fugger 2"): new `EnumAuftrag` and the field `Spieleinstellungen.Auftrag` (default `KeinAuftrag` = free/endless game; savegame-safe). New `AuftragManager` with seven missions across three difficulties (easy: Aufsteiger, Kleiner Wohlstand; medium: Herr des Doms, Mäzen, Baumeister; hard: Talerrennen, Kriegsherr), including progress/fulfilment checking (`AktualisiereFortschrittUndPruefe`) and progress text. New `HighscoreManager` for the local leaderboard (`highscores.json`, sorted by speed). `HumSpieler` gains two counters for this (`DomherrJahreInFolge`, `GestifteterBauwert`); `BauwerkStiftenManager.FuehreStiftungAus` also adds up the donated value (for "Mäzen"). Old savegames start without a mission and with counters at 0.
+
 ## 3.81.0
 
 _04.08.2026_
