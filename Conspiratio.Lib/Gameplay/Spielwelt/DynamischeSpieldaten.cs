@@ -1078,9 +1078,14 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             //Alle Untergebenen herausfinden
             int amtid = GetSpWithID(bossID).GetAmtID();
             int gebid = GetSpWithID(bossID).GetAmtGebiet();
-            int[] untergebeneAmtids = new int[7];
 
-            int[] ufinalID = new int[7];
+            // Arrays großzügig nach den Max-Konstanten dimensionieren, nicht mit fester Größe 7:
+            // untergebeneAmtids wird über alle Ämter befüllt, ufinalID zusätzlich je Stadt/Land eines
+            // Gebiets – bei einem Land-/Reichsamt mit mehreren untergeordneten Ämtern liefen die früheren
+            // [7]-Arrays über (IndexOutOfRange). Die Obergrenzen decken jeden möglichen Fall sicher ab.
+            int[] untergebeneAmtids = new int[SW.Statisch.GetMaxAmtID()];
+
+            int[] ufinalID = new int[SW.Statisch.GetMaxAmtID() * SW.Statisch.GetMaxStadtID()];
             int ucounter = 0;
 
             if (amtid == 0)
