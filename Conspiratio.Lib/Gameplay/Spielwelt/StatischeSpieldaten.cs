@@ -525,7 +525,6 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             Tipps[14] = "Mit einem Rechtsklick auf eine Werkstatt in einer Stadt kann die Werkstatt verkauft werden.";
             Tipps[15] = "Ein regelmäßiger Blick in die Gesetzesbücher kann Euch den ein oder anderen Prozess ersparen.";
             Tipps[16] = "Wenn Ihr einen bestimmten Rohstoff immer wieder in derselben Stadt verkauft, so wird der Verkaufserlös für diesen Rohstoff in dieser Stadt abnehmen.";
-            Tipps[16] = "Ein Kredit kann Eure Liquiditätsprobleme im Handumdrehen lösen. Doch Vorsicht! Die Zinsen können Euch in den Ruin treiben.";
             Tipps[17] = "Damit Ihr bei Amtswahlen als Sieger hervorgeht, müsst Ihr um die Gunst der Wähler buhlen. Dies könnt Ihr mittels Bestechung, Kartenspielen oder Ähnlichem erreichen.";
             Tipps[18] = "Falls Ihr über die Landesgrenzen hinaus Eure Waren exportiert, so fallen zusätzlich zu den Karawanenkosten auch noch Zölle an.";
             Tipps[19] = "Es lohnt sich nur dorthin zu exportieren, wo der Rohstoff auch benötigt wird.";
@@ -539,8 +538,9 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             Tipps[27] = "Werden die Räuberbanden bei ihren Überfällen auf die Karawanen regelmäßig von Söldnern besiegt, sinkt ihre Moral und damit auch die Chance auf weitere Überfälle.";
             Tipps[28] = "Habt Ihr Interesse am Kauf einer Söldnerburg oder eines Räuberlagers, so schadet es nicht, sich mit dem Eigentümer gut zu stellen.";
             Tipps[29] = "Achtet während der Umwerbung auf die Reaktion Eures (hoffentlich zukünftigen) Partners auf Eure Geschenke. Neben dem Preis spielt auch sein Charakter eine Rolle!";
+            Tipps[30] = "Ein Kredit kann Eure Liquiditätsprobleme im Handumdrehen lösen. Doch Vorsicht! Die Zinsen können Euch in den Ruin treiben.";
 
-            TippsMaxIndex = 29;
+            TippsMaxIndex = 30;
 
             #endregion
 
