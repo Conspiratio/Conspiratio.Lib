@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
+using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
 namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
@@ -145,6 +146,13 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
                     break;
                 case 12: // Vergifteter Wein (Privileg des Kellermeisters)
                     await SW.Dynamisch.WeinVergiften(id);
+                    break;
+                case 14: // Duell/Beleidigung (Issue #17)
+                    var fechtDuell = new FechtDuellManager();
+                    if (!fechtDuell.KannDuellFordern(id, out string grundDuell))
+                        SW.Dynamisch.BelTextAnzeigen(grundDuell);
+                    else if (await SW.UI.YesNoQuestion.ShowDialogText(fechtDuell.GetDuellFrage(id)) == DialogResultGame.Yes)
+                        SW.Dynamisch.BelTextAnzeigen(fechtDuell.FuehreDuellDurch(id).Meldung);
                     break;
                 default:
                     // Erpressung (5) ist bereits im Original deaktiviert und bleibt es hier.

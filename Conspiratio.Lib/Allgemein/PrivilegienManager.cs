@@ -29,6 +29,19 @@ namespace Conspiratio.Lib.Allgemein
         public const int MaetressePrivilegId = 10001;
 
         /// <summary>
+        /// Kennung des Eintrags „Fechtunterricht nehmen" (Issue #17). Synthetischer, immer verfügbarer
+        /// Listeneintrag – der Client fängt die ID ab und öffnet den Fechtunterricht-Dialog.
+        /// </summary>
+        public const int FechtunterrichtPrivilegId = 10002;
+
+        /// <summary>
+        /// Kennung des Eintrags „Zum Duell fordern" (Issue #17). Synthetischer Listeneintrag – der Client
+        /// öffnet die Personen-Karte (Modus 14) zur Auswahl eines Amtsträgers. Nur sichtbar, solange der
+        /// Spieler in diesem Jahr noch kein Duell geführt hat.
+        /// </summary>
+        public const int DuellPrivilegId = 10003;
+
+        /// <summary>
         /// Aktualisiert die Privilegien des Spielers (abhängig von Amt, Titel und Familienstand).
         /// </summary>
         [PublicAPI]
@@ -54,6 +67,11 @@ namespace Conspiratio.Lib.Allgemein
             // „Mätresse nehmen" (Issue #8): immer wählbar, solange der Spieler noch keine unterhält.
             if (!spieler.HatMaetresse())
                 privilegien.Add(new PrivilegInfo(MaetressePrivilegId, "Mätresse nehmen"));
+
+            // Fechtunterricht & Duell (Issue #17): immer verfügbar; ein Duell nur einmal pro Jahr.
+            privilegien.Add(new PrivilegInfo(FechtunterrichtPrivilegId, "Fechtunterricht nehmen"));
+            if (!spieler.DuellGefuehrtDiesesJahr)
+                privilegien.Add(new PrivilegInfo(DuellPrivilegId, "Zum Duell fordern"));
 
             for (int i = 1; i < SW.Statisch.GetMaxPriv(); i++)
             {

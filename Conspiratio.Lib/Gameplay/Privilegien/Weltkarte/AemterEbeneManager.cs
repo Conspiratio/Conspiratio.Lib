@@ -124,6 +124,7 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
                 case 8: prefix = "Prozess initiieren in "; break;
                 case 12: prefix = "Wein vergiften in "; break;
                 case 13: prefix = "Hand des Henkers in "; break;
+                case 14: prefix = "Zum Duell fordern in "; break;
                 default: prefix = string.Empty; break;
             }
 

@@ -51,6 +51,18 @@ namespace Conspiratio.Lib.Gameplay.Personen
         public int GestifteterBauwert { get; set; }
 
         /// <summary>
+        /// Fechtfähigkeit (Issue #17): steigt durch Fechtunterricht und erhöht die Gewinnchance im Duell.
+        /// Alte Spielstände starten mit 0.
+        /// </summary>
+        public int Fechtfaehigkeit { get; set; }
+
+        /// <summary>Anzahl der bisher genommenen Fechtstunden – bestimmt den (steigenden) Preis der nächsten Stunde.</summary>
+        public int FechtstundenGenommen { get; set; }
+
+        /// <summary>Ob der Spieler in diesem Jahr bereits ein Duell geführt hat (max. eines pro Zug). Reset zu Zugbeginn.</summary>
+        public bool DuellGefuehrtDiesesJahr { get; set; }
+
+        /// <summary>
         /// Die Ahnentafel der Dynastie: je Generation das verstorbene Oberhaupt samt Ehepartner und Kindern,
         /// festgehalten beim Erbfall (sonst gingen diese Daten bei der Erbübernahme verloren). Übersteht den
         /// Erbfall, da sie am fortbestehenden Spielerobjekt hängt. Alte Spielstände starten mit null (leer).

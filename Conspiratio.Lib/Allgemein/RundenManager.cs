@@ -19,6 +19,9 @@ namespace Conspiratio.Lib.Allgemein
         {
             SW.Dynamisch.PrivilegienAktualisieren();
             SW.Dynamisch.GetAktHum().AnsehenAktualisieren();
+
+            // Die Duell-Sperre (max. ein Duell pro Zug, Issue #17) gilt nur für das laufende Jahr.
+            SW.Dynamisch.GetAktHum().DuellGefuehrtDiesesJahr = false;
         }
 
         /// <summary>
