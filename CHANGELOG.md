@@ -1,5 +1,15 @@
 # Changelog Conspiratio.Lib
 
+## 3.83.0
+
+_05.08.2026_
+
+**[DE]**
+- Spiel-Aufträge erweitert (Issue #15): sechs weitere Aufträge im `AuftragManager` – leicht: „Kaufmann" (200.000 Taler Gesamtumsatz), „Familienvater" (3 Kinder); mittel: „Wahlsieger" (3 Wahlen gewinnen), „Kriegsheld" (10 Kämpfe gewinnen); schwer: „Karawanenschreck" (8 Karawanen überfallen), „Meuchelmörder" (3 erfolgreiche Anschläge). Alle nutzen bereits geführte Statistik-Kennzahlen; kein neues Tracking nötig. Die neuen Enum-Werte sind ans Ende angehängt, sodass bestehende Spielstände unverändert bleiben. Damit gibt es 13 Aufträge (4 leicht, 5 mittel, 4 schwer).
+
+**[EN]**
+- Game missions extended (issue #15): six more missions in `AuftragManager` – easy: "Kaufmann" (200,000 taler total turnover), "Familienvater" (3 children); medium: "Wahlsieger" (win 3 elections), "Kriegsheld" (win 10 battles); hard: "Karawanenschreck" (raid 8 caravans), "Meuchelmörder" (3 successful assassinations). All use already-tracked statistics; no new tracking needed. The new enum values are appended at the end so existing savegames stay unchanged. This brings the total to 13 missions (4 easy, 5 medium, 4 hard).
+
 ## 3.82.0
 
 _05.08.2026_

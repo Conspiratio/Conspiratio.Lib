@@ -21,6 +21,16 @@ namespace Conspiratio.Lib.Gameplay.Einstellungen
 
         // schwer
         Talerrennen,
-        Kriegsherr
+        Kriegsherr,
+
+        // Weitere Aufträge – ans Ende angehängt, damit die bestehenden Enum-Werte (und damit alte
+        // Spielstände) stabil bleiben. Die Anzeige-Gruppierung erfolgt über die Schwierigkeit, nicht
+        // über die Enum-Reihenfolge.
+        Kaufmann,          // leicht
+        Familienvater,     // leicht
+        Wahlsieger,        // mittel
+        Kriegsheld,        // mittel
+        Karawanenschreck,  // schwer
+        Meuchelmoerder     // schwer
     }
 }

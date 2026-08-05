@@ -59,6 +59,18 @@ namespace Conspiratio.Lib.Allgemein
                 Ziel = "Besitzt 100.000 Taler.",
                 Schwierigkeit = EnumAuftragSchwierigkeit.Leicht, Zielwert = 100000, Einheit = "Taler", IstGeld = true
             },
+            new AuftragInfo
+            {
+                Auftrag = EnumAuftrag.Kaufmann, Name = "Kaufmann",
+                Ziel = "Erzielt einen Gesamtumsatz von 200.000 Talern.",
+                Schwierigkeit = EnumAuftragSchwierigkeit.Leicht, Zielwert = 200000, Einheit = "Taler Umsatz", IstGeld = true
+            },
+            new AuftragInfo
+            {
+                Auftrag = EnumAuftrag.Familienvater, Name = "Familienvater",
+                Ziel = "Zeugt 3 Kinder.",
+                Schwierigkeit = EnumAuftragSchwierigkeit.Leicht, Zielwert = 3, Einheit = "Kinder"
+            },
 
             // mittel
             new AuftragInfo
@@ -79,6 +91,18 @@ namespace Conspiratio.Lib.Allgemein
                 Ziel = "Errichtet 10 Häuser.",
                 Schwierigkeit = EnumAuftragSchwierigkeit.Mittel, Zielwert = 10, Einheit = "Häuser"
             },
+            new AuftragInfo
+            {
+                Auftrag = EnumAuftrag.Wahlsieger, Name = "Wahlsieger",
+                Ziel = "Gewinnt 3 Wahlen.",
+                Schwierigkeit = EnumAuftragSchwierigkeit.Mittel, Zielwert = 3, Einheit = "Wahlen gewonnen"
+            },
+            new AuftragInfo
+            {
+                Auftrag = EnumAuftrag.Kriegsheld, Name = "Kriegsheld",
+                Ziel = "Gewinnt 10 Kämpfe.",
+                Schwierigkeit = EnumAuftragSchwierigkeit.Mittel, Zielwert = 10, Einheit = "Kämpfe gewonnen"
+            },
 
             // schwer
             new AuftragInfo
@@ -92,6 +116,18 @@ namespace Conspiratio.Lib.Allgemein
                 Auftrag = EnumAuftrag.Kriegsherr, Name = "Kriegsherr",
                 Ziel = "Erobert 5 gegnerische Stützpunkte.",
                 Schwierigkeit = EnumAuftragSchwierigkeit.Schwer, Zielwert = 5, Einheit = "Stützpunkte erobert"
+            },
+            new AuftragInfo
+            {
+                Auftrag = EnumAuftrag.Karawanenschreck, Name = "Karawanenschreck",
+                Ziel = "Überfallt 8 Karawanen.",
+                Schwierigkeit = EnumAuftragSchwierigkeit.Schwer, Zielwert = 8, Einheit = "Karawanen überfallen"
+            },
+            new AuftragInfo
+            {
+                Auftrag = EnumAuftrag.Meuchelmoerder, Name = "Meuchelmörder",
+                Ziel = "Verübt 3 erfolgreiche Anschläge.",
+                Schwierigkeit = EnumAuftragSchwierigkeit.Schwer, Zielwert = 3, Einheit = "erfolgreiche Anschläge"
             }
         };
 
@@ -182,6 +218,18 @@ namespace Conspiratio.Lib.Allgemein
                     return spieler.GetTaler();
                 case EnumAuftrag.Kriegsherr:
                     return spieler.GetSpielerStatistik().MiEroberteStuetzpunkte;
+                case EnumAuftrag.Kaufmann:
+                    return spieler.GetSpielerStatistik().SoGesamtumsatz;
+                case EnumAuftrag.Familienvater:
+                    return spieler.GetSpielerStatistik().SogezeugteKinder;
+                case EnumAuftrag.Wahlsieger:
+                    return spieler.GetSpielerStatistik().SWahlenGewonnen;
+                case EnumAuftrag.Kriegsheld:
+                    return spieler.GetSpielerStatistik().MiKaempfeGewonnen;
+                case EnumAuftrag.Karawanenschreck:
+                    return spieler.GetSpielerStatistik().MiUeberfalleneKarawanen;
+                case EnumAuftrag.Meuchelmoerder:
+                    return spieler.GetSpielerStatistik().HiErfolgreicheErmordungen;
                 default:
                     return 0;
             }
