@@ -147,13 +147,35 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
                 case 12: // Vergifteter Wein (Privileg des Kellermeisters)
                     await SW.Dynamisch.WeinVergiften(id);
                     break;
-                case 14: // Duell/Beleidigung (Issue #17)
+                case 14: // Beleidigung → Satisfaktion/Duell (Issue #17)
+                {
                     var fechtDuell = new FechtDuellManager();
-                    if (!fechtDuell.KannDuellFordern(id, out string grundDuell))
+
+                    if (!fechtDuell.KannBeleidigen(id, out string grundDuell))
+                    {
                         SW.Dynamisch.BelTextAnzeigen(grundDuell);
-                    else if (await SW.UI.YesNoQuestion.ShowDialogText(fechtDuell.GetDuellFrage(id)) == DialogResultGame.Yes)
+                        break;
+                    }
+
+                    if (await SW.UI.YesNoQuestion.ShowDialogText(fechtDuell.GetBeleidigungsFrage(id)) != DialogResultGame.Yes)
+                        break;
+
+                    var reaktion = fechtDuell.Beleidige(id);
+
+                    // KI entscheidet aus ihrer Bosheit, ein menschliches Ziel per Dialog.
+                    bool satisfaktion = reaktion.ZielIstMensch
+                        ? await SW.UI.YesNoQuestion.ShowDialogText(
+                              fechtDuell.GetSatisfaktionsFrage(SW.Dynamisch.GetAktiverSpieler()),
+                              "Duell im Morgengrauen", "Verzichten") == DialogResultGame.Yes
+                        : reaktion.KiVerlangtSatisfaktion;
+
+                    if (satisfaktion)
                         SW.Dynamisch.BelTextAnzeigen(fechtDuell.FuehreDuellDurch(id).Meldung);
+                    else
+                        SW.Dynamisch.BelTextAnzeigen(fechtDuell.VerweigereSatisfaktion(id));
+
                     break;
+                }
                 default:
                     // Erpressung (5) ist bereits im Original deaktiviert und bleibt es hier.
                     SW.Dynamisch.BelTextAnzeigen("Diese Aktion ist noch nicht verfügbar.");

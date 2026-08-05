@@ -71,7 +71,7 @@ namespace Conspiratio.Lib.Allgemein
             // Fechtunterricht & Duell (Issue #17): immer verfügbar; ein Duell nur einmal pro Jahr.
             privilegien.Add(new PrivilegInfo(FechtunterrichtPrivilegId, "Fechtunterricht nehmen"));
             if (!spieler.DuellGefuehrtDiesesJahr)
-                privilegien.Add(new PrivilegInfo(DuellPrivilegId, "Zum Duell fordern"));
+                privilegien.Add(new PrivilegInfo(DuellPrivilegId, "Amtsträger beleidigen"));
 
             for (int i = 1; i < SW.Statisch.GetMaxPriv(); i++)
             {
