@@ -328,6 +328,9 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             //Waffenhandel
             GesetzDefUntergrenze[24] = 0;
             GesetzDefObergrenze[24] = 1;
+            //Erpressung (Issue #13)
+            GesetzDefUntergrenze[25] = 0;
+            GesetzDefObergrenze[25] = 1;
 
             //Kirchengesetze
             //Rel-Freiheit
@@ -497,6 +500,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             GerichtsGesetzesvorwurf[22] = "Mittels politischen Intrigen habt Ihr Euch einen Vorteil verschafft";
             GerichtsGesetzesvorwurf[23] = "Es gibt Zeugen, die behaupten Ihr habt eine Ermordung in Auftrag gegeben!";
             GerichtsGesetzesvorwurf[24] = "Euer Waffenhandel ist nichts anderes als Kriegstreiberei!";
+            GerichtsGesetzesvorwurf[25] = "Ihr habt einen Amtsträger mit Beweisen erpresst!";
 
             GerichtsGesetzesvorwurf[40] = "Ihr habt Euch gegen Gottes Willen von allen Religionen losgesagt!";
             GerichtsGesetzesvorwurf[41] = "Ihr habt es versucht, Euch von Euren Missetaten freizukaufen!";
@@ -1601,6 +1605,13 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         public int GetMaxAnzahlStrafen() { return maxAnzahlStrafen; }
         public IStrafe GetStrafartX(int x) { return Strafarten[x]; }
         public int GetMaxGesetze() { return maxGesetze; }
+
+        /// <summary>
+        /// Index des Strafgesetzes „Erpressung" (Issue #13). Liegt im Block der Strafgesetze hinter dem
+        /// Waffenhandel; die Gesetzestabelle ist mit 100 Plätzen fest dimensioniert und nur dünn belegt,
+        /// sodass ein weiteres Gesetz keine Spielstand-Anpassung erfordert.
+        /// </summary>
+        public int GetGesetzErpressung() { return 25; }
         public int GetGesetzXDefUntergrenze(int X) { return GesetzDefUntergrenze[X]; }
         public int GetGesetzXDefObergrenze(int X) { return GesetzDefObergrenze[X]; }
         public int GetMaxStaedteProLand() { return maxStaedteProLand; }

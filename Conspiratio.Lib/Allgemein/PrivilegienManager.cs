@@ -42,6 +42,23 @@ namespace Conspiratio.Lib.Allgemein
         public const int DuellPrivilegId = 10003;
 
         /// <summary>
+        /// Basis-Kennung der Einträge „[Amt] [Name] Privilegien" (Issue #13): je laufender Erpressung ein
+        /// synthetischer Eintrag, dessen ID sich aus dieser Basis plus der Opfer-ID ergibt. Ein Klick
+        /// schaltet die Liste auf die Amtsprivilegien des Erpressten um.
+        /// </summary>
+        public const int ErpressungPrivilegBasisId = 10100;
+
+        /// <summary>Kennung des Eintrags „Eigene Privilegien" – schaltet aus dem Fremdmodus zurück.</summary>
+        public const int EigenePrivilegienId = 10099;
+
+        /// <summary>Opfer-ID zu einer Erpressungs-Eintrags-ID (0, wenn die ID keine solche ist).</summary>
+        [PublicAPI]
+        public static int GetErpressungsOpferId(int privilegId)
+        {
+            return privilegId > ErpressungPrivilegBasisId ? privilegId - ErpressungPrivilegBasisId : 0;
+        }
+
+        /// <summary>
         /// Aktualisiert die Privilegien des Spielers (abhängig von Amt, Titel und Familienstand).
         /// </summary>
         [PublicAPI]
@@ -73,11 +90,38 @@ namespace Conspiratio.Lib.Allgemein
             if (!spieler.DuellGefuehrtDiesesJahr)
                 privilegien.Add(new PrivilegInfo(DuellPrivilegId, "Amtsträger beleidigen"));
 
+            // Erpressungen (Issue #13): je Opfer ein Eintrag, der auf dessen Amtsprivilegien umschaltet.
+            foreach (var erpressung in spieler.GetErpressungen())
+            {
+                var opfer = SW.Dynamisch.GetSpWithID(erpressung.OpferId);
+
+                privilegien.Add(new PrivilegInfo(ErpressungPrivilegBasisId + erpressung.OpferId,
+                    opfer.GetAmtNameUndOrt() + " " + opfer.GetName() + ": Privilegien"));
+            }
+
             for (int i = 1; i < SW.Statisch.GetMaxPriv(); i++)
             {
                 if (spieler.CheckPrivilegX(i))
                     privilegien.Add(new PrivilegInfo(i, SW.Statisch.GetPrivX(i).Name));
             }
+
+            return privilegien;
+        }
+
+        /// <summary>
+        /// Die Privilegien, die der Erpresser vom Amt seines Opfers mitnutzen darf (Issue #13) – plus den
+        /// Eintrag, mit dem er zu seinen eigenen zurückkehrt.
+        /// </summary>
+        [PublicAPI]
+        public List<PrivilegInfo> GetErpresstePrivilegien(int opferId)
+        {
+            var privilegien = new List<PrivilegInfo>
+            {
+                new PrivilegInfo(EigenePrivilegienId, "Eigene Privilegien")
+            };
+
+            foreach (int privilegId in SW.Dynamisch.GetAmtsPrivilegien(opferId))
+                privilegien.Add(new PrivilegInfo(privilegId, SW.Statisch.GetPrivX(privilegId).Name));
 
             return privilegien;
         }

@@ -1889,29 +1889,90 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         #endregion
 
         #region Erpressen
-        public void Erpressen(int id)
+        /// <summary>
+        /// Steht dieser Spieler derzeit unter der Fuchtel eines menschlichen Mitspielers (Issue #13)?
+        /// Maßgeblich für den Entzug seiner aktiven Amtsprivilegien und für die Kennzeichnung in den
+        /// Personenlisten.
+        /// </summary>
+        public bool WirdErpresst(int spielerId)
         {
-            if (id >= SW.Statisch.GetMinKIID())
-            {
-                int Delikte = GetHumWithID(GetAktiverSpieler()).GetAktiveSpionage(id).GetDelikte();
-                string Name = GetKIwithID(id).GetKompletterName();
+            return GetErpresserVon(spielerId) != 0;
+        }
 
-                if ((Delikte * 10) > 69)
-                {
-                    //lässt sich erpressen
-                    BelTextAnzeigen(Name + " muss sich den erdrückenden Beweisen beugen und steht nun unter Eurer Fuchtel.");
-                }
-                else
-                {
-                    //lässt sich nicht erpressen
-                    BelTextAnzeigen(Name + " lacht über Eure läppischen Drohungen.");
-                    GetKIwithID(id).ErhoeheBeziehungZuX(GetAktiverSpieler(), -20);
-                }
-            }
-            else
+        /// <summary>
+        /// Die Privilegien, die einem Spieler allein durch sein Amt zustehen (Issue #13). Grundlage der
+        /// Erpressung: Genau diese darf der Erpresser mitnutzen.
+        ///
+        /// Spiegelt die amtsabhängigen Bedingungen aus <see cref="PrivilegienAktualisieren"/> – ein
+        /// Konsolentest vergleicht beide über alle Ämter, damit sie nicht auseinanderlaufen.
+        /// „Amt niederlegen" (2) bleibt bewusst außen vor: Ein fremdes Amt legt man nicht nieder.
+        /// </summary>
+        public List<int> GetAmtsPrivilegien(int spielerId)
+        {
+            var privilegien = new List<int>();
+            int amt = GetSpWithID(spielerId).GetAmtID();
+
+            if (amt == 0)
+                return privilegien;
+
+            privilegien.Add(5);                                                     // Einkommen
+
+            if (GetUntergebene(spielerId)[0] != 0)
+                privilegien.Add(6);                                                 // Untergebene
+
+            if (amt == 15) privilegien.Add(7);                                       // Kerkerklatsch
+            if (amt == 8 || amt == 9) privilegien.Add(8);                            // Confessio
+            if (amt >= SW.Statisch.GetMaxAmtStadtID()) privilegien.Add(10);          // Bauwerk stiften
+            if (amt == 7) privilegien.Add(14);                                       // Umsatzsteuer festlegen
+            if (amt == 4) privilegien.Add(15);                                       // Sparplan
+            if (amt == 10 || (amt >= 23 && amt <= 27) || (amt >= 40 && amt <= 42))
+                privilegien.Add(16);                                                 // Kein Kirchenzehnt
+            if (amt == 23) privilegien.Add(17);                                      // Vergifteter Wein
+            if (amt == 22 || amt == 27 || amt == 33 || amt >= 34) privilegien.Add(18); // Wachen
+            if (amt == 39 || amt == 42 || amt == 48) privilegien.Add(19);            // Leibgarde
+            if (amt == 13) privilegien.Add(20);                                      // HenkersHand
+            if (amt == 11) privilegien.Add(21);                                      // Korruptionsgelder
+            if (amt == 29 || amt == 30 || amt == 32) privilegien.Add(22);            // Schmuggel
+            if (amt == 32) privilegien.Add(23);                                      // Zollkartell
+            if (amt == 42) privilegien.Add(24);                                      // Kirchengesetze festlegen
+            if (amt == 38) privilegien.Add(25);                                      // Finanzgesetze festlegen
+            if (amt == 37) privilegien.Add(26);                                      // Justizgesetze festlegen
+            if (amt == 1 || amt == 2 || amt == 3) privilegien.Add(27);               // Steuerhinterziehung A
+            if (amt == 17 || amt == 18 || amt == 19) privilegien.Add(28);            // Steuerhinterziehung B
+            if (amt == 34 || amt == 35 || amt == 36) privilegien.Add(29);            // Steuerhinterziehung C
+            if (amt == 22) privilegien.Add(30);                                      // Günstige Kredite
+            if (amt == 29 || amt == 30) privilegien.Add(31);                         // Zollfrei
+            if (amt == 8 || amt == 9) privilegien.Add(32);                           // Prediger
+
+            return privilegien;
+        }
+
+        /// <summary>
+        /// Die aktiv nutzbaren Amtsprivilegien – jene, mit denen ein Amtsträger in die Welt eingreift
+        /// (Gesetze, Urteile, Stiftungen, Anschläge). Genau diese verliert ein Erpresster, während seine
+        /// passiven Vorteile (Einkommen, Steuerfreiheiten, Schutz) bestehen bleiben – so im Issue
+        /// vereinbart. Reine Spielbalance, jederzeit anpassbar.
+        /// </summary>
+        private static readonly int[] AktiveAmtsPrivilegien = { 8, 10, 14, 15, 17, 20, 21, 22, 23, 24, 25, 26, 32 };
+
+        /// <summary>Ist dieses Amtsprivileg ein aktives (also dem Erpressten entzogenes)?</summary>
+        public bool IstAktivesAmtsPrivileg(int privilegId)
+        {
+            return System.Array.IndexOf(AktiveAmtsPrivilegien, privilegId) >= 0;
+        }
+
+        /// <summary>ID des Spielers, der das angegebene Opfer erpresst – oder 0, wenn es keinen gibt.</summary>
+        public int GetErpresserVon(int opferId)
+        {
+            for (int i = 1; i < SW.Statisch.GetMinKIID(); i++)
             {
-                BelTextAnzeigen("Ihr könnt keinen menschlichen Mitspieler erpressen");
+                var mensch = GetHumWithID(i);
+
+                if (mensch != null && mensch.ErpresstBereits(opferId))
+                    return i;
             }
+
+            return 0;
         }
         #endregion
 
@@ -2677,6 +2738,19 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             else
             {
                 GetAktHum().SetPrivilegX(34, false);
+            }
+            #endregion
+
+            #region Erpressung (Issue #13)
+            // Wer erpresst wird, führt sein Amt nicht mehr frei: Die aktiv nutzbaren Amtsprivilegien
+            // stehen ihm nicht mehr zu (sie liegen beim Erpresser), die passiven Vorteile bleiben.
+            if (WirdErpresst(GetAktiverSpieler()))
+            {
+                foreach (int privilegId in GetAmtsPrivilegien(GetAktiverSpieler()))
+                {
+                    if (IstAktivesAmtsPrivileg(privilegId))
+                        GetAktHum().SetPrivilegX(privilegId, false);
+                }
             }
             #endregion
         }

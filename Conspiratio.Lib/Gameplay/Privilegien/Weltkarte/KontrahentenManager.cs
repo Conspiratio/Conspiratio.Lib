@@ -197,8 +197,35 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
 
                     break;
                 }
+                case 5: // Erpressung (Issue #13)
+                {
+                    var erpressung = new ErpressungManager();
+
+                    if (!erpressung.KannErpressen(id, out string grundErpressung))
+                    {
+                        SW.Dynamisch.BelTextAnzeigen(grundErpressung);
+                        break;
+                    }
+
+                    if (await SW.UI.YesNoQuestion.ShowDialogText(erpressung.GetErpressungsFrage(id),
+                            "Erpressen", "Davon absehen") != DialogResultGame.Yes)
+                        break;
+
+                    // Ein menschliches Opfer entscheidet selbst, ob es sich beugt; bei der KI würfelt
+                    // die Erfolgschance. Ohne Dialog (Client ohne Unterstützung) beugt es sich nicht.
+                    bool? opferBeugtSich = null;
+
+                    if (id < SW.Statisch.GetMinKIID())
+                    {
+                        opferBeugtSich = SW.UI.ErpressungDialog != null &&
+                                         await SW.UI.ErpressungDialog.FrageOpfer(
+                                             erpressung.GetOpferFrage(SW.Dynamisch.GetAktiverSpieler(), id));
+                    }
+
+                    SW.Dynamisch.BelTextAnzeigen(erpressung.FuehreErpressungDurch(id, opferBeugtSich).Meldung);
+                    break;
+                }
                 default:
-                    // Erpressung (5) ist bereits im Original deaktiviert und bleibt es hier.
                     SW.Dynamisch.BelTextAnzeigen("Diese Aktion ist noch nicht verfügbar.");
                     break;
             }

@@ -79,6 +79,48 @@ namespace Conspiratio.Lib.Gameplay.Personen
         }
 
         /// <summary>
+        /// Die derzeit von diesem Spieler ausgeübten Erpressungen (Issue #13). Mehrere gleichzeitig sind
+        /// erlaubt. Alte Spielstände starten mit null (leer).
+        /// </summary>
+        public List<Erpressung> Erpressungen { get; set; }
+
+        /// <summary>Liefert die Erpressungsliste und legt sie bei Bedarf an (kompatibel mit alten Spielständen).</summary>
+        public List<Erpressung> GetErpressungen()
+        {
+            if (Erpressungen == null)
+                Erpressungen = new List<Erpressung>();
+
+            return Erpressungen;
+        }
+
+        /// <summary>Erpresst dieser Spieler das angegebene Opfer bereits?</summary>
+        public bool ErpresstBereits(int opferId)
+        {
+            return GetErpressungen().Any(e => e.OpferId == opferId);
+        }
+
+        /// <summary>Nimmt ein Opfer bis einschließlich <paramref name="laufendBis"/> unter die Fuchtel.</summary>
+        public void ErpressungAnlegen(int opferId, int laufendBis)
+        {
+            if (ErpresstBereits(opferId))
+                return;
+
+            GetErpressungen().Add(new Erpressung { OpferId = opferId, LaufendBis = laufendBis });
+        }
+
+        /// <summary>
+        /// Entfernt die im angegebenen Jahr abgelaufenen Erpressungen und liefert die Opfer-IDs zurück,
+        /// damit der Aufrufer sie melden kann.
+        /// </summary>
+        public List<int> AbgelaufeneErpressungenEntfernen(int jahr)
+        {
+            var abgelaufen = GetErpressungen().Where(e => e.LaufendBis < jahr).Select(e => e.OpferId).ToList();
+            GetErpressungen().RemoveAll(e => e.LaufendBis < jahr);
+
+            return abgelaufen;
+        }
+
+        /// <summary>
         /// Seit dem letzten Zug dieses Spielers eingenommene Zölle aus seinen Zollburgen (wird ihm zu
         /// Zugbeginn gemeldet und danach zurückgesetzt). Alte Spielstände starten mit 0.
         /// </summary>

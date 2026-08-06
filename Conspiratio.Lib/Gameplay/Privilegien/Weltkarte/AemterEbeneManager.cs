@@ -121,6 +121,7 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
             string prefix;
             switch (modus)
             {
+                case 5: prefix = "Erpressen in "; break;
                 case 8: prefix = "Prozess initiieren in "; break;
                 case 12: prefix = "Wein vergiften in "; break;
                 case 13: prefix = "Hand des Henkers in "; break;
@@ -145,6 +146,10 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
                 string amtName = SW.Statisch.GetAmtwithID(amtId)
                     .GetAmtsname(besetzt ? SW.Dynamisch.GetSpWithID(holder).GetMaennlich() : true);
                 string holderName = besetzt ? SW.Dynamisch.GetSpWithID(holder).GetName() : "(unbesetzt)";
+
+                // Erpresste Amtsträger tragen einen Dolch hinter dem Namen (Issue #13).
+                if (besetzt && SW.Dynamisch.WirdErpresst(holder))
+                    holderName += " †";
 
                 bool hatSabotage = false;
                 bool hatSpionage = false;

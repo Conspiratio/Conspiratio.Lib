@@ -25,9 +25,13 @@ namespace Conspiratio.Lib.Allgemein
         /// <summary>Vollbild-Inszenierung eines Duells; bleibt null, wenn der Client sie nicht anbietet.</summary>
         public IDuellDialog DuellDialog { get; private set; }
 
+        /// <summary>Entscheidung eines menschlichen Erpressungsopfers; null, wenn der Client sie nicht anbietet.</summary>
+        public IErpressungDialog ErpressungDialog { get; private set; }
+
         public void Initialisieren(IYesNoQuestion yesNoQuestion, IShowText showText, IBeziehungPflegen beziehungPflegen, IBauwerkStiftenDialog bauwerkStiftenDialog,
                                    IFestGebenDialog festGebenDialog, IPolitischeWeltkarteDialog politischeWeltkarteDialog, ITestamentAnzeigenDialog testamentAnzeigenDialog,
-                                   IProzentwertFestlegenDialog prozentwertFestlegenDialog, IUntergebeneDialog untergebeneDialog, IDuellDialog duellDialog = null)
+                                   IProzentwertFestlegenDialog prozentwertFestlegenDialog, IUntergebeneDialog untergebeneDialog, IDuellDialog duellDialog = null,
+                                   IErpressungDialog erpressungDialog = null)
         {
             YesNoQuestion = yesNoQuestion;
             ShowText = showText;
@@ -39,6 +43,7 @@ namespace Conspiratio.Lib.Allgemein
             ProzentwertFestlegenDialog = prozentwertFestlegenDialog;
             UntergebeneDialog = untergebeneDialog;
             DuellDialog = duellDialog;
+            ErpressungDialog = erpressungDialog;
         }
     }
 }
