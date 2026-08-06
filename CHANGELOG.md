@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 **[DE]**
+- Duell als Vollbild-Ereignis (Issue #17): Neue Schnittstelle `IDuellDialog` (`SW.UI.DuellDialog`, optionaler Parameter in `UIHelper.Initialisieren` – Clients ohne Inszenierung bleiben unverändert). `DuellErgebnis` liefert zusätzlich `GegnerName` und `AmtName`, sodass der Client den Ausgang selbst formulieren kann. Verlangt ein Beleidigter Satisfaktion, spielt `KontrahentenManager` das Duell über den neuen Dialog aus; ist keiner registriert, bleibt es bei der bisherigen Textmeldung.
 - Menschliche Spieler starten nun mit dem Geburtsjahr 1580 (`PlayerSetupManager.ErstelleSpieler` setzt das Alter passend zum Startjahr); zuvor blieb das Alter auf 0, sodass das Geburtsjahr fälschlich dem Startjahr entsprach.
 - Beleidigung: Die Rückfrage berücksichtigt jetzt das Geschlecht des Ziels („Er"/„Sie könnte Satisfaktion verlangen") statt fest „Er".
 - Balancing Duelle (Issue #17): Die Chance, dass eine beleidigte KI Satisfaktion (ein Duell) verlangt, wurde um rund 20 Prozentpunkte angehoben – jetzt 50 % + Bosheit/2 (Bereich 50–100 %, vorher 30–80 %).
@@ -57,6 +58,7 @@
 - Räuber/Söldner-System (Issue #16): Kaufangebote für Stützpunkte können nun auch an menschliche Mitspieler gerichtet werden. Das Angebot reserviert den Betrag beim Anbieter und wird dem Besitzer zu Beginn seines nächsten Zuges vorgelegt (`Stuetzpunkt.AngebotVorlegen`, `SoeldnerRaeuberManager.VerarbeiteEingehendeKaufangebote`/`StehenKaufangeboteAn`); bei Annahme wechselt der Stützpunkt gegen den Preis den Besitzer (samt Handelszertifikat der Stufe 3), bei Ablehnung wird der reservierte Betrag zurückerstattet. Nebenbei behoben: Der Besitzername im Bestätigungstext bezog sich fälschlich auf den aktiven Spieler statt auf den Stützpunkt-Besitzer.
 
 **[EN]**
+- Duel as a fullscreen event (issue #17): new `IDuellDialog` interface (`SW.UI.DuellDialog`, an optional parameter of `UIHelper.Initialisieren` – clients without the staging are unaffected). `DuellErgebnis` additionally carries `GegnerName` and `AmtName` so the client can phrase the outcome itself. When satisfaction is demanded, `KontrahentenManager` plays the duel through the new dialog; if none is registered, the previous text message is used.
 - Human players now start with the birth year 1580 (`PlayerSetupManager.ErstelleSpieler` sets the age to match the start year); previously the age stayed at 0, so the birth year wrongly equalled the start year.
 - Insult: the confirmation prompt now respects the target's gender ("Er"/"Sie könnte Satisfaktion verlangen") instead of a fixed "Er".
 - Duel balancing (issue #17): the chance that an insulted AI demands satisfaction (a duel) was raised by about 20 percentage points – now 50 % + malice/2 (range 50–100 %, previously 30–80 %).

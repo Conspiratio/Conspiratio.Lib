@@ -13,6 +13,12 @@ namespace Conspiratio.Lib.Allgemein
         public bool AmtVerloren { get; set; }
         public int VerliererId { get; set; }
         public string Meldung { get; set; }
+
+        /// <summary>Vollständiger Name des Gegners (für die Vollbild-Inszenierung des Duells).</summary>
+        public string GegnerName { get; set; }
+
+        /// <summary>Name des Amtes, das der Verlierer niederlegen muss – leer, wenn keines betroffen ist.</summary>
+        public string AmtName { get; set; }
     }
 
     /// <summary>Reaktion eines Ziels auf eine Beleidigung.</summary>
@@ -281,6 +287,8 @@ namespace Conspiratio.Lib.Allgemein
                 SpielerHatGewonnen = spielerGewinnt,
                 AmtVerloren = amtVerloren,
                 VerliererId = verliererId,
+                GegnerName = zielName,
+                AmtName = amtVerloren ? amtName : "",
                 Meldung = BaueMeldung(spielerGewinnt, zielName, verlierer, amtVerloren, amtName)
             };
         }

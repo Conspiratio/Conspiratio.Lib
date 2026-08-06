@@ -170,9 +170,21 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
                         : reaktion.KiVerlangtSatisfaktion;
 
                     if (satisfaktion)
-                        SW.Dynamisch.BelTextAnzeigen(fechtDuell.FuehreDuellDurch(id).Meldung);
+                    {
+                        var ergebnis = fechtDuell.FuehreDuellDurch(id);
+
+                        // Bietet der Client die Vollbild-Inszenierung an, wird das Duell als Szene gespielt;
+                        // sonst bleibt es bei der reinen Textmeldung.
+                        if (SW.UI.DuellDialog != null)
+                            await SW.UI.DuellDialog.ShowDuell(ergebnis.SpielerHatGewonnen, ergebnis.GegnerName,
+                                                              ergebnis.AmtVerloren, ergebnis.AmtName);
+                        else
+                            SW.Dynamisch.BelTextAnzeigen(ergebnis.Meldung);
+                    }
                     else
+                    {
                         SW.Dynamisch.BelTextAnzeigen(fechtDuell.VerweigereSatisfaktion(id));
+                    }
 
                     break;
                 }

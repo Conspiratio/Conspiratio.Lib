@@ -20,11 +20,14 @@ namespace Conspiratio.Lib.Allgemein
 
         public IProzentwertFestlegenDialog ProzentwertFestlegenDialog { get; private set; }
 
-        public IUntergebeneDialog UntergebeneDialog { get; private set; }       
+        public IUntergebeneDialog UntergebeneDialog { get; private set; }
+
+        /// <summary>Vollbild-Inszenierung eines Duells; bleibt null, wenn der Client sie nicht anbietet.</summary>
+        public IDuellDialog DuellDialog { get; private set; }
 
         public void Initialisieren(IYesNoQuestion yesNoQuestion, IShowText showText, IBeziehungPflegen beziehungPflegen, IBauwerkStiftenDialog bauwerkStiftenDialog,
                                    IFestGebenDialog festGebenDialog, IPolitischeWeltkarteDialog politischeWeltkarteDialog, ITestamentAnzeigenDialog testamentAnzeigenDialog,
-                                   IProzentwertFestlegenDialog prozentwertFestlegenDialog, IUntergebeneDialog untergebeneDialog)
+                                   IProzentwertFestlegenDialog prozentwertFestlegenDialog, IUntergebeneDialog untergebeneDialog, IDuellDialog duellDialog = null)
         {
             YesNoQuestion = yesNoQuestion;
             ShowText = showText;
@@ -35,6 +38,7 @@ namespace Conspiratio.Lib.Allgemein
             TestamentAnzeigenDialog = testamentAnzeigenDialog;
             ProzentwertFestlegenDialog = prozentwertFestlegenDialog;
             UntergebeneDialog = untergebeneDialog;
+            DuellDialog = duellDialog;
         }
     }
 }
