@@ -253,20 +253,40 @@ namespace Conspiratio.Lib.Allgemein
         [PublicAPI]
         public DuellErgebnis FuehreDuellDurch(int zielId)
         {
-            var herausforderer = SW.Dynamisch.GetAktHum();
-            int herausfordererId = SW.Dynamisch.GetAktiverSpieler();
-            var ziel = SW.Dynamisch.GetSpWithID(zielId);
-            string zielName = ziel.GetKompletterName();
+            bool spielerGewinnt = SW.Statisch.Rnd.Next(0, 100) < BerechneSiegchance(zielId);
+            return WendeDuellAusgangAn(zielId, spielerGewinnt);
+        }
 
+        /// <summary>
+        /// Siegchance des aktiven Spielers gegen <paramref name="zielId"/> in Prozent: Fechtfähigkeit
+        /// gegen die Gegnerstärke (bei KI aus ihrer Bosheit, bei Menschen deren Fechtfähigkeit),
+        /// gedeckelt auf 5–95 %.
+        /// </summary>
+        [PublicAPI]
+        public int BerechneSiegchance(int zielId)
+        {
             int gegnerStaerke = zielId >= SW.Statisch.GetMinKIID()
                 ? 15 + SW.Dynamisch.GetKIwithID(zielId).GetBosheit() / 4
                 : SW.Dynamisch.GetHumWithID(zielId).Fechtfaehigkeit;
 
-            int chance = 50 + (herausforderer.Fechtfaehigkeit - gegnerStaerke);
+            int chance = 50 + (SW.Dynamisch.GetAktHum().Fechtfaehigkeit - gegnerStaerke);
             if (chance < 5) chance = 5;
             if (chance > 95) chance = 95;
 
-            bool spielerGewinnt = SW.Statisch.Rnd.Next(0, 100) < chance;
+            return chance;
+        }
+
+        /// <summary>
+        /// Wendet einen feststehenden Duellausgang an: Der Verlierer verliert Gesundheit und – sinkt sie
+        /// unter die Schwelle – sein Amt (Neuwahl). Wird sowohl vom gewürfelten Duell als auch vom
+        /// interaktiven Wortgefecht genutzt.
+        /// </summary>
+        [PublicAPI]
+        public DuellErgebnis WendeDuellAusgangAn(int zielId, bool spielerGewinnt)
+        {
+            int herausfordererId = SW.Dynamisch.GetAktiverSpieler();
+            var ziel = SW.Dynamisch.GetSpWithID(zielId);
+            string zielName = ziel.GetKompletterName();
 
             int verliererId = spielerGewinnt ? zielId : herausfordererId;
             var verlierer = SW.Dynamisch.GetSpWithID(verliererId);

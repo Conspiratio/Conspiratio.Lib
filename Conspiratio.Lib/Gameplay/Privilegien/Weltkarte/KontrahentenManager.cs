@@ -171,15 +171,24 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Weltkarte
 
                     if (satisfaktion)
                     {
-                        var ergebnis = fechtDuell.FuehreDuellDurch(id);
-
-                        // Bietet der Client die Vollbild-Inszenierung an, wird das Duell als Szene gespielt;
-                        // sonst bleibt es bei der reinen Textmeldung.
+                        // Bietet der Client die Vollbild-Inszenierung an, wird das Duell dort ausgetragen
+                        // (interaktives Wortgefecht) und erst danach ausgewertet; sonst bleibt es beim
+                        // gewürfelten Duell mit reiner Textmeldung.
                         if (SW.UI.DuellDialog != null)
-                            await SW.UI.DuellDialog.ShowDuell(ergebnis.SpielerHatGewonnen, ergebnis.GegnerName,
-                                                              ergebnis.AmtVerloren, ergebnis.AmtName);
+                        {
+                            string gegnerName = SW.Dynamisch.GetSpWithID(id).GetKompletterName();
+                            var gefecht = new WortgefechtManager(id);
+
+                            bool gewonnen = await SW.UI.DuellDialog.SpieleWortgefecht(gefecht, gegnerName);
+                            var ergebnis = fechtDuell.WendeDuellAusgangAn(id, gewonnen);
+
+                            await SW.UI.DuellDialog.ZeigeAusgang(ergebnis.SpielerHatGewonnen, ergebnis.GegnerName,
+                                                                 ergebnis.AmtVerloren, ergebnis.AmtName);
+                        }
                         else
-                            SW.Dynamisch.BelTextAnzeigen(ergebnis.Meldung);
+                        {
+                            SW.Dynamisch.BelTextAnzeigen(fechtDuell.FuehreDuellDurch(id).Meldung);
+                        }
                     }
                     else
                     {
