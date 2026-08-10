@@ -14,6 +14,7 @@ namespace Conspiratio.Lib.Tests
     {
         private const int AmtBuergermeister = 7;
         private const int PrivEinkommen = 5;          // passiv
+        private const int PrivUntergebene = 6;        // passiv, zusätzlich an vorhandene Untergebene gebunden
         private const int PrivUmsatzsteuer = 14;      // aktiv (Bürgermeister)
 
         /// <summary>
@@ -39,6 +40,43 @@ namespace Conspiratio.Lib.Tests
                         $"Amt {amtId}: Privileg {privilegId} steht in GetAmtsPrivilegien, wurde aber nicht gesetzt.");
                 }
             }
+        }
+
+        /// <summary>
+        /// „Untergebene" hängt nicht nur am Amt, sondern daran, ob es überhaupt Untergebene gibt. Beim
+        /// Wechsel in ein Amt ohne Untergebene muss das Privileg wieder verschwinden – zuvor blieb ein
+        /// einmal gesetztes true stehen, weil dieser Fall keine Zuweisung hatte.
+        /// </summary>
+        [Fact]
+        public void Untergebenen_Privileg_verschwindet_im_Amt_ohne_Untergebene()
+        {
+            TestSpielwelt.Starte();
+            var spieler = SW.Dynamisch.GetAktHum();
+
+            int mitUntergebenen = 0;
+            int ohneUntergebene = 0;
+
+            for (int amtId = 1; amtId < SW.Statisch.GetMaxAmtID(); amtId++)
+            {
+                spieler.SetAmt(amtId, 1);
+                bool hatUntergebene = SW.Dynamisch.GetUntergebene(1)[0] != 0;
+
+                if (hatUntergebene && mitUntergebenen == 0)
+                    mitUntergebenen = amtId;
+                else if (!hatUntergebene && ohneUntergebene == 0)
+                    ohneUntergebene = amtId;
+            }
+
+            Assert.True(mitUntergebenen != 0 && ohneUntergebene != 0,
+                "Für diesen Test braucht es je ein Amt mit und ohne Untergebene.");
+
+            spieler.SetAmt(mitUntergebenen, 1);
+            SW.Dynamisch.PrivilegienAktualisieren();
+            Assert.True(spieler.CheckPrivilegX(PrivUntergebene));
+
+            spieler.SetAmt(ohneUntergebene, 1);
+            SW.Dynamisch.PrivilegienAktualisieren();
+            Assert.False(spieler.CheckPrivilegX(PrivUntergebene));
         }
 
         [Fact]

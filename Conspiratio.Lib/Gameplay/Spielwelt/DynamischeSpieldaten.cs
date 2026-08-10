@@ -2425,12 +2425,11 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             #region 6 - Untergebene
             if (GetAktHum().GetAmtID() != 0)
             {
-                //Wenn auch noch Untergebene vorhanden sind...
+                // Nur mit tatsächlich vorhandenen Untergebenen. Die Zuweisung muss auch den Fall "keine
+                // Untergebenen" abdecken: Sonst bliebe ein true aus einem früheren Amt stehen, und der
+                // Spieler behielte das Privileg in einem Amt ohne Untergebene.
                 int[] uid = SW.Dynamisch.GetUntergebene(SW.Dynamisch.GetAktiverSpieler());
-                if (uid[0] != 0)
-                {
-                    GetAktHum().SetPrivilegX(6, true);
-                }
+                GetAktHum().SetPrivilegX(6, uid[0] != 0);
             }
             else
             {
