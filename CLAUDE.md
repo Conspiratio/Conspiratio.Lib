@@ -40,6 +40,12 @@ into a dated `## <Version>` section when a real GitHub release is made.
 A feature that touches both repos is committed **Lib first, then Godot**, and the Godot commit's
 subject references the Lib version it depends on (`… (Conspiratio.Lib 3.95.0)`). Commit only when asked.
 
+**Publishing is a side effect of `master`.** `.github/workflows/main.yml` builds, tests, packs, pushes to
+nuget.org and cuts a GitHub release on every push to `master` — there is no manual publish step. As long
+as work sits on a feature branch, nothing is published, and the Godot client can only resolve those
+versions through the local cache trick above. Keep that in mind before pointing the client at a version:
+for anyone else (and for CI) it does not exist yet.
+
 ### Letting the Godot client see an unreleased version
 
 The Godot repo resolves nuget.org only, so an unreleased build has to be planted in the **global NuGet
@@ -54,10 +60,34 @@ dotnet restore --source "D:/Projekte/C# Projekte/Conspiratio.Lib/Conspiratio.Lib
 Step 2 is the one that bites: rebuilding without purging leaves the old code in the cache and the Godot
 build silently keeps using it.
 
-## Verifying a change
+## Tests
 
-There are no automated tests. Logic is verified with a **throwaway console harness** (net8.0) that
-references the same package version and drives a real game state:
+`Conspiratio.Lib.Tests` (xUnit, net8.0, project reference) covers the game rules. Run them with
+`dotnet test`; both workflows run them too — in the release workflow deliberately **before** publishing,
+so a broken package never reaches nuget.org.
+
+**A new feature normally comes with tests.** Cover what decides rules: calculations, probabilities,
+preconditions, and state that spans several turns. Don't cover pure text output or plain delegation to
+the UI. Conventions that the suite depends on:
+
+- **No parallelism** (`AssemblyInfo.cs`): the whole game state lives in the static `SW` facades, so
+  tests would trample each other. Every test builds its own world with `TestSpielwelt.Starte()` instead
+  of relying on a predecessor.
+- `TestSpielwelt` also provides `SetzeKiGegner(...)` (office plus **pinned** malice) and `GibBeweise(...)`.
+  Pin randomized inputs — otherwise dependent values swing from run to run and look like regressions.
+- **Assert on rates, not single outcomes,** for anything probabilistic (a few thousand runs). Numbers
+  from a design document make excellent exact assertions — the blackmail concept's 56 / 48 / 40 % are
+  pinned that way.
+- **When fixing a bug, first watch the new test fail without the fix.** That is the only proof it
+  captures the bug; it is cheap (revert, run, re-apply) and was what confirmed the „Untergebene" fix.
+- **Regression-compare a refactor against the original** over the whole input space. When
+  `GetAmtsPrivilegien` was extracted to mirror the office conditions of `PrivilegienAktualisieren`, the
+  suite compares both across all offices — that proved equivalence and now guards against drift.
+
+## Exploring a change
+
+For a quick look at a manager's output before it has tests, a **throwaway console harness** (net8.0)
+referencing the package drives a real game state:
 
 ```csharp
 SW.Statisch.Initialisieren();
@@ -71,15 +101,8 @@ SW.Dynamisch.SetAktiverSpieler(1);
 ```
 
 `SW.UI` needs at least stub implementations of `IYesNoQuestion` and `IShowText`; the remaining slots may
-be `null`. Three habits that repeatedly paid off:
-
-- **Pin randomized inputs.** Much state is rolled per game (KI `Bosheit`, and with it opponent
-  strength). Without pinning, two runs differ enough to look like a regression.
-- **Assert on rates, not single outcomes,** for anything probabilistic — a few thousand runs. Numbers
-  from a design document (e.g. the blackmail concept's 56 / 48 / 40 %) make excellent exact assertions.
-- **Regression-compare a refactor against the original** over the whole input space. When
-  `GetAmtsPrivilegien` was extracted to mirror the office conditions of `PrivilegienAktualisieren`, the
-  harness compared both across all offices — that proved equivalence and now guards against drift.
+be `null`. Whatever the harness establishes should end up as a test — the harness is for looking around,
+not for keeping.
 
 ## Architecture
 
