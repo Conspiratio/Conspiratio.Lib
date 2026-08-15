@@ -4,6 +4,12 @@ on:
   push:
     branches: 
       - master
+    # Reine Dokumentationsaenderungen loesen keinen Release-Lauf aus. Der Lauf baut, testet, packt und
+    # veroeffentlicht - fuer eine nachgezogene CHANGELOG-Ueberschrift ist das verschwendete Zeit, und er
+    # laeuft auf windows-latest, dessen Minuten doppelt auf das Kontingent zaehlen.
+    # Gilt pro Push: Enthaelt ein Push Code *und* Markdown, laeuft der Workflow wie gewohnt.
+    paths-ignore:
+      - '**.md'
 
 jobs:
   build:
