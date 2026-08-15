@@ -67,6 +67,54 @@ namespace Conspiratio.Lib.Allgemein
             return SW.Dynamisch.GetSpXlebtNochSoVielJahre(spielerId) + SW.Statisch.Rnd.Next(-1, 2) <= 0;
         }
 
+        /// <summary>
+        /// Lässt die KI-Spieler zum Rundenende zufällig Straftaten begehen (Issue #18). Die tatsächlich
+        /// begangenen Verbrechen werden je Gesetz in ihrem Delikt-Speicher (`GetBegingVerbrechenX`) geführt,
+        /// können von Spionen als Beweise erkannt und bei einer Gerichtsverhandlung herangezogen werden.
+        ///
+        /// „Mischung" (vom Nutzer gewählt): Die Basis ist zufällig und skaliert mit der Bosheit der KI; der
+        /// Speicher ist additiv, sodass real begangene illegale Aktionen (sobald es solche für die KI gibt)
+        /// zusätzlich hineinzählen. Alte Delikte verblassen jährlich (rollierendes Fenster), damit sie ohne
+        /// Verurteilung nicht unbegrenzt anwachsen.
+        /// </summary>
+        [PublicAPI]
+        public void FuehreKiStraftatenDurch()
+        {
+            string[] vorwuerfe = SW.Statisch.GetGerichtsGesetzesvorwurf();
+
+            // Gesetze, gegen die überhaupt verstoßen werden kann (mit hinterlegtem Vorwurf-Text).
+            var verletzbareGesetze = new List<int>();
+            for (int g = 0; g < SW.Statisch.GetMaxGesetze(); g++)
+            {
+                if (!string.IsNullOrEmpty(vorwuerfe[g]))
+                    verletzbareGesetze.Add(g);
+            }
+
+            if (verletzbareGesetze.Count == 0)
+                return;
+
+            for (int i = SW.Statisch.GetMinKIID(); i < SW.Statisch.GetMaxKIID(); i++)
+            {
+                var ki = SW.Dynamisch.GetKIwithID(i);
+
+                // Alte Delikte verblassen (rollierendes Fenster).
+                ki.HalbiereDelikte();
+
+                // Bösere KI begehen mehr zufällige Delikte.
+                int hoechstzahl = ki.GetBosheit() / 25;
+                if (hoechstzahl < 1)
+                    hoechstzahl = 1;
+
+                int anzahl = SW.Statisch.Rnd.Next(0, hoechstzahl + 1);
+
+                for (int n = 0; n < anzahl; n++)
+                {
+                    int gesetz = verletzbareGesetze[SW.Statisch.Rnd.Next(0, verletzbareGesetze.Count)];
+                    ki.ErhoeheGesetzXUmEins(gesetz);
+                }
+            }
+        }
+
         private static string GetTodesmeldung(int kiId)
         {
             var ki = SW.Dynamisch.GetSpWithID(kiId);

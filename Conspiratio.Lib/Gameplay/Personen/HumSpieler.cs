@@ -18,7 +18,129 @@ namespace Conspiratio.Lib.Gameplay.Personen
 
         public int WirbtUmSpielerID { get; set; }
         public bool HatAngebotFuerStuetzpunktAbgegeben { get; set; }
+
+        /// <summary>
+        /// Verknüpfung zum spielübergreifenden Profil (GUID). Leer/null = „ohne Profil", wird dann nicht
+        /// in ein Profil gewertet. Alte Spielstände starten ohne Zuordnung (null).
+        /// </summary>
+        public string ProfilId { get; set; }
+
+        /// <summary>
+        /// Snapshot der zuletzt ins Profil gewerteten Statistik (Basis für die Delta-Wertung beim Speichern).
+        /// Null = für dieses Spiel wurde noch nichts gewertet. Nur für die spielübergreifende Statistik.
+        /// </summary>
+        public SpielerStatistik GewerteteStatistik { get; set; }
+
+        /// <summary>Bereits ins Profil gutgeschriebene Spieljahre dieses Spiels (Delta-Basis).</summary>
+        public int GewerteteJahre { get; set; }
+
+        /// <summary>Ob dieses Spiel bereits als „gespielt" im Profil (SpieleGesamt) gezählt wurde.</summary>
+        public bool WurdeGezaehlt { get; set; }
+
+        /// <summary>
+        /// Anzahl der Jahre in Folge, die dieser Spieler das Amt des Domherrn hält (für den Auftrag
+        /// „Herr des Doms"). Wird je Zug aktualisiert (Amt gehalten ⇒ +1, sonst zurück auf 0). Alte
+        /// Spielstände starten mit 0.
+        /// </summary>
+        public int DomherrJahreInFolge { get; set; }
+
+        /// <summary>
+        /// Gesamtwert der von diesem Spieler dem Reich gestifteten Bauwerke in Talern (für den Auftrag
+        /// „Mäzen"). Wird beim Stiften aufaddiert. Alte Spielstände starten mit 0.
+        /// </summary>
+        public int GestifteterBauwert { get; set; }
+
+        /// <summary>
+        /// Fechtfähigkeit (Issue #17): steigt durch Fechtunterricht und erhöht die Gewinnchance im Duell.
+        /// Alte Spielstände starten mit 0.
+        /// </summary>
+        public int Fechtfaehigkeit { get; set; }
+
+        /// <summary>Anzahl der bisher genommenen Fechtstunden – bestimmt den (steigenden) Preis der nächsten Stunde.</summary>
+        public int FechtstundenGenommen { get; set; }
+
+        /// <summary>Ob der Spieler in diesem Jahr bereits ein Duell geführt hat (max. eines pro Zug). Reset zu Zugbeginn.</summary>
+        public bool DuellGefuehrtDiesesJahr { get; set; }
+
+        /// <summary>
+        /// Die Ahnentafel der Dynastie: je Generation das verstorbene Oberhaupt samt Ehepartner und Kindern,
+        /// festgehalten beim Erbfall (sonst gingen diese Daten bei der Erbübernahme verloren). Übersteht den
+        /// Erbfall, da sie am fortbestehenden Spielerobjekt hängt. Alte Spielstände starten mit null (leer).
+        /// </summary>
+        public List<Dynastiegeneration> Ahnentafel { get; set; }
+
+        /// <summary>Liefert die Ahnentafel-Liste und legt sie bei Bedarf an (kompatibel mit alten Spielständen).</summary>
+        public List<Dynastiegeneration> GetAhnentafelListe()
+        {
+            if (Ahnentafel == null)
+                Ahnentafel = new List<Dynastiegeneration>();
+
+            return Ahnentafel;
+        }
+
+        /// <summary>
+        /// Die derzeit von diesem Spieler ausgeübten Erpressungen (Issue #13). Mehrere gleichzeitig sind
+        /// erlaubt. Alte Spielstände starten mit null (leer).
+        /// </summary>
+        public List<Erpressung> Erpressungen { get; set; }
+
+        /// <summary>Liefert die Erpressungsliste und legt sie bei Bedarf an (kompatibel mit alten Spielständen).</summary>
+        public List<Erpressung> GetErpressungen()
+        {
+            if (Erpressungen == null)
+                Erpressungen = new List<Erpressung>();
+
+            return Erpressungen;
+        }
+
+        /// <summary>Erpresst dieser Spieler das angegebene Opfer bereits?</summary>
+        public bool ErpresstBereits(int opferId)
+        {
+            return GetErpressungen().Any(e => e.OpferId == opferId);
+        }
+
+        /// <summary>Nimmt ein Opfer bis einschließlich <paramref name="laufendBis"/> unter die Fuchtel.</summary>
+        public void ErpressungAnlegen(int opferId, int laufendBis)
+        {
+            if (ErpresstBereits(opferId))
+                return;
+
+            GetErpressungen().Add(new Erpressung { OpferId = opferId, LaufendBis = laufendBis });
+        }
+
+        /// <summary>
+        /// Entfernt die im angegebenen Jahr abgelaufenen Erpressungen und liefert die Opfer-IDs zurück,
+        /// damit der Aufrufer sie melden kann.
+        /// </summary>
+        public List<int> AbgelaufeneErpressungenEntfernen(int jahr)
+        {
+            var abgelaufen = GetErpressungen().Where(e => e.LaufendBis < jahr).Select(e => e.OpferId).ToList();
+            GetErpressungen().RemoveAll(e => e.LaufendBis < jahr);
+
+            return abgelaufen;
+        }
+
+        /// <summary>
+        /// Seit dem letzten Zug dieses Spielers eingenommene Zölle aus seinen Zollburgen (wird ihm zu
+        /// Zugbeginn gemeldet und danach zurückgesetzt). Alte Spielstände starten mit 0.
+        /// </summary>
+        public int ZolleinnahmenGesammelt { get; set; }
         public List<Ereigniszeitpunkt> EreignisseZuletztPassiert { get; set; }
+
+        /// <summary>
+        /// Zu Zugbeginn vorzulegende Meldungen zum Stützpunkt-Handel (z. B. Annahme/Ablehnung eines eigenen
+        /// Kaufangebots). Lazy initialisiert, damit ältere Spielstände (ohne dieses Feld) kompatibel bleiben.
+        /// </summary>
+        public List<string> HandelsNachrichten
+        {
+            get
+            {
+                if (_handelsNachrichten == null)
+                    _handelsNachrichten = new List<string>();
+
+                return _handelsNachrichten;
+            }
+        }
 
         private int _bannerID;
         private bool _sitztImKerker;
@@ -26,6 +148,7 @@ namespace Conspiratio.Lib.Gameplay.Personen
         private int _bekamTitelX;
         private int _permaAnsehen;
         private bool _kindBekommen;  // nur mit Cheats
+        private bool _hatMaetresse;  // Privileg „Mätresse nehmen" (Issue #8); alte Spielstände starten mit false
         private int[] _umsatzInStadt;
         private int _klagtSpielerMitIDXAn;
         private bool _gebeichtet;
@@ -39,8 +162,8 @@ namespace Conspiratio.Lib.Gameplay.Personen
         private int _erbeSpielerID;
         private bool[] _rohstoffrechte = new bool[SW.Statisch.GetMaxRohID()];  // Welche Handelsrechte der Spieler von welchem Rohstoff schon besitzt
         private int[] _karawaneInStadt = new int[SW.Statisch.GetMaxStadtID()];
-        private int[] _begingVerbrechenX;
         private bool _privilegKaufmannBenutzt;
+        private List<string> _handelsNachrichten;
 
         private SpielerStatistik _spielerStatistik;
         private Produktionsslot[,] _produktionsslotsInStadtX;
@@ -67,7 +190,6 @@ namespace Conspiratio.Lib.Gameplay.Personen
             _erbeSpielerID = 0;
             _bannerID = 0;
             _spielerStatistik = new SpielerStatistik();
-            _begingVerbrechenX = new int[SW.Statisch.GetMaxGesetze()];
             _hatInStadtXMengeYRohstoffe = new int[SW.Statisch.GetMaxStadtID(), SW.Statisch.GetMaxRohID()];
             _umsatzInStadt = new int[SW.Statisch.GetMaxStadtID()];  // Umsatz pro Stadt
             _rohstoffeEinVerkaeufeInStadt = new int[SW.Statisch.GetMaxStadtID(), SW.Statisch.GetMaxRohID()];
@@ -384,6 +506,17 @@ namespace Conspiratio.Lib.Gameplay.Personen
             return _kindBekommen;
         }
 
+        /// <summary>Ob der Spieler eine Mätresse unterhält (Privileg „Mätresse nehmen", Issue #8).</summary>
+        public bool HatMaetresse()
+        {
+            return _hatMaetresse;
+        }
+
+        public void SetHatMaetresse(bool wert)
+        {
+            _hatMaetresse = wert;
+        }
+
         public int GetUmsatzInStadtX(int X)
         {
             return _umsatzInStadt[X];
@@ -552,31 +685,6 @@ namespace Conspiratio.Lib.Gameplay.Personen
             return _sitztImKerker;
         }
 
-        public int GetBegingVerbrechenX(int x)
-        {
-            return _begingVerbrechenX[x];
-        }
-
-        public void SetBegingVerbrechenX(int x, int y)
-        {
-            _begingVerbrechenX[x] = y;
-        }
-
-        public void ErhoeheGesetzXUmEins(int x)
-        {
-            _begingVerbrechenX[x]++;
-        }
-
-        public void HalbiereDelikte()
-        {
-            for (int i = 0; i < SW.Statisch.GetMaxGesetze(); i++)
-                _begingVerbrechenX[i] /= 2;
-        }
-
-        public int[] GetBegingVerbrechenX()
-        {
-            return _begingVerbrechenX;
-        }
         #endregion
 
         #region GetFirstStadtIDMitWohnsitz

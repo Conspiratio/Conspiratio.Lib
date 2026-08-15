@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 using Conspiratio.Lib.Gameplay.Schreibstube;
 using Conspiratio.Lib.Gameplay.Spielwelt;
@@ -26,15 +27,6 @@ namespace Conspiratio.Lib.Allgemein
         }
 
         /// <summary>
-        /// Die Wahl-ID, für die der aktive Spieler zurzeit als Kandidat aufgestellt ist (0 = keine).
-        /// </summary>
-        [PublicAPI]
-        public int GetAngemeldeteWahlId()
-        {
-            return SW.Dynamisch.GetAktHum().GetWahlTeilnahme();
-        }
-
-        /// <summary>
         /// Liefert die freien Ämter, auf die sich der aktive Spieler bewerben kann (wie im Original maximal zehn).
         /// </summary>
         [PublicAPI]
@@ -49,7 +41,6 @@ namespace Conspiratio.Lib.Allgemein
                 max = 10;
 
             int[] wahlIds = SW.Dynamisch.GetFreieAemterFuerSpX(aktiv);
-            int angemeldet = SW.Dynamisch.GetAktHum().GetWahlTeilnahme();
 
             for (int i = 0; i < max; i++)
             {
@@ -57,38 +48,52 @@ namespace Conspiratio.Lib.Allgemein
                 string amtName = SW.Statisch.GetAmtwithID(wahl.AmtID).GetAmtsname(true);
                 string gebietName = SW.Dynamisch.GetGebietwithID(wahl.GebietID, wahl.Stufe).GetGebietsName();
 
-                angebote.Add(new BewerbungsAngebot(wahlIds[i], amtName, gebietName, wahlIds[i] == angemeldet));
+                angebote.Add(new BewerbungsAngebot(wahlIds[i], amtName, gebietName, IstFuerWahlAngemeldet(wahlIds[i], aktiv)));
             }
 
             return angebote;
         }
 
         /// <summary>
+        /// Die Ankündigung der zu Zugbeginn neu zu besetzenden Ämter für den aktiven Spieler (wie im
+        /// Original). Liefert <c>null</c>, wenn es aktuell keine freien Ämter gibt, auf die er sich
+        /// bewerben könnte. Die Ämter werden mit ihrem Ort aufgelistet.
+        /// </summary>
+        [PublicAPI]
+        public string GetFreieAemterAnkuendigung()
+        {
+            var angebote = GetBewerbungsangebote();
+
+            if (angebote.Count == 0)
+                return null;
+
+            string text = "Folgende Ämter sind neu zu besetzen:\n";
+
+            foreach (var angebot in angebote)
+                text += "\n" + angebot.AmtName + " in " + angebot.GebietName;
+
+            text += "\n\nBewerbt Euch in der Schreibstube um ein Amt.";
+
+            return text;
+        }
+
+        /// <summary>
         /// Meldet den aktiven Spieler für die angegebene Wahl an oder – falls er dort bereits aufgestellt ist –
-        /// wieder ab. War er zuvor bei einer anderen Wahl gemeldet, wird er dort zunächst ausgetragen.
+        /// wieder ab. Ein Spieler kann sich für mehrere freie Ämter gleichzeitig bewerben; gewinnt er später
+        /// eines, werden seine übrigen Bewerbungen automatisch zurückgezogen (siehe <see cref="VergebeAmt"/>).
         /// </summary>
         [PublicAPI]
         public BewerbungsErgebnis WahlAnmeldungUmschalten(int wahlId)
         {
-            var spieler = SW.Dynamisch.GetAktHum();
             int aktiv = SW.Dynamisch.GetAktiverSpieler();
-            int aktuelleTeilnahme = spieler.GetWahlTeilnahme();
+            string amtName = SW.Statisch.GetAmtwithID(SW.Dynamisch.GetWahlX(wahlId).AmtID).GetAmtsname(true);
 
-            // Bereits für genau diese Wahl gemeldet -> Bewerbung zurückziehen
-            if (wahlId == aktuelleTeilnahme)
+            // Bereits für diese Wahl gemeldet -> Bewerbung zurückziehen
+            if (IstFuerWahlAngemeldet(wahlId, aktiv))
             {
-                EntferneKandidatAusWahl(aktuelleTeilnahme, aktiv);
-                string amtName = SW.Statisch.GetAmtwithID(SW.Dynamisch.GetWahlX(aktuelleTeilnahme).AmtID).GetAmtsname(true);
-                spieler.SetWahlTeilnahme(0);
-
+                EntferneKandidatAusWahl(wahlId, aktiv);
                 return new BewerbungsErgebnis(false, amtName);
             }
-
-            // Für eine andere Wahl gemeldet -> dort austragen
-            if (aktuelleTeilnahme != 0)
-                EntferneKandidatAusWahl(aktuelleTeilnahme, aktiv);
-
-            spieler.SetWahlTeilnahme(wahlId);
 
             // An der ersten freien Kandidatenstelle eintragen
             int[] kandidaten = SW.Dynamisch.GetWahlX(wahlId).GetKandidaten();
@@ -102,7 +107,19 @@ namespace Conspiratio.Lib.Allgemein
                 }
             }
 
-            return new BewerbungsErgebnis(true, SW.Statisch.GetAmtwithID(SW.Dynamisch.GetWahlX(wahlId).AmtID).GetAmtsname(true));
+            return new BewerbungsErgebnis(true, amtName);
+        }
+
+        /// <summary>Ob der Spieler als Kandidat der angegebenen Wahl eingetragen ist.</summary>
+        private static bool IstFuerWahlAngemeldet(int wahlId, int spielerId)
+        {
+            foreach (int kandidat in SW.Dynamisch.GetWahlX(wahlId).GetKandidaten())
+            {
+                if (kandidat == spielerId)
+                    return true;
+            }
+
+            return false;
         }
 
         private static void EntferneKandidatAusWahl(int wahlId, int spielerId)
@@ -156,7 +173,9 @@ namespace Conspiratio.Lib.Allgemein
 
         /// <summary>
         /// Liefert die Wahlen, an denen ein menschlicher Spieler beteiligt ist (als Kandidat oder Wähler)
-        /// und die daher interaktiv ausgezählt werden. Reihenfolge nach Wahl-ID wie im Original.
+        /// und die daher interaktiv ausgezählt werden. Sortiert nach Amtsstufe absteigend (höchstes Amt
+        /// zuerst): Bewirbt sich ein Spieler für mehrere Ämter, wird so zuerst das höchste ausgezählt – gewinnt
+        /// er es, ziehen sich seine übrigen Bewerbungen automatisch zurück.
         /// </summary>
         [PublicAPI]
         public List<int> GetWahlenMitMenschlicherBeteiligung()
@@ -172,10 +191,17 @@ namespace Conspiratio.Lib.Allgemein
                     wahlIds.Add(i);
             }
 
-            return wahlIds;
+            return wahlIds
+                .OrderByDescending(id => SW.Statisch.GetAmtwithID(SW.Dynamisch.GetWahlX(id).AmtID).GetAmtsStufe())
+                .ToList();
         }
 
-        private static bool HatMenschlicheBeteiligung(int wahlId)
+        /// <summary>
+        /// Ob an der Wahl ein menschlicher Spieler beteiligt ist (als Kandidat oder Wähler). Wird zur
+        /// Auszählung erneut geprüft, da ein Spieler nach dem Gewinn eines höheren Amts als Kandidat wegfällt.
+        /// </summary>
+        [PublicAPI]
+        public bool HatMenschlicheBeteiligung(int wahlId)
         {
             // Menschlicher Kandidat?
             foreach (int kandidat in SW.Dynamisch.GetWahlX(wahlId).GetKandidaten())
@@ -337,6 +363,17 @@ namespace Conspiratio.Lib.Allgemein
             string gebietName = SW.Dynamisch.GetGebietwithID(wahl.GebietID, wahl.Stufe).GetGebietsName();
             string gewinnerName = SW.Dynamisch.GetSpWithID(gewinnerId).GetKompletterName();
 
+            // Statistik (Issue #19): Wahlteilnahmen der menschlichen Kandidaten und den Sieg zählen
+            // (vor VergebeAmt, das die Kandidatenliste der Wahl abräumt).
+            foreach (int kandidatId in kandidaten)
+            {
+                if (kandidatId != 0 && kandidatId < SW.Statisch.GetMinKIID())
+                    SW.Dynamisch.GetHumWithID(kandidatId).GetSpielerStatistik().SWahlenTeilgenommen++;
+            }
+
+            if (gewinnerId != 0 && gewinnerId < SW.Statisch.GetMinKIID())
+                SW.Dynamisch.GetHumWithID(gewinnerId).GetSpielerStatistik().SWahlenGewonnen++;
+
             VergebeAmt(wahl, gewinnerId);
 
             return new WahlErgebnis(gewinnerId, gewinnerName, amtName, gebietName, warLoswahl);
@@ -356,8 +393,22 @@ namespace Conspiratio.Lib.Allgemein
                 if (!wahl.IstDieWahlVoll())
                     continue;
 
-                int gewinnerIndex = SW.Statisch.Rnd.Next(0, SW.Statisch.GetKITeilnehmerProWahl());
-                VergebeAmt(wahl, wahl.GetKandidaten()[gewinnerIndex]);
+                // IstDieWahlVoll heißt nur "die Wahl ist angelegt", nicht "es haben sich genug beworben".
+                // Blind einen der KI-Plätze auszuwürfeln traf daher auch leere Plätze (Kandidat 0) und
+                // führte in VergebeAmt zu einer NullReferenceException, die den ganzen Jahreswechsel abbrach.
+                var bewerber = new List<int>();
+
+                for (int k = 0; k < SW.Statisch.GetKITeilnehmerProWahl(); k++)
+                {
+                    if (wahl.GetKandidaten()[k] != 0)
+                        bewerber.Add(wahl.GetKandidaten()[k]);
+                }
+
+                // Ohne Bewerber bleibt das Amt unbesetzt und die Wahl steht im nächsten Jahr erneut an.
+                if (bewerber.Count == 0)
+                    continue;
+
+                VergebeAmt(wahl, bewerber[SW.Statisch.Rnd.Next(bewerber.Count)]);
             }
         }
 
@@ -379,6 +430,10 @@ namespace Conspiratio.Lib.Allgemein
             }
 
             wahl.NullSetzen();
+
+            // Der Gewinner zieht alle weiteren offenen Bewerbungen zurück: Ein Spieler kann sich für mehrere
+            // Ämter gleichzeitig bewerben, hält am Ende aber nur das (höchste) tatsächlich gewonnene.
+            SW.Dynamisch.SpielerAusAllenWahlenEntfernen(gewinnerId);
         }
 
         /// <summary>

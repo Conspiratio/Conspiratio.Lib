@@ -65,6 +65,9 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.BauwerkStiften
             var spieler = SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler());
             spieler.ErhoehePermaAnsehen(Convert.ToInt16(_preise[index] / 1000));
             spieler.ErhoeheTaler(-_preise[index]);
+
+            // Gestifteten Gesamtwert mitführen (für den Auftrag „Mäzen").
+            spieler.GestifteterBauwert += _preise[index];
         }
     }
 }

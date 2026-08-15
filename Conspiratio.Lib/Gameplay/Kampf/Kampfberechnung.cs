@@ -171,20 +171,31 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             }
             else
             {
-                // Zukünftig: Normales Aufeinandertreffen in einem Land (kein Überfall), Angriff auf einen Stützpunkt oder Belagerung einer Stadt usw.
+                // Angriff eines Stützpunkts auf einen anderen ("Truppen schicken").
                 MoralAngreiferAdjektiv = ErmittleMoralAdjektiv(kampf.MoralAngreifer, kampf.TruppenAngreifer.Count > 1, true);
-                MoralVerteidigerAdjektiv = ErmittleMoralAdjektiv(kampf.MoralVerteidiger, kampf.TruppenVerteidiger.Count > 1, true);
 
-                Zusammenfassung += $"In {SW.Dynamisch.GetLandWithID(kampf.LandID).GetGebietsName()} kommt zu einem Zusammentreffen von {kampf.TruppenAngreifer.Count} {MoralAngreiferAdjektiv} " +
-                                   $"{BezeichnungTruppenAngreiferDativ} aus {SW.Dynamisch.GetStuetzpunkte()[StuetzpunktIndexAngreifer].Name} unter dem Befehl von |{SW.Dynamisch.GetSpWithID(kampf.SpielerIDAngreifer).GetKompletterName()}| " +
-                                   $"und {kampf.TruppenVerteidiger.Count} {MoralVerteidigerAdjektiv} {BezeichnungTruppenVerteidigerDativ} aus {SW.Dynamisch.GetStuetzpunkte()[StuetzpunktIndexVerteidiger].Name}, " +
-                                   $"angeführt von |{SW.Dynamisch.GetSpWithID(kampf.SpielerIDVerteidiger).GetKompletterName()}|. Ein erbitterter Kampf entbrennt.\n\n";
+                Zusammenfassung += $"In {SW.Dynamisch.GetLandWithID(kampf.LandID).GetGebietsName()} rücken {kampf.TruppenAngreifer.Count} {MoralAngreiferAdjektiv} " +
+                                   $"{BezeichnungTruppenAngreiferNominativ} aus {SW.Dynamisch.GetStuetzpunkte()[StuetzpunktIndexAngreifer].Name} unter dem Befehl von |{SW.Dynamisch.GetSpWithID(kampf.SpielerIDAngreifer).GetKompletterName()}| " +
+                                   $"gegen {SW.Dynamisch.GetStuetzpunkte()[StuetzpunktIndexVerteidiger].Name} von |{SW.Dynamisch.GetSpWithID(kampf.SpielerIDVerteidiger).GetKompletterName()}| vor. ";
+
+                if (VerteidigerVorhanden)
+                {
+                    MoralVerteidigerAdjektiv = ErmittleMoralAdjektiv(kampf.MoralVerteidiger, kampf.TruppenVerteidiger.Count > 1, true);
+                    Zusammenfassung += $"{kampf.TruppenVerteidiger.Count} {MoralVerteidigerAdjektiv} {BezeichnungTruppenVerteidigerDativ} stellen sich zur Verteidigung. Ein erbitterter Kampf entbrennt.\n\n";
+                }
+                else
+                {
+                    Zusammenfassung += "Der Stützpunkt ist ungeschützt.\n\n";
+                }
             }
 
             if (!VerteidigerVorhanden)  // Wenn es keinen Verteidiger gibt, muss keine Kampfberechnung erfolgen
             {
-                Zusammenfassung += $"Die {BezeichnungTruppenAngreiferNominativ} von |{SW.Dynamisch.GetSpWithID(kampf.SpielerIDAngreifer).GetKompletterName()}| genießen als Sieger ihren kampflosen Triumph und " +
-                                   $"machen sich mit der gesamten Beute davon.\nKeine Truppenverluste auf beiden Seiten.";
+                if (kampf.KampfArt == EnumKampfArt.StuetzpunktAngriff)
+                    Zusammenfassung += $"Die {BezeichnungTruppenAngreiferNominativ} von |{SW.Dynamisch.GetSpWithID(kampf.SpielerIDAngreifer).GetKompletterName()}| überrennen den Stützpunkt kampflos.\nKeine Truppenverluste auf beiden Seiten.";
+                else
+                    Zusammenfassung += $"Die {BezeichnungTruppenAngreiferNominativ} von |{SW.Dynamisch.GetSpWithID(kampf.SpielerIDAngreifer).GetKompletterName()}| genießen als Sieger ihren kampflosen Triumph und " +
+                                       $"machen sich mit der gesamten Beute davon.\nKeine Truppenverluste auf beiden Seiten.";
 
                 MoralSpielerBeginnt = kampf.MoralAngreifer;
 
@@ -193,8 +204,10 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 else if (kampf.MoralAngreifer < 100)
                     MoralSpielerBeginnt = 100;
 
-                return new KampfErgebnis(kampf.SpielerIDAngreifer, 0, kampf.SpielerIDAngreifer, MoralSpielerBeginnt, 0, kampf.StuetzpunktIDAngreifer, 0, kampf.AktionIndexAngreifer,
-                                         0, new List<Einheit>(), null, Zusammenfassung, kampf.KampfArt, kampf.Karawane);
+                // Ziel-IDs erhalten (für die Einnahme eines unverteidigten Stützpunkts); bei Karawanen sind sie 0.
+                return new KampfErgebnis(kampf.SpielerIDAngreifer, kampf.SpielerIDVerteidiger, kampf.SpielerIDAngreifer, MoralSpielerBeginnt, kampf.MoralVerteidiger,
+                                         kampf.StuetzpunktIDAngreifer, kampf.StuetzpunktIDVerteidiger, kampf.AktionIndexAngreifer, kampf.AktionIndexVerteidiger,
+                                         new List<Einheit>(), new List<Einheit>(), Zusammenfassung, kampf.KampfArt, kampf.Karawane);
             }
 
             // Entscheidung, welche Seite beginnen darf
@@ -545,6 +558,13 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         /// <param name="ergebnis">Das Ergebnis, welches angewendet werden soll</param>
         public void KampfErgebnisAnwenden(KampfErgebnis ergebnis)
         {
+            // Ein Stützpunkt-Angriff wird eigenständig abgewickelt (Garnison als Verteidiger, Einnahme/Schaden).
+            if (ergebnis.KampfArt == EnumKampfArt.StuetzpunktAngriff)
+            {
+                StuetzpunktAngriffAnwenden(ergebnis);
+                return;
+            }
+
             // Angreifer aktualisieren
             SW.Dynamisch.GetStuetzpunkte()[ergebnis.StuetzpunktIDAngreifer - 1].MoralTruppeInProzent = ergebnis.MoralAngreifer;
 
@@ -626,17 +646,126 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             {
                 SW.Dynamisch.GetSpWithID(ergebnis.SpielerIDGewinner).ErhoeheTaler(ergebnis.Karawane.Warenwert);  // Sieger erhält den Wert der Ware, die Ware verschwindet aus dem System
 
+                // Statistik (Issue #19-Erweiterung): erfolgreicher Karawanen-Überfall durch einen menschlichen Angreifer.
+                if (ergebnis.SpielerIDAngreifer > 0 && ergebnis.SpielerIDAngreifer < SW.Statisch.GetMinKIID())
+                    SW.Dynamisch.GetHumWithID(ergebnis.SpielerIDAngreifer).GetSpielerStatistik().MiUeberfalleneKarawanen++;
+
                 if (ergebnis.Karawane.Menge > 0)   // Handelt es sich beim Opfer um einen menschlichen Spieler mit einer "echten" Warenladung? (bei einem KI-Spieler wird nur ein prozentaler Warenwert berechnet und die Menge ist immer 0)
                 {
                     int VerkAnzahl = SW.Dynamisch.GetHumWithID(ergebnis.Karawane.SpielerID).GetProduktionsslot(ergebnis.Karawane.StadtID, ergebnis.Karawane.ProduktionsslotNr).GetVerkaufAnzahl() - ergebnis.Karawane.Menge;  // Gestohlene Menge von geplanter Verkaufsmenge abziehen
                     if (VerkAnzahl < 0)
                         VerkAnzahl = 0;
 
-                    SW.Dynamisch.GetHumWithID(ergebnis.Karawane.SpielerID).GetProduktionsslot(ergebnis.Karawane.StadtID, ergebnis.Karawane.ProduktionsslotNr).SetVerkaufAnzahl(VerkAnzahl);  
+                    SW.Dynamisch.GetHumWithID(ergebnis.Karawane.SpielerID).GetProduktionsslot(ergebnis.Karawane.StadtID, ergebnis.Karawane.ProduktionsslotNr).SetVerkaufAnzahl(VerkAnzahl);
                     SW.Dynamisch.GetHumWithID(ergebnis.Karawane.SpielerID).GetProduktionsslot(ergebnis.Karawane.StadtID, ergebnis.Karawane.ProduktionsslotNr).SetGestohlenAnzahl(ergebnis.Karawane.Menge);
                 }
             }
         }
+        #endregion
+
+        #region StuetzpunktAngriffAnwenden
+
+        /// <summary>Zustandsschaden (in Prozentpunkten), den ein gewonnener, aber nicht einnehmender Angriff verursacht.</summary>
+        private const int SchadenZustandBeiAngriff = 25;
+
+        /// <summary>
+        /// Wendet das Ergebnis eines Stützpunkt-Angriffs an: Moral und Truppenverluste beider Seiten (der
+        /// Verteidiger ist die Garnison des Zielstützpunkts) sowie – bei einem Sieg des Angreifers – die
+        /// Einnahme (nur wenn alle Verteidiger fielen und der Angreifer Überlebende hat, die einrücken) oder
+        /// andernfalls Schaden am Zustand des Ziels. Die Angriffsaktion wird anschließend zurückgesetzt.
+        /// </summary>
+        private void StuetzpunktAngriffAnwenden(KampfErgebnis ergebnis)
+        {
+            var angreifer = SW.Dynamisch.GetStuetzpunkte()[ergebnis.StuetzpunktIDAngreifer - 1];
+            var ziel = SW.Dynamisch.GetStuetzpunkte()[ergebnis.StuetzpunktIDVerteidiger - 1];
+            var angriffsaktion = angreifer.Aktionen[ergebnis.AktionIndexAngreifer];
+
+            angreifer.MoralTruppeInProzent = ergebnis.MoralAngreifer;
+            ziel.MoralTruppeInProzent = ergebnis.MoralVerteidiger;
+
+            // Angreifer-Verluste vom Stützpunkt und von der Angriffsaktion abziehen.
+            foreach (var typ in EinheitenTypen(angreifer))
+            {
+                int verlust = GetAnzahlEinheit(ergebnis.VerlusteAngreifer, typ);
+                angreifer.VerringereTruppen(verlust, typ, false);
+                angriffsaktion.VerringereTruppen(verlust, typ);
+            }
+
+            // Verteidiger-Verluste von der Garnison des Ziels abziehen (kein eigener Verteidigungsauftrag).
+            foreach (var typ in EinheitenTypen(ziel))
+                ziel.VerringereTruppen(GetAnzahlEinheit(ergebnis.VerlusteVerteidiger, typ), typ, false);
+
+            bool angreiferGewonnen = ergebnis.SpielerIDGewinner == ergebnis.SpielerIDAngreifer;
+            bool verteidigerAusgeloescht = ziel.Einheiten.Count == 0;
+            int ueberlebendeGesendet = angriffsaktion.Einheiten.Count;
+
+            // Statistik (Issue #19-Erweiterung): Sieg/Niederlage für die menschlichen Beteiligten dieses Stützpunkt-Kampfes zählen.
+            ZaehleKampfausgang(ergebnis.SpielerIDAngreifer, angreiferGewonnen);
+            if (ergebnis.SpielerIDVerteidiger > 0)
+                ZaehleKampfausgang(ergebnis.SpielerIDVerteidiger, !angreiferGewonnen);
+
+            if (angreiferGewonnen && verteidigerAusgeloescht && ueberlebendeGesendet > 0)
+            {
+                // Einnahme: die überlebenden gesendeten Truppen verlassen den Heimatstützpunkt und besetzen das Ziel.
+                foreach (var typ in EinheitenTypen(angreifer))
+                {
+                    int anzahl = angriffsaktion.GetAnzahlTruppen(typ);
+                    if (anzahl <= 0)
+                        continue;
+
+                    angreifer.VerringereTruppen(anzahl, typ, false);
+                    ziel.ErhoeheTruppen(anzahl, typ, false);
+                }
+
+                ziel.Besitzer = ergebnis.SpielerIDAngreifer;
+
+                // Statistik (Issue #19-Erweiterung): eingenommener Stützpunkt durch einen menschlichen Angreifer.
+                if (ergebnis.SpielerIDAngreifer > 0 && ergebnis.SpielerIDAngreifer < SW.Statisch.GetMinKIID())
+                    SW.Dynamisch.GetHumWithID(ergebnis.SpielerIDAngreifer).GetSpielerStatistik().MiEroberteStuetzpunkte++;
+
+                // Offene Angebote/Flags des eroberten Stützpunkts verfallen.
+                ziel.ZumVerkaufAngeboten = false;
+                ziel.AngebotVonSpielerID = 0;
+                ziel.AngebotPreis = 0;
+                ziel.MoralBonusBezahlt = 0;
+            }
+            else if (angreiferGewonnen)
+            {
+                // Kein vollständiger Sieg über die Garnison: der Stützpunkt wird nur beschädigt.
+                ziel.ZustandInProzent -= SchadenZustandBeiAngriff;
+            }
+
+            // Angriffsaktion nach dem Kampf zurücksetzen.
+            if (angreifer.Art == EnumStuetzpunktArt.Raeuberlager)
+                angreifer.Aktionen[ergebnis.AktionIndexAngreifer] = new RaeuberlagerAktion(EnumAktionsartRaeuberlager.Kein_Auftrag, 0, 0, ergebnis.StuetzpunktIDAngreifer, ergebnis.AktionIndexAngreifer, new List<Einheit>());
+            else
+                angreifer.Aktionen[ergebnis.AktionIndexAngreifer] = new ZollburgAktion(EnumAktionsartZollburg.Kein_Auftrag, 0, 0, ergebnis.StuetzpunktIDAngreifer, ergebnis.AktionIndexAngreifer, new List<Einheit>());
+        }
+
+        /// <summary>Die vier Einheitentypen eines Stützpunkts (je nach Art Zollburg oder Räuberlager).</summary>
+        private static Type[] EinheitenTypen(Stuetzpunkt stuetzpunkt)
+        {
+            return stuetzpunkt.Art == EnumStuetzpunktArt.Zollburg
+                ? new[] { typeof(ZollSoeldner), typeof(ZollMusketier), typeof(ZollKanonier), typeof(ZollOffizier) }
+                : new[] { typeof(RaubRaeuber), typeof(RaubBombenleger), typeof(RaubKanonier), typeof(RaubSchuetze) };
+        }
+
+        /// <summary>
+        /// Verbucht den Ausgang eines Stützpunkt-Kampfes in der Statistik – aber nur für menschliche Spieler.
+        /// </summary>
+        private static void ZaehleKampfausgang(int spielerId, bool gewonnen)
+        {
+            if (spielerId <= 0 || spielerId >= SW.Statisch.GetMinKIID())
+                return;
+
+            var stat = SW.Dynamisch.GetHumWithID(spielerId).GetSpielerStatistik();
+
+            if (gewonnen)
+                stat.MiKaempfeGewonnen++;
+            else
+                stat.MiKaempfeVerloren++;
+        }
+
         #endregion
 
         #region GetAnzahlEinheit
@@ -831,7 +960,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                             {
                                 SpielerIDAngreifer = SW.Dynamisch.GetStuetzpunkte()[oAktion.StuetzpunktID - 1].Besitzer,
                                 SpielerIDVerteidiger = 0,
-                                MoralAngreifer = SW.Dynamisch.GetStuetzpunkte()[oAktion.StuetzpunktID - 1].MoralTruppeInProzent,
+                                MoralAngreifer = SW.Dynamisch.GetStuetzpunkte()[oAktion.StuetzpunktID - 1].MoralFuerKampf(),
                                 MoralVerteidiger = 0,
                                 TruppenAngreifer = oAktion.Einheiten,
                                 TruppenVerteidiger = null,
@@ -855,7 +984,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                             {
                                 SpielerIDAngreifer = SW.Dynamisch.GetStuetzpunkte()[oAktion.StuetzpunktID - 1].Besitzer,
                                 SpielerIDVerteidiger = SW.Dynamisch.GetStuetzpunkte()[verteidigungen[index].StuetzpunktID - 1].Besitzer,
-                                MoralAngreifer = SW.Dynamisch.GetStuetzpunkte()[oAktion.StuetzpunktID - 1].MoralTruppeInProzent,
+                                MoralAngreifer = SW.Dynamisch.GetStuetzpunkte()[oAktion.StuetzpunktID - 1].MoralFuerKampf(),
                                 MoralVerteidiger = SW.Dynamisch.GetStuetzpunkte()[verteidigungen[index].StuetzpunktID - 1].MoralTruppeInProzent,
                                 TruppenAngreifer = oAktion.Einheiten,
                                 TruppenVerteidiger = verteidigungen[index].Einheiten,
@@ -902,6 +1031,54 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                         kaempfe.Add(oKampf);
                         zaehler++;
                     }
+                }
+            }
+
+            // Stützpunkt-Angriffe ("Truppen schicken"): jeder Stützpunkt kann gezielt einen anderen angreifen.
+            foreach (var stuetzpunkt in SW.Dynamisch.GetStuetzpunkte())
+            {
+                if (stuetzpunkt.Aktionen == null)
+                    continue;
+
+                foreach (var aktion in stuetzpunkt.Aktionen)
+                {
+                    if (aktion == null || aktion.Einheiten.Count == 0 || aktion.ZielStuetzpunktID <= 0)
+                        continue;
+
+                    bool istAngriff = stuetzpunkt.Art == EnumStuetzpunktArt.Zollburg
+                        ? ((ZollburgAktion)aktion).Aktionsart == EnumAktionsartZollburg.Truppen_schicken
+                        : ((RaeuberlagerAktion)aktion).Aktionsart == EnumAktionsartRaeuberlager.Truppen_schicken;
+
+                    if (!istAngriff)
+                        continue;
+
+                    var ziel = SW.Dynamisch.GetStuetzpunkte()[aktion.ZielStuetzpunktID - 1];
+
+                    // Kein Angriff auf einen eigenen Stützpunkt.
+                    if (ziel.Besitzer == stuetzpunkt.Besitzer)
+                        continue;
+
+                    // KI-Spieler greifen sich nicht gegenseitig an; Angriffe finden nur mit
+                    // menschlicher Beteiligung statt (KI gegen Mensch, Mensch gegen KI, Mensch gegen Mensch).
+                    if (stuetzpunkt.Besitzer >= SW.Statisch.GetMinKIID() && ziel.Besitzer >= SW.Statisch.GetMinKIID())
+                        continue;
+
+                    kaempfe.Add(new Kampf()
+                    {
+                        SpielerIDAngreifer = stuetzpunkt.Besitzer,
+                        SpielerIDVerteidiger = ziel.Besitzer,
+                        MoralAngreifer = stuetzpunkt.MoralFuerKampf(),
+                        MoralVerteidiger = ziel.MoralTruppeInProzent,
+                        TruppenAngreifer = aktion.Einheiten,
+                        TruppenVerteidiger = new List<Einheit>(ziel.Einheiten),
+                        StuetzpunktIDAngreifer = stuetzpunkt.ID,
+                        StuetzpunktIDVerteidiger = ziel.ID,
+                        AktionIndexAngreifer = aktion.AktionIndexStuetzpunkt,
+                        AktionIndexVerteidiger = 0,
+                        LandID = ziel.LandID,
+                        KampfArt = EnumKampfArt.StuetzpunktAngriff,
+                        Karawane = null
+                    });
                 }
             }
 

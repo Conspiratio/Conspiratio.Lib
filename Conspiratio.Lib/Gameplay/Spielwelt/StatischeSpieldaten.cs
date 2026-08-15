@@ -328,6 +328,9 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             //Waffenhandel
             GesetzDefUntergrenze[24] = 0;
             GesetzDefObergrenze[24] = 1;
+            //Erpressung (Issue #13)
+            GesetzDefUntergrenze[25] = 0;
+            GesetzDefObergrenze[25] = 1;
 
             //Kirchengesetze
             //Rel-Freiheit
@@ -497,6 +500,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             GerichtsGesetzesvorwurf[22] = "Mittels politischen Intrigen habt Ihr Euch einen Vorteil verschafft";
             GerichtsGesetzesvorwurf[23] = "Es gibt Zeugen, die behaupten Ihr habt eine Ermordung in Auftrag gegeben!";
             GerichtsGesetzesvorwurf[24] = "Euer Waffenhandel ist nichts anderes als Kriegstreiberei!";
+            GerichtsGesetzesvorwurf[25] = "Ihr habt einen Amtsträger mit Beweisen erpresst!";
 
             GerichtsGesetzesvorwurf[40] = "Ihr habt Euch gegen Gottes Willen von allen Religionen losgesagt!";
             GerichtsGesetzesvorwurf[41] = "Ihr habt es versucht, Euch von Euren Missetaten freizukaufen!";
@@ -525,7 +529,6 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             Tipps[14] = "Mit einem Rechtsklick auf eine Werkstatt in einer Stadt kann die Werkstatt verkauft werden.";
             Tipps[15] = "Ein regelmäßiger Blick in die Gesetzesbücher kann Euch den ein oder anderen Prozess ersparen.";
             Tipps[16] = "Wenn Ihr einen bestimmten Rohstoff immer wieder in derselben Stadt verkauft, so wird der Verkaufserlös für diesen Rohstoff in dieser Stadt abnehmen.";
-            Tipps[16] = "Ein Kredit kann Eure Liquiditätsprobleme im Handumdrehen lösen. Doch Vorsicht! Die Zinsen können Euch in den Ruin treiben.";
             Tipps[17] = "Damit Ihr bei Amtswahlen als Sieger hervorgeht, müsst Ihr um die Gunst der Wähler buhlen. Dies könnt Ihr mittels Bestechung, Kartenspielen oder Ähnlichem erreichen.";
             Tipps[18] = "Falls Ihr über die Landesgrenzen hinaus Eure Waren exportiert, so fallen zusätzlich zu den Karawanenkosten auch noch Zölle an.";
             Tipps[19] = "Es lohnt sich nur dorthin zu exportieren, wo der Rohstoff auch benötigt wird.";
@@ -539,8 +542,9 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             Tipps[27] = "Werden die Räuberbanden bei ihren Überfällen auf die Karawanen regelmäßig von Söldnern besiegt, sinkt ihre Moral und damit auch die Chance auf weitere Überfälle.";
             Tipps[28] = "Habt Ihr Interesse am Kauf einer Söldnerburg oder eines Räuberlagers, so schadet es nicht, sich mit dem Eigentümer gut zu stellen.";
             Tipps[29] = "Achtet während der Umwerbung auf die Reaktion Eures (hoffentlich zukünftigen) Partners auf Eure Geschenke. Neben dem Preis spielt auch sein Charakter eine Rolle!";
+            Tipps[30] = "Ein Kredit kann Eure Liquiditätsprobleme im Handumdrehen lösen. Doch Vorsicht! Die Zinsen können Euch in den Ruin treiben.";
 
-            TippsMaxIndex = 29;
+            TippsMaxIndex = 30;
 
             #endregion
 
@@ -1601,6 +1605,13 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         public int GetMaxAnzahlStrafen() { return maxAnzahlStrafen; }
         public IStrafe GetStrafartX(int x) { return Strafarten[x]; }
         public int GetMaxGesetze() { return maxGesetze; }
+
+        /// <summary>
+        /// Index des Strafgesetzes „Erpressung" (Issue #13). Liegt im Block der Strafgesetze hinter dem
+        /// Waffenhandel; die Gesetzestabelle ist mit 100 Plätzen fest dimensioniert und nur dünn belegt,
+        /// sodass ein weiteres Gesetz keine Spielstand-Anpassung erfordert.
+        /// </summary>
+        public int GetGesetzErpressung() { return 25; }
         public int GetGesetzXDefUntergrenze(int X) { return GesetzDefUntergrenze[X]; }
         public int GetGesetzXDefObergrenze(int X) { return GesetzDefObergrenze[X]; }
         public int GetMaxStaedteProLand() { return maxStaedteProLand; }
@@ -1608,6 +1619,17 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         public int GetStuetzpunktRechteck(int stuetzpunktID, int x) { return StuetzpunktRechtecke[stuetzpunktID - 1, x]; }
         public int GetTippsMaxIndex() { return TippsMaxIndex; }
         public Random Rnd { get; private set; } = new Random();
+
+        /// <summary>
+        /// Setzt den Zufallsgenerator auf einen festen Startwert. Damit läuft ein Spiel reproduzierbar
+        /// ab – gedacht für automatisierte Durchläufe und Tests, in denen ein Fehlschlag sonst nicht
+        /// nachstellbar wäre. Muss nach <see cref="Initialisieren"/> aufgerufen werden, weil dieses den
+        /// Generator neu anlegt.
+        /// </summary>
+        public void SetRnd(int seed)
+        {
+            Rnd = new Random(seed);
+        }
         public double GetMaxZollsatz() { return maxZollsatz; }
         public double GetMinZollsatz() { return minZollsatz; }
         #endregion

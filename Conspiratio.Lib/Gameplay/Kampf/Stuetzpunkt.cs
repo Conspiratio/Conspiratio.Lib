@@ -23,6 +23,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         private int _maximaleKapazitaet;
         private int _kapazitaet;
         private int _moralTruppeInProzent;
+        private List<Einheit> _geworbeneTruppen;
 
         /// <summary>
         /// Interne, eindeutige Nummer des Stützpunktes (laufend, beginnt mit 1)
@@ -73,6 +74,42 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         /// Aktionen des Stützpunktes (z.B. Überwachen von ...)
         /// </summary>
         public StuetzpunktAktion[] Aktionen { get; set;  }
+
+        /// <summary>
+        /// ID des menschlichen Spielers, der ein Kaufangebot für diesen Stützpunkt abgegeben hat (0 = keines).
+        /// Das Angebot wird zu Beginn des nächsten Zuges des Besitzers vorgelegt.
+        /// </summary>
+        public int AngebotVonSpielerID { get; set; }
+
+        /// <summary>
+        /// Höhe des ausstehenden Kaufangebots (bei einem menschlichen Anbieter bereits reserviert/abgezogen).
+        /// </summary>
+        public int AngebotPreis { get; set; }
+
+        /// <summary>
+        /// Ob der Besitzer diesen Stützpunkt zum Verkauf anbietet. Ist dies gesetzt, unterbreiten
+        /// KI-Spieler von Zeit zu Zeit zufällige Kaufangebote, die dem Besitzer vorgelegt werden.
+        /// </summary>
+        public bool ZumVerkaufAngeboten { get; set; }
+
+        /// <summary>Moralbonus (in Prozentpunkten), den ein vor dem Kampf bezahlter Bonus den Angreifern gewährt.</summary>
+        public const int MoralBonusWert = 15;
+
+        /// <summary>
+        /// Für den nächsten Kampf bezahlter Moral-Bonus in Talern (0 = keiner). Der Betrag wird beim Sieg
+        /// zurückerstattet; der Bonus hebt die Kampfmoral der angreifenden Truppen dieses Stützpunkts.
+        /// </summary>
+        public int MoralBonusBezahlt { get; set; }
+
+        /// <summary>
+        /// Die für einen Kampf wirksame Moral: die aktuelle Truppenmoral zuzüglich eines bezahlten
+        /// Moral-Bonus (auf höchstens 100 % begrenzt).
+        /// </summary>
+        public int MoralFuerKampf()
+        {
+            int moral = MoralTruppeInProzent + (MoralBonusBezahlt > 0 ? MoralBonusWert : 0);
+            return moral > 100 ? 100 : moral;
+        }
 
         /// <summary>
         /// Zustand des Stützpunktes in Prozent (0 - 100), hat Einfluss auf die Verteidung bei einem Angriff.
@@ -297,6 +334,46 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         {
             return Einheiten.Count(x => x.GetType() == TypeEinheit);
         }
+
+        /// <summary>
+        /// Truppen, die für diesen Stützpunkt angeworben (und bereits bezahlt) sind, aber erst zum nächsten
+        /// Rundenende tatsächlich eintreffen. Lazy initialisiert, damit ältere Spielstände kompatibel bleiben.
+        /// </summary>
+        public List<Einheit> GeworbeneTruppen
+        {
+            get
+            {
+                if (_geworbeneTruppen == null)
+                    _geworbeneTruppen = new List<Einheit>();
+
+                return _geworbeneTruppen;
+            }
+        }
+
+        /// <summary>Anzahl der für einen Einheitentyp angeworbenen (noch nicht eingetroffenen) Truppen.</summary>
+        public int GetAnzahlGeworben(Type TypeEinheit)
+        {
+            return GeworbeneTruppen.Count(x => x.GetType() == TypeEinheit);
+        }
+
+        /// <summary>Aktuelle plus angeworbene Truppen eines Typs (für die Anzeige in der Verwaltung).</summary>
+        public int GetAnzahlTruppenInklGeworben(Type TypeEinheit)
+        {
+            return GetAnzahlTruppen(TypeEinheit) + GetAnzahlGeworben(TypeEinheit);
+        }
+
+        /// <summary>
+        /// Liefert für die KI die ID eines zufälligen Angriffsziels, oder 0, wenn es kein solches Ziel gibt.
+        /// Die KI greift ausschließlich Stützpunkte menschlicher Spieler an (KI-Spieler greifen sich nicht
+        /// gegenseitig an).
+        /// </summary>
+        public int KiZufaelligesAngriffsziel()
+        {
+            var ziele = SW.Dynamisch.GetStuetzpunkte()
+                .Where(s => s.ID != ID && s.Besitzer > 0 && s.Besitzer < SW.Statisch.GetMinKIID())
+                .ToList();
+            return ziele.Count == 0 ? 0 : ziele[SW.Statisch.Rnd.Next(0, ziele.Count)].ID;
+        }
         #endregion
 
         #region BerechneWert
@@ -423,6 +500,50 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         }
         #endregion
 
+        #region MoralBonusZahlen
+        /// <summary>Kosten für einen einmaligen Moral-Bonus vor dem Kampf (abhängig von der Truppenstärke).</summary>
+        public int BerechneKostenMoralBonus()
+        {
+            return Einheiten.Count * 100;  // pro Truppeneinheit 100 Taler
+        }
+
+        /// <summary>
+        /// Bezahlt vor dem Kampf einen einmaligen Moral-Bonus für die Truppen dieses Stützpunkts. Der Bonus
+        /// hebt die Kampfmoral (siehe <see cref="MoralFuerKampf"/>) und wird bei einem Sieg zurückerstattet.
+        /// </summary>
+        /// <returns>Wurde der Bonus bezahlt?</returns>
+        public async Task<bool> MoralBonusZahlen()
+        {
+            if (Einheiten.Count == 0)
+            {
+                SW.Dynamisch.BelTextAnzeigen($"Ihr habt keine Truppen in {Name} stationiert,\n für die sich ein Moral-Bonus lohnen würde.");
+                return false;
+            }
+
+            if (MoralBonusBezahlt > 0)
+            {
+                SW.Dynamisch.BelTextAnzeigen($"Für die Truppen in {Name} habt Ihr\n bereits einen Moral-Bonus bezahlt.");
+                return false;
+            }
+
+            int kosten = BerechneKostenMoralBonus();
+
+            if (await SW.UI.YesNoQuestion.ShowDialogText(
+                    $"Wollt Ihr Euren Truppen in {Name} vor dem\n Kampf für {kosten.ToStringGeld()} einen Moral-Bonus\n von {MoralBonusWert} % gewähren?",
+                    "Ja", "Lieber nicht!") != DialogResultGame.Yes)
+                return false;
+
+            if (!SW.Dynamisch.CheckIfenoughGold(kosten))
+                return false;
+
+            SW.Dynamisch.GetSpWithID(Besitzer).ErhoeheTaler(-kosten);
+            MoralBonusBezahlt = kosten;
+
+            SW.Dynamisch.BelTextAnzeigen($"Eure Truppen in {Name} sind hochmotiviert\n in die kommende Schlacht (Moral-Bonus +{MoralBonusWert} %).");
+            return true;
+        }
+        #endregion
+
         #region ManoeverDurchfuehrenKISpieler
         /// <summary>
         /// Dient zur Durchführung eines Manövers auf dem Stützpunkt eines KI-Spielers.
@@ -514,7 +635,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             if (Besitzer >= SW.Statisch.GetMinKIID())
                 NameBesitzer = SW.Dynamisch.GetKIwithID(Besitzer).GetName();
             else
-                NameBesitzer = SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler()).GetName();
+                NameBesitzer = SW.Dynamisch.GetHumWithID(Besitzer).GetName();
 
             if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr " + NameBesitzer + " wirklich ein Angebot\nüber " + Preis.ToStringGeld() +
                                                  " unterbreiten?\nIhr könnt pro Jahr nur einmal ein Angebot abgeben.", "Ja", "Lieber nicht!") == DialogResultGame.Yes)
@@ -558,13 +679,88 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 }
                 else
                 {
-                    // TODO: Kauf von anderem Spieler
-                    SW.Dynamisch.BelTextAnzeigen("Ein Kaufangebot an einen Mitspieler ist leider noch nicht möglich.");
+                    // Angebot an einen menschlichen Mitspieler: Es wird beim nächsten Zug des Besitzers vorgelegt.
+                    if (AngebotVonSpielerID != 0)
+                    {
+                        SW.Dynamisch.BelTextAnzeigen($"Für {Name} liegt bereits ein Kaufangebot vor.\nWartet, bis der Besitzer darüber entschieden hat.");
+                        return false;
+                    }
+
+                    // Das Angebot wird beim Anbieter sofort reserviert (bei Ablehnung später zurückerstattet).
+                    SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler()).HatAngebotFuerStuetzpunktAbgegeben = true;
+                    SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler()).ErhoeheTaler(-Preis);
+                    AngebotVonSpielerID = SW.Dynamisch.GetAktiverSpieler();
+                    AngebotPreis = Preis;
+
+                    SW.Dynamisch.BelTextAnzeigen($"Euer Angebot über {Preis.ToStringGeld()} für {Name} wurde übermittelt.\n{NameBesitzer} wird es zu Beginn des nächsten Zuges prüfen.");
                     return false;
                 }
             }
             else
                 return false;
+        }
+        #endregion
+
+        #region AngebotVorlegen
+        /// <summary>
+        /// Legt dem aktuellen (menschlichen) Besitzer ein ausstehendes Kaufangebot eines Mitspielers vor.
+        /// Bei Annahme wechselt der Stützpunkt gegen den reservierten Preis den Besitzer, bei Ablehnung
+        /// wird der reservierte Betrag an den Anbieter zurückerstattet. Danach ist das Angebot verbraucht.
+        /// </summary>
+        public async Task AngebotVorlegen()
+        {
+            if (AngebotVonSpielerID == 0)
+                return;
+
+            int anbieterId = AngebotVonSpielerID;
+            int preis = AngebotPreis;
+
+            AngebotVonSpielerID = 0;
+            AngebotPreis = 0;
+
+            bool anbieterIstKi = anbieterId >= SW.Statisch.GetMinKIID();
+            string anbieterName = anbieterIstKi ? SW.Dynamisch.GetKIwithID(anbieterId).GetName()
+                                                : SW.Dynamisch.GetHumWithID(anbieterId).GetName();
+
+            // Menschlicher Anbieter nicht mehr im Spiel: Angebot verfällt (keine Rückerstattung möglich).
+            if (!anbieterIstKi && (SW.Dynamisch.GetHumWithID(anbieterId) == null || anbieterName == ""))
+                return;
+
+            string besitzerName = SW.Dynamisch.GetHumWithID(Besitzer).GetName();
+
+            if (await SW.UI.YesNoQuestion.ShowDialogText(
+                    $"{anbieterName} bietet Euch {preis.ToStringGeld()} für {Name}.\nWollt Ihr den Stützpunkt verkaufen?",
+                    "Ja, verkaufen", "Nein, behalten") == DialogResultGame.Yes)
+            {
+                SW.Dynamisch.GetHumWithID(Besitzer).ErhoeheTaler(preis);
+                Besitzer = anbieterId;
+                ZumVerkaufAngeboten = false;  // Nach dem Verkauf ist der Stützpunkt nicht mehr im Angebot.
+                SW.Dynamisch.BelTextAnzeigen($"Ihr habt {Name} für {preis.ToStringGeld()} an {anbieterName} verkauft.");
+
+                if (anbieterIstKi)
+                {
+                    SW.Dynamisch.GetKIwithID(anbieterId).SetTaler(SW.Dynamisch.GetKIwithID(anbieterId).GetTaler() - preis);
+                }
+                else
+                {
+                    var anbieter = SW.Dynamisch.GetHumWithID(anbieterId);
+                    anbieter.NeuesHandelszertifikatVerleihen(3);  // Wie beim Kauf gibt es ein Handelszertifikat der Stufe 3.
+                    anbieter.HandelsNachrichten.Add($"{besitzerName} hat Euer Angebot über {preis.ToStringGeld()} angenommen.\n{Name} gehört nun Euch.");
+                }
+            }
+            else
+            {
+                SW.Dynamisch.BelTextAnzeigen($"Ihr habt das Kaufangebot von {anbieterName} für {Name} abgelehnt.");
+
+                if (!anbieterIstKi)
+                {
+                    // Menschlicher Anbieter: reservierten Betrag zurückerstatten und informieren.
+                    var anbieter = SW.Dynamisch.GetHumWithID(anbieterId);
+                    anbieter.ErhoeheTaler(preis);
+                    anbieter.HandelsNachrichten.Add($"{besitzerName} hat Euer Kaufangebot für {Name} abgelehnt.\nDer reservierte Betrag ({preis.ToStringGeld()}) wurde Euch zurückerstattet.");
+                }
+                // Bei KI-Angeboten bleibt der Stützpunkt weiter im Verkaufsangebot (nächste Runde neuer Versuch).
+            }
         }
         #endregion
 
@@ -613,7 +809,6 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         {
             Einheit Truppeneinheit = (Einheit)Activator.CreateInstance(TypeEinheit);
             int Kosten = Truppeneinheit.Basispreis * Anzahl;
-            string Meldung;
             string NameEinheiten = Truppeneinheit.NamePlural;
 
             if (Kosten <= 0)
@@ -622,22 +817,46 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             if (Anzahl == 1)
                 NameEinheiten = Truppeneinheit.Name;
 
-            if (await SW.UI.YesNoQuestion.ShowDialogText($"Wollt Ihr {Anzahl} {NameEinheiten}\n für {Kosten.ToStringGeld()} Handgeld anheuern?", "Ja", "Lieber nicht!") != DialogResultGame.Yes)
+            // Kapazitätsprüfung inkl. bereits angeworbener (noch nicht eingetroffener) Truppen.
+            if (Einheiten.Count + GeworbeneTruppen.Count + Anzahl > Kapazitaet)
+            {
+                SW.Dynamisch.BelTextAnzeigen($"Es gibt in {Name} nicht genügend Unterkünfte\n für {Anzahl} weitere Rekruten.");
+                return false;
+            }
+
+            if (await SW.UI.YesNoQuestion.ShowDialogText($"Wollt Ihr {Anzahl} {NameEinheiten}\n für {Kosten.ToStringGeld()} Werbe-Etat anwerben?\nSie treffen zum nächsten Rundenende ein.", "Ja", "Lieber nicht!") != DialogResultGame.Yes)
                 return false;
 
             if (!SW.Dynamisch.CheckIfenoughGold(Kosten))
                 return false;
 
-            Meldung = ErhoeheTruppen(Anzahl, TypeEinheit);
-
-            if (Meldung != null)
-            {
-                SW.Dynamisch.BelTextAnzeigen(Meldung);
-                return false;
-            }
-
             SW.Dynamisch.GetSpWithID(Besitzer).ErhoeheTaler(-Kosten);
+
+            // Nicht sofort einstellen, sondern anwerben – die Truppen kommen zum Rundenende (einmal je Runde).
+            for (int i = 0; i < Anzahl; i++)
+                GeworbeneTruppen.Add((Einheit)Activator.CreateInstance(TypeEinheit));
+
             return true;
+        }
+
+        /// <summary>
+        /// Stellt die angeworbenen Truppen tatsächlich in den Stützpunkt ein (zum Rundenende aufzurufen) und
+        /// leert die Warteliste. Liefert eine Meldung über die eingetroffenen Truppen (oder null, wenn keine).
+        /// </summary>
+        public string GeworbeneTruppenEinstellen()
+        {
+            if (GeworbeneTruppen.Count == 0)
+                return null;
+
+            int gesamt = GeworbeneTruppen.Count;
+
+            // Nach Typ gruppiert einstellen (mit Moralveränderung wie beim direkten Anheuern).
+            foreach (var gruppe in GeworbeneTruppen.GroupBy(x => x.GetType()).ToList())
+                ErhoeheTruppen(gruppe.Count(), gruppe.Key);
+
+            GeworbeneTruppen.Clear();
+
+            return $"In {Name} sind {gesamt} neu angeworbene Truppen eingetroffen.";
         }
         #endregion
 
@@ -659,6 +878,27 @@ namespace Conspiratio.Lib.Gameplay.Kampf
 
             if (await SW.UI.YesNoQuestion.ShowDialogText($"Wollt Ihr wirklich\n{Anzahl} {NameEinheiten} entlassen?", "Ja", "Lieber nicht!") != DialogResultGame.Yes)
                 return false;
+
+            // Zuerst noch nicht eingetroffene, angeworbene Truppen dieses Typs stornieren und den Werbe-Etat
+            // zurückerstatten, bevor tatsächlich stationierte Truppen entlassen werden.
+            int storniert = 0;
+            for (int i = GeworbeneTruppen.Count - 1; i >= 0 && storniert < Anzahl; i--)
+            {
+                if (GeworbeneTruppen[i].GetType() != TypeEinheit)
+                    continue;
+
+                GeworbeneTruppen.RemoveAt(i);
+                storniert++;
+            }
+
+            if (storniert > 0)
+            {
+                SW.Dynamisch.GetSpWithID(Besitzer).ErhoeheTaler(Truppeneinheit.Basispreis * storniert);
+                Anzahl -= storniert;
+            }
+
+            if (Anzahl <= 0)
+                return true;
 
             Meldung = VerringereTruppen(Anzahl, TypeEinheit);
 

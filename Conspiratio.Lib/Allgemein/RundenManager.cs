@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
 using JetBrains.Annotations;
@@ -17,8 +19,33 @@ namespace Conspiratio.Lib.Allgemein
         [PublicAPI]
         public void BeginneZug()
         {
+            // Abgelaufene Erpressungen (Issue #13) enden, bevor die Privilegien neu bestimmt werden –
+            // sonst stünden dem Erpresser die fremden Privilegien noch einen Zug zu lange offen.
+            BeendeAbgelaufeneErpressungen();
+
             SW.Dynamisch.PrivilegienAktualisieren();
             SW.Dynamisch.GetAktHum().AnsehenAktualisieren();
+
+            // Die Duell-Sperre (max. ein Duell pro Zug, Issue #17) gilt nur für das laufende Jahr.
+            SW.Dynamisch.GetAktHum().DuellGefuehrtDiesesJahr = false;
+        }
+
+        /// <summary>
+        /// Beendet die Erpressungen des aktiven Spielers, deren Laufzeit verstrichen ist, und liefert je
+        /// beendeter Erpressung eine Meldung für die Zugbeginn-Nachrichten.
+        /// </summary>
+        [PublicAPI]
+        public List<string> BeendeAbgelaufeneErpressungen()
+        {
+            var meldungen = new List<string>();
+
+            foreach (int opferId in SW.Dynamisch.GetAktHum().AbgelaufeneErpressungenEntfernen(SW.Dynamisch.GetAktuellesJahr()))
+            {
+                meldungen.Add(SW.Dynamisch.GetSpWithID(opferId).GetKompletterName() +
+                              " ist Euch nicht länger zu Diensten – die Erpressung ist verjährt.");
+            }
+
+            return meldungen;
         }
 
         /// <summary>
@@ -46,6 +73,7 @@ namespace Conspiratio.Lib.Allgemein
         [PublicAPI]
         public void KerkerAufenthaltAbschliessen()
         {
+            SW.Dynamisch.GetAktHum().GetSpielerStatistik().SoSchuldturmaufenthalte++;  // Statistik (Issue #19)
             SW.Dynamisch.GetAktHum().SetSitztImKerker(false);
         }
 

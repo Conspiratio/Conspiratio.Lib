@@ -27,6 +27,7 @@ namespace Conspiratio.Lib.Gameplay.Personen
         private int _ansehen;
         private int _titel;
         private bool[] _privilegien = new bool[SW.Statisch.GetMaxPriv()];
+        private int[] _begingVerbrechenX;
 
         #endregion
 
@@ -40,6 +41,7 @@ namespace Conspiratio.Lib.Gameplay.Personen
             VerheiratetMit = verheiratetMit;
             VerbleibendeJahre = verbleibendeJahre;
             _gesundheit = SW.Statisch.GetMaxGesundheit();
+            _begingVerbrechenX = new int[SW.Statisch.GetMaxGesetze()];
         }
         #endregion
 
@@ -58,6 +60,10 @@ namespace Conspiratio.Lib.Gameplay.Personen
         public void SetAmt(int amtsID, int slrid)
         {
             Amtsinformationen.SetAll(amtsID, slrid);
+
+            // Statistik (Issue #19): das höchste je gehaltene Amt des menschlichen Spielers merken.
+            if (this is HumSpieler mensch && amtsID > mensch.GetSpielerStatistik().SoHoechstesAmt)
+                mensch.GetSpielerStatistik().SoHoechstesAmt = amtsID;
         }
 
         public int GetAmtID()
@@ -209,6 +215,57 @@ namespace Conspiratio.Lib.Gameplay.Personen
         {
             Deliktpunkte = punkte;
         }
+
+        #region Begangene Verbrechen (je Gesetz)
+        // Zählt die tatsächlich begangenen Verbrechen je Gesetz. Menschen füllen sie über ihre illegalen
+        // Aktionen; KI-Spieler zusätzlich durch die zufällige Straftatenermittlung zum Rundenende
+        // (RundenEndeManager.FuehreKiStraftatenDurch). Bei einer Gerichtsverhandlung werden sie herangezogen.
+
+        /// <summary>
+        /// Liefert den Delikt-Speicher und legt ihn bei Bedarf an. Das ist nötig, weil die feldbasierte
+        /// Deserialisierung den Konstruktor umgeht und ältere Spielstände das Feld noch nicht enthalten –
+        /// dort wäre es sonst null.
+        /// </summary>
+        private int[] BegingVerbrechenSicher()
+        {
+            if (_begingVerbrechenX == null)
+                _begingVerbrechenX = new int[SW.Statisch.GetMaxGesetze()];
+
+            return _begingVerbrechenX;
+        }
+
+        public int GetBegingVerbrechenX(int x)
+        {
+            return BegingVerbrechenSicher()[x];
+        }
+
+        public void SetBegingVerbrechenX(int x, int y)
+        {
+            BegingVerbrechenSicher()[x] = y;
+        }
+
+        public void ErhoeheGesetzXUmEins(int x)
+        {
+            BegingVerbrechenSicher()[x]++;
+
+            // Statistik (Issue #19): begangene Gesetzesverstöße des menschlichen Spielers mitzählen.
+            if (this is HumSpieler mensch)
+                mensch.GetSpielerStatistik().SogebrocheneGesetze++;
+        }
+
+        public void HalbiereDelikte()
+        {
+            int[] delikte = BegingVerbrechenSicher();
+
+            for (int i = 0; i < SW.Statisch.GetMaxGesetze(); i++)
+                delikte[i] /= 2;
+        }
+
+        public int[] GetBegingVerbrechenX()
+        {
+            return BegingVerbrechenSicher();
+        }
+        #endregion
 
         public int GetAlter()
         {

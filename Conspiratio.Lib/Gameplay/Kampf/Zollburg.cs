@@ -83,22 +83,15 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         {
             string text = "";
             string result;
-            double kiAktivitaetsfaktor = 1d;  // 1.00 = normal (50 %), von 0.02 (1 %) bis 2.00 (100 %) möglich
             int wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
             Type truppeneinheit = null;
 
-            switch (SW.Dynamisch.Spielstand.Einstellungen.AggressivitaetKISpieler)
-            {
-                case Einstellungen.EnumSchwierigkeitsgrad.Niedrig:
-                    kiAktivitaetsfaktor = 0.5d;  // 25 %
-                    break;
-                case Einstellungen.EnumSchwierigkeitsgrad.Mittel:
-                    kiAktivitaetsfaktor = 1d;  // 50 %
-                    break;
-                case Einstellungen.EnumSchwierigkeitsgrad.Hoch:
-                    kiAktivitaetsfaktor = 1.7d;  // 85 %
-                    break;
-            }
+            // KI-Aktivität als Prozentwert (1–100, Standard 50). 50 % entspricht dem Normalfaktor 1.0,
+            // 100 % dem Faktor 2.0; alte Spielstände (0) werden wie 50 % behandelt.
+            int aktivitaetProzent = SW.Dynamisch.Spielstand.Einstellungen.KiAktivitaetProzent;
+            if (aktivitaetProzent <= 0)
+                aktivitaetProzent = 50;
+            double kiAktivitaetsfaktor = aktivitaetProzent / 50d;
 
             if (wuerfel <= Convert.ToInt32(Math.Round(50 * kiAktivitaetsfaktor, 0)))  // Auswürfeln, ob generell in diesem Zug etwas passieren soll
             {
@@ -180,28 +173,27 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 {
                     if (Aktionen == null || Aktionen?.Length == 0)  // Müsste eine neue Aktion angelegt werden?
                     {
+                        AktionenInitialisieren();
                         wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
 
-                        // Neue Aktion: Überwachen
-                        if (wuerfel <= Convert.ToInt32(Math.Round(90 * kiAktivitaetsfaktor, 0)))  // Soll eine neue Aktion Überwachen angelegt werden?
+                        // Gelegentlich einen gezielten Angriff auf einen anderen Stützpunkt, sonst Überwachen.
+                        if (!VersucheKiAngriff(kiAktivitaetsfaktor) &&
+                            wuerfel <= Convert.ToInt32(Math.Round(90 * kiAktivitaetsfaktor, 0)))  // Soll eine neue Aktion Überwachen angelegt werden?
                         {
-                            AktionenInitialisieren();
-
                             Aktionen[0] = new ZollburgAktion(EnumAktionsartZollburg.Überwachen, GetLandID(), 0, ID, 0);
                             Aktionen[0].ErhoeheTruppen(Convert.ToInt32(Math.Round(Convert.ToDouble(GetAnzahlTruppen(typeof(ZollSoeldner))) / 2d, 0)), typeof(ZollSoeldner));
                             Aktionen[0].ErhoeheTruppen(Convert.ToInt32(Math.Round(Convert.ToDouble(GetAnzahlTruppen(typeof(ZollMusketier))) / 2d, 0)), typeof(ZollMusketier));
                             Aktionen[0].ErhoeheTruppen(Convert.ToInt32(Math.Round(Convert.ToDouble(GetAnzahlTruppen(typeof(ZollKanonier))) / 2d, 0)), typeof(ZollKanonier));
                             Aktionen[0].ErhoeheTruppen(Convert.ToInt32(Math.Round(Convert.ToDouble(GetAnzahlTruppen(typeof(ZollOffizier))) / 2d, 0)), typeof(ZollOffizier));
                         }
-
-                        // TODO: Neue Aktion: Truppen schicken
                     }
                     else
                     {
                         wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
 
-                        // Aktion aktualisieren (Art "Überwachen" und 50 % der Truppen)
-                        if (wuerfel <= Convert.ToInt32(Math.Round(50 * kiAktivitaetsfaktor, 0)))  // Soll die erste Aktion aktualisiert werden?
+                        // Bestehende Aktion gelegentlich durch einen Angriff ersetzen oder als Überwachen erneuern.
+                        if (!VersucheKiAngriff(kiAktivitaetsfaktor) &&
+                            wuerfel <= Convert.ToInt32(Math.Round(50 * kiAktivitaetsfaktor, 0)))  // Soll die erste Aktion aktualisiert werden?
                         {
                             Aktionen[0] = new ZollburgAktion(EnumAktionsartZollburg.Überwachen, GetLandID(), 0, ID, 0);
                             Aktionen[0].ErhoeheTruppen(Convert.ToInt32(Math.Round(Convert.ToDouble(GetAnzahlTruppen(typeof(ZollSoeldner))) / 2d, 0)), typeof(ZollSoeldner));
@@ -209,13 +201,40 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                             Aktionen[0].ErhoeheTruppen(Convert.ToInt32(Math.Round(Convert.ToDouble(GetAnzahlTruppen(typeof(ZollKanonier))) / 2d, 0)), typeof(ZollKanonier));
                             Aktionen[0].ErhoeheTruppen(Convert.ToInt32(Math.Round(Convert.ToDouble(GetAnzahlTruppen(typeof(ZollOffizier))) / 2d, 0)), typeof(ZollOffizier));
                         }
-
-                        // TODO: Aktion entfernen (z.B. Truppen schicken)
                     }
                 }
             }
 
             return text;
+        }
+        #endregion
+
+        #region VersucheKiAngriff
+        /// <summary>
+        /// Richtet für die KI mit geringer Wahrscheinlichkeit (abhängig vom Aktivitätsfaktor) einen Angriff
+        /// ("Truppen schicken") auf einen zufälligen gegnerischen Stützpunkt in Slot 0 ein, mit etwa der
+        /// Hälfte der Truppen. Gibt zurück, ob ein Angriff eingerichtet wurde.
+        /// </summary>
+        private bool VersucheKiAngriff(double kiAktivitaetsfaktor)
+        {
+            int ziel = KiZufaelligesAngriffsziel();
+            if (ziel == 0)
+                return false;
+
+            if (SW.Statisch.Rnd.Next(1, 101) > Convert.ToInt32(Math.Round(20 * kiAktivitaetsfaktor, 0)))
+                return false;
+
+            var aktion = new ZollburgAktion(EnumAktionsartZollburg.Truppen_schicken, 0, ziel, ID, 0);
+            aktion.ErhoeheTruppen(Convert.ToInt32(Math.Round(GetAnzahlTruppen(typeof(ZollSoeldner)) / 2d, 0)), typeof(ZollSoeldner));
+            aktion.ErhoeheTruppen(Convert.ToInt32(Math.Round(GetAnzahlTruppen(typeof(ZollMusketier)) / 2d, 0)), typeof(ZollMusketier));
+            aktion.ErhoeheTruppen(Convert.ToInt32(Math.Round(GetAnzahlTruppen(typeof(ZollKanonier)) / 2d, 0)), typeof(ZollKanonier));
+            aktion.ErhoeheTruppen(Convert.ToInt32(Math.Round(GetAnzahlTruppen(typeof(ZollOffizier)) / 2d, 0)), typeof(ZollOffizier));
+
+            if (aktion.Einheiten.Count == 0)
+                return false;
+
+            Aktionen[0] = aktion;
+            return true;
         }
         #endregion
 

@@ -18,6 +18,25 @@ Das Projekt wurde erstellt mit: Visual Studio 2019
 
 Für den manuellen Build einfach die Projektmappe `Conspiratio.Lib.sln` öffnen und kompilieren.
 
+## Tests
+
+Die Spielregeln sind mit Unit-Tests (xUnit) im Projekt `Conspiratio.Lib.Tests` abgesichert:
+
+```
+dotnet test
+```
+
+Die Tests laufen auch in der CI – bei jedem Push und Pull-Request sowie vor jeder Veröffentlichung auf nuget.org.
+
+**Für neue Features sind Tests der Normalfall.** Abgedeckt gehört alles, was Regeln festlegt: Berechnungen, Wahrscheinlichkeiten, Voraussetzungen und Zustände, die sich über mehrere Runden entwickeln. Reine Textausgaben oder das bloße Weiterreichen an die Oberfläche brauchen keine Tests.
+
+Ein paar Hinweise, die sich bewährt haben:
+
+- Der Spielzustand liegt in den statischen `SW`-Fassaden. Die Tests laufen deshalb bewusst ohne Parallelität, und jeder Test baut sich seine Spielwelt mit `TestSpielwelt.Starte()` neu auf, statt auf dem Zustand eines vorherigen aufzusetzen.
+- Zufällige Größen (etwa die Bosheit der KI) vorher festlegen – sonst schwanken abhängige Werte von Lauf zu Lauf so stark, dass es wie ein echter Fehler aussieht.
+- Wahrscheinliches über Quoten aus vielen Durchläufen prüfen statt über einzelne Ausgänge. Zahlen aus einem Konzept eignen sich hervorragend als exakte Zusicherung.
+- Bei einer Fehlerbehebung zuerst nachsehen, dass der neue Test **ohne** die Korrektur wirklich fehlschlägt. Nur dann prüft er den Fehler auch.
+
 ## Systemvoraussetzungen / Abhängigkeiten
 - .NET Standard 2.0 (keine Abhängigkeiten)
 

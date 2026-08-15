@@ -12,18 +12,17 @@ namespace Conspiratio.Lib.Gameplay.Privilegien
         {
             SW.Dynamisch.BelTextAnzeigen("Als Kellermeister steht Euch der Zugang zu den Getränkevorräten mancher Konkurrenten offen. Dadurch könnt Ihr vergünstigt eine Ermordung verüben.");
 
-            // TODO: Prüfen, ob noch aktiv
-            //if (SW.Dynamisch.getHumWithID(SW.Dynamisch.getAktiverSpieler()).getWeinVergiftenVonSpMitID() == 0)
-            //{
-            //    PolitischeWeltkarte pkw = new PolitischeWeltkarte(12);
-            //    pkw.ShowDialog();
-            //}
-            //else
-            //{
-            //    SW.Dynamisch.BelTextAnzeigen("Ihr habt dieses Jahr schon einen Anschlag auf " + SW.Dynamisch.getSpWithID(SW.Dynamisch.getHumWithID(SW.Dynamisch.getAktiverSpieler()).getWeinVergiftenVonSpMitID()).getCompleteName() + " geplant");
-            //}
-
-            //SpE.setBoolKurzSpeicher(true);
+            // Ist noch keine Vergiftung vorbereitet, öffnet sich die Personen-Karte zur Zielauswahl
+            // (Modus 12). Dort ausgeführt wird die Vergiftung über KontrahentenManager.PersonWasMachen →
+            // SW.Dynamisch.WeinVergiften; die Auflösung folgt zum Zugende (FuehreVergiftetenWeinDurch).
+            if (SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler()).GetVergiftetWeinVonKISpielerID() == 0)
+            {
+                SW.UI.PolitischeWeltkarteDialog.ShowDialogModus(12);
+            }
+            else
+            {
+                SW.Dynamisch.BelTextAnzeigen("Ihr habt in diesem Jahr bereits Vorbereitungen für einen Anschlag getroffen.");
+            }
         }
     }
 }

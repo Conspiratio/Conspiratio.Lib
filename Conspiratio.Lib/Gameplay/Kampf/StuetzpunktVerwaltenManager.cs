@@ -53,8 +53,8 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         /// <summary>Plural-Name eines Einheitentyps (z. B. "Söldner").</summary>
         public string GetEinheitName(int index) => _einheiten[index].NamePlural;
 
-        /// <summary>Aktuell stationierte Anzahl eines Einheitentyps.</summary>
-        public int GetAnzahl(int index) => _stuetzpunkt.GetAnzahlTruppen(_typen[index]);
+        /// <summary>Aktuell stationierte Anzahl eines Einheitentyps zuzüglich der angeworbenen (noch eintreffenden) Truppen.</summary>
+        public int GetAnzahl(int index) => _stuetzpunkt.GetAnzahlTruppenInklGeworben(_typen[index]);
 
         /// <summary>Heuert die angegebene Anzahl eines Einheitentyps an (mit Rückfrage/Kostenprüfung in der Lib).</summary>
         public Task<bool> Anheuern(int index, int anzahl) => _stuetzpunkt.TruppenAnheuern(anzahl, _typen[index]);
@@ -64,5 +64,24 @@ namespace Conspiratio.Lib.Gameplay.Kampf
 
         /// <summary>Führt ein Manöver durch (kostet Taler, hebt die Moral) – mit Rückfrage in der Lib.</summary>
         public Task<bool> ManoeverDurchfuehren() => _stuetzpunkt.ManoeverDurchfuehrenSpieler();
+
+        /// <summary>
+        /// Ob der Stützpunkt zum Verkauf angeboten wird. Ist dies gesetzt, unterbreiten KI-Spieler
+        /// von Zeit zu Zeit zufällige Kaufangebote, die dem Besitzer zu Zugbeginn vorgelegt werden.
+        /// </summary>
+        public bool ZumVerkaufAngeboten
+        {
+            get => _stuetzpunkt.ZumVerkaufAngeboten;
+            set => _stuetzpunkt.ZumVerkaufAngeboten = value;
+        }
+
+        /// <summary>Ob für die Truppen dieses Stützpunkts bereits ein Moral-Bonus vor dem Kampf bezahlt wurde.</summary>
+        public bool MoralBonusBezahlt => _stuetzpunkt.MoralBonusBezahlt > 0;
+
+        /// <summary>Kosten für einen einmaligen Moral-Bonus vor dem Kampf.</summary>
+        public int KostenMoralBonus => _stuetzpunkt.BerechneKostenMoralBonus();
+
+        /// <summary>Bezahlt einen einmaligen Moral-Bonus für die kommende Schlacht (Rückerstattung bei Sieg).</summary>
+        public Task<bool> MoralBonusZahlen() => _stuetzpunkt.MoralBonusZahlen();
     }
 }

@@ -13,59 +13,62 @@ namespace Conspiratio.Lib.Allgemein
     /// </summary>
     public sealed class SpielstandDeserializationBinder : SerializationBinder
     {
-        Dictionary<string, string> typeMappings = new Dictionary<string, string>();  // Key = alter Typename, Value = neuer Typename
-
-        public SpielstandDeserializationBinder() : base()
+        // Key = alter Typename (vor der Auslagerung in die Conspiratio.Lib-Assembly), Value = aktueller Typename.
+        // Wird sowohl vom BinaryFormatter-Binder (diese Klasse) als auch vom JSON-Binder (SpielstandJsonTypBinder)
+        // genutzt, damit ältere Spielstände in beiden Formaten geladen werden können.
+        internal static readonly Dictionary<string, string> TypeMappings = new Dictionary<string, string>
         {
-            typeMappings.Add("Conspiratio.Rohstoff", "Conspiratio.Lib.Gameplay.Rohstoffe.Rohstoff");
-            typeMappings.Add("Conspiratio.Enumeratoren+StuetzpunktArt", "Conspiratio.Lib.Gameplay.Kampf.EnumStuetzpunktArt");
-            typeMappings.Add("Conspiratio.Enumeratoren+KampfArt", "Conspiratio.Lib.Gameplay.Kampf.EnumKampfArt");
-            typeMappings.Add("Conspiratio.Enumeratoren+AktionsartZollburg", "Conspiratio.Lib.Gameplay.Kampf.EnumAktionsartZollburg");
-            typeMappings.Add("Conspiratio.Enumeratoren+AktionsartRaeuberlager", "Conspiratio.Lib.Gameplay.Kampf.EnumAktionsartRaeuberlager");
-            typeMappings.Add("Conspiratio.Classes.Privilegien.FestGeben.Fest", "Conspiratio.Lib.Gameplay.Privilegien.FestGeben.Fest");
-            typeMappings.Add("Conspiratio.Classes.Privilegien.FestGeben.EnumFestMusiker", "Conspiratio.Lib.Gameplay.Privilegien.FestGeben.EnumFestMusiker");
-            typeMappings.Add("Conspiratio.Classes.Privilegien.FestGeben.EnumFestGroesse", "Conspiratio.Lib.Gameplay.Privilegien.FestGeben.EnumFestGroesse");
-            typeMappings.Add("Conspiratio.AktiveSpionagen", "Conspiratio.Lib.Gameplay.Hinterzimmer.AktiveSpionagen");
-            typeMappings.Add("Conspiratio.AktiveSabotagen", "Conspiratio.Lib.Gameplay.Hinterzimmer.AktiveSabotagen");
-            typeMappings.Add("Conspiratio.Gebiet", "Conspiratio.Lib.Gameplay.Gebiete.Gebiet");
-            typeMappings.Add("Conspiratio.Kampf.Einheit", "Conspiratio.Lib.Gameplay.Kampf.Einheiten.Einheit");
-            typeMappings.Add("Conspiratio.Kampf.Kampf", "Conspiratio.Lib.Gameplay.Kampf.Kampf");
-            typeMappings.Add("Conspiratio.Kampf.KampfKarawane", "Conspiratio.Lib.Gameplay.Kampf.KampfKarawane");
-            typeMappings.Add("Conspiratio.Kampf.KampfErgebnis", "Conspiratio.Lib.Gameplay.Kampf.KampfErgebnis");
-            typeMappings.Add("Conspiratio.Classes.Ereignisse.Ereigniszeitpunkt", "Conspiratio.Lib.Gameplay.Ereignisse.Ereigniszeitpunkt");
-            typeMappings.Add("Conspiratio.Land", "Conspiratio.Lib.Gameplay.Gebiete.Land");
-            typeMappings.Add("Conspiratio.Reich", "Conspiratio.Lib.Gameplay.Gebiete.Reich");
-            typeMappings.Add("Conspiratio.Kind", "Conspiratio.Lib.Gameplay.Personen.Kind");
-            typeMappings.Add("Conspiratio.SpielerStatistik", "Conspiratio.Lib.Gameplay.Personen.SpielerStatistik");
-            typeMappings.Add("Conspiratio.Amtsenthebung", "Conspiratio.Lib.Gameplay.Privilegien.Amtsenthebung");
-            typeMappings.Add("Conspiratio.Gerichtsverhandlung", "Conspiratio.Lib.Gameplay.Justiz.Gerichtsverhandlung");
-            typeMappings.Add("Conspiratio.AmtsInfo", "Conspiratio.Lib.Gameplay.Schreibstube.AmtsInfo");
-            typeMappings.Add("Conspiratio.Kredite", "Conspiratio.Lib.Gameplay.Schreibstube.Kredit");
-            typeMappings.Add("Conspiratio.WahlAbhalten", "Conspiratio.Lib.Gameplay.Schreibstube.WahlAbhalten");
-            typeMappings.Add("Conspiratio.SpHatHaus", "Conspiratio.Lib.Gameplay.Wohnsitz.SpHatHaus");
-            typeMappings.Add("Conspiratio.SpHatWerkstaetten", "Conspiratio.Lib.Gameplay.Niederlassung.SpHatWerkstaetten");
-            typeMappings.Add("Conspiratio.Classes.Spielstand", "Conspiratio.Lib.Gameplay.Spielwelt.Spielstand");
-            typeMappings.Add("Conspiratio.Spieler", "Conspiratio.Lib.Gameplay.Personen.Spieler");
-            typeMappings.Add("Conspiratio.KISpieler", "Conspiratio.Lib.Gameplay.Personen.KISpieler");
-            typeMappings.Add("Conspiratio.HumSpieler", "Conspiratio.Lib.Gameplay.Personen.HumSpieler");
-            typeMappings.Add("Conspiratio.Produktionsslot", "Conspiratio.Lib.Gameplay.Niederlassung.Produktionsslot");
-            typeMappings.Add("Conspiratio.Stadt", "Conspiratio.Lib.Gameplay.Gebiete.Stadt");
-            typeMappings.Add("Conspiratio.Kampf.Stuetzpunkt", "Conspiratio.Lib.Gameplay.Kampf.Stuetzpunkt");
-            typeMappings.Add("Conspiratio.Kampf.Landsicherheit", "Conspiratio.Lib.Gameplay.Kampf.Landsicherheit");
-            typeMappings.Add("Conspiratio.Kampf.StuetzpunktAktion", "Conspiratio.Lib.Gameplay.Kampf.StuetzpunktAktion");
-            typeMappings.Add("Conspiratio.Kampf.Raeuberlager", "Conspiratio.Lib.Gameplay.Kampf.Raeuberlager");
-            typeMappings.Add("Conspiratio.Kampf.RaeuberlagerAktion", "Conspiratio.Lib.Gameplay.Kampf.RaeuberlagerAktion");
-            typeMappings.Add("Conspiratio.Kampf.RaubBombenleger", "Conspiratio.Lib.Gameplay.Kampf.RaubBombenleger");
-            typeMappings.Add("Conspiratio.Kampf.RaubKanonier", "Conspiratio.Lib.Gameplay.Kampf.RaubKanonier");
-            typeMappings.Add("Conspiratio.Kampf.RaubRaeuber", "Conspiratio.Lib.Gameplay.Kampf.RaubRaeuber");
-            typeMappings.Add("Conspiratio.Kampf.RaubSchuetze", "Conspiratio.Lib.Gameplay.Kampf.RaubSchuetze");
-            typeMappings.Add("Conspiratio.Kampf.Zollburg", "Conspiratio.Lib.Gameplay.Kampf.Zollburg");
-            typeMappings.Add("Conspiratio.Kampf.ZollburgAktion", "Conspiratio.Lib.Gameplay.Kampf.ZollburgAktion");
-            typeMappings.Add("Conspiratio.Kampf.ZollKanonier", "Conspiratio.Lib.Gameplay.Kampf.ZollKanonier");
-            typeMappings.Add("Conspiratio.Kampf.ZollMusketier", "Conspiratio.Lib.Gameplay.Kampf.ZollMusketier");
-            typeMappings.Add("Conspiratio.Kampf.ZollOffizier", "Conspiratio.Lib.Gameplay.Kampf.ZollOffizier");
-            typeMappings.Add("Conspiratio.Kampf.ZollSoeldner", "Conspiratio.Lib.Gameplay.Kampf.ZollSoeldner");
-        }
+            { "Conspiratio.Rohstoff", "Conspiratio.Lib.Gameplay.Rohstoffe.Rohstoff" },
+            { "Conspiratio.Enumeratoren+StuetzpunktArt", "Conspiratio.Lib.Gameplay.Kampf.EnumStuetzpunktArt" },
+            { "Conspiratio.Enumeratoren+KampfArt", "Conspiratio.Lib.Gameplay.Kampf.EnumKampfArt" },
+            { "Conspiratio.Enumeratoren+AktionsartZollburg", "Conspiratio.Lib.Gameplay.Kampf.EnumAktionsartZollburg" },
+            { "Conspiratio.Enumeratoren+AktionsartRaeuberlager", "Conspiratio.Lib.Gameplay.Kampf.EnumAktionsartRaeuberlager" },
+            { "Conspiratio.Classes.Privilegien.FestGeben.Fest", "Conspiratio.Lib.Gameplay.Privilegien.FestGeben.Fest" },
+            { "Conspiratio.Classes.Privilegien.FestGeben.EnumFestMusiker", "Conspiratio.Lib.Gameplay.Privilegien.FestGeben.EnumFestMusiker" },
+            { "Conspiratio.Classes.Privilegien.FestGeben.EnumFestGroesse", "Conspiratio.Lib.Gameplay.Privilegien.FestGeben.EnumFestGroesse" },
+            { "Conspiratio.AktiveSpionagen", "Conspiratio.Lib.Gameplay.Hinterzimmer.AktiveSpionagen" },
+            { "Conspiratio.AktiveSabotagen", "Conspiratio.Lib.Gameplay.Hinterzimmer.AktiveSabotagen" },
+            { "Conspiratio.Gebiet", "Conspiratio.Lib.Gameplay.Gebiete.Gebiet" },
+            { "Conspiratio.Kampf.Einheit", "Conspiratio.Lib.Gameplay.Kampf.Einheiten.Einheit" },
+            { "Conspiratio.Kampf.Kampf", "Conspiratio.Lib.Gameplay.Kampf.Kampf" },
+            { "Conspiratio.Kampf.KampfKarawane", "Conspiratio.Lib.Gameplay.Kampf.KampfKarawane" },
+            { "Conspiratio.Kampf.KampfErgebnis", "Conspiratio.Lib.Gameplay.Kampf.KampfErgebnis" },
+            { "Conspiratio.Classes.Ereignisse.Ereigniszeitpunkt", "Conspiratio.Lib.Gameplay.Ereignisse.Ereigniszeitpunkt" },
+            { "Conspiratio.Land", "Conspiratio.Lib.Gameplay.Gebiete.Land" },
+            { "Conspiratio.Reich", "Conspiratio.Lib.Gameplay.Gebiete.Reich" },
+            { "Conspiratio.Kind", "Conspiratio.Lib.Gameplay.Personen.Kind" },
+            { "Conspiratio.SpielerStatistik", "Conspiratio.Lib.Gameplay.Personen.SpielerStatistik" },
+            { "Conspiratio.Amtsenthebung", "Conspiratio.Lib.Gameplay.Privilegien.Amtsenthebung" },
+            { "Conspiratio.Gerichtsverhandlung", "Conspiratio.Lib.Gameplay.Justiz.Gerichtsverhandlung" },
+            { "Conspiratio.AmtsInfo", "Conspiratio.Lib.Gameplay.Schreibstube.AmtsInfo" },
+            { "Conspiratio.Kredite", "Conspiratio.Lib.Gameplay.Schreibstube.Kredit" },
+            { "Conspiratio.WahlAbhalten", "Conspiratio.Lib.Gameplay.Schreibstube.WahlAbhalten" },
+            { "Conspiratio.SpHatHaus", "Conspiratio.Lib.Gameplay.Wohnsitz.SpHatHaus" },
+            { "Conspiratio.SpHatWerkstaetten", "Conspiratio.Lib.Gameplay.Niederlassung.SpHatWerkstaetten" },
+            { "Conspiratio.Classes.Spielstand", "Conspiratio.Lib.Gameplay.Spielwelt.Spielstand" },
+            { "Conspiratio.Spieler", "Conspiratio.Lib.Gameplay.Personen.Spieler" },
+            { "Conspiratio.KISpieler", "Conspiratio.Lib.Gameplay.Personen.KISpieler" },
+            { "Conspiratio.HumSpieler", "Conspiratio.Lib.Gameplay.Personen.HumSpieler" },
+            { "Conspiratio.Produktionsslot", "Conspiratio.Lib.Gameplay.Niederlassung.Produktionsslot" },
+            { "Conspiratio.Stadt", "Conspiratio.Lib.Gameplay.Gebiete.Stadt" },
+            { "Conspiratio.Kampf.Stuetzpunkt", "Conspiratio.Lib.Gameplay.Kampf.Stuetzpunkt" },
+            { "Conspiratio.Kampf.Landsicherheit", "Conspiratio.Lib.Gameplay.Kampf.Landsicherheit" },
+            { "Conspiratio.Kampf.StuetzpunktAktion", "Conspiratio.Lib.Gameplay.Kampf.StuetzpunktAktion" },
+            { "Conspiratio.Kampf.Raeuberlager", "Conspiratio.Lib.Gameplay.Kampf.Raeuberlager" },
+            { "Conspiratio.Kampf.RaeuberlagerAktion", "Conspiratio.Lib.Gameplay.Kampf.RaeuberlagerAktion" },
+            { "Conspiratio.Kampf.RaubBombenleger", "Conspiratio.Lib.Gameplay.Kampf.RaubBombenleger" },
+            { "Conspiratio.Kampf.RaubKanonier", "Conspiratio.Lib.Gameplay.Kampf.RaubKanonier" },
+            { "Conspiratio.Kampf.RaubRaeuber", "Conspiratio.Lib.Gameplay.Kampf.RaubRaeuber" },
+            { "Conspiratio.Kampf.RaubSchuetze", "Conspiratio.Lib.Gameplay.Kampf.RaubSchuetze" },
+            { "Conspiratio.Kampf.Zollburg", "Conspiratio.Lib.Gameplay.Kampf.Zollburg" },
+            { "Conspiratio.Kampf.ZollburgAktion", "Conspiratio.Lib.Gameplay.Kampf.ZollburgAktion" },
+            { "Conspiratio.Kampf.ZollKanonier", "Conspiratio.Lib.Gameplay.Kampf.ZollKanonier" },
+            { "Conspiratio.Kampf.ZollMusketier", "Conspiratio.Lib.Gameplay.Kampf.ZollMusketier" },
+            { "Conspiratio.Kampf.ZollOffizier", "Conspiratio.Lib.Gameplay.Kampf.ZollOffizier" },
+            { "Conspiratio.Kampf.ZollSoeldner", "Conspiratio.Lib.Gameplay.Kampf.ZollSoeldner" },
+        };
+
+        private readonly Dictionary<string, string> typeMappings = TypeMappings;
 
         public override Type BindToType(string assemblyName, string typeName)
         {

@@ -18,6 +18,25 @@ The project was created with: Visual Studio 2019
 
 For a manual build, simply open the solution `Conspiratio.Lib.sln` and compile it.
 
+## Tests
+
+The game rules are covered by unit tests (xUnit) in the `Conspiratio.Lib.Tests` project:
+
+```
+dotnet test
+```
+
+The tests also run in CI – on every push and pull request, and before each release to nuget.org.
+
+**New features normally come with tests.** Cover everything that decides rules: calculations, probabilities, preconditions and state that develops over several turns. Pure text output or plain delegation to the UI does not need tests.
+
+A few practices that have proven themselves:
+
+- The game state lives in the static `SW` facades. The tests therefore deliberately run without parallelism, and each test builds its own world with `TestSpielwelt.Starte()` instead of building on a predecessor's state.
+- Pin randomized values (such as the AI's malice) up front – otherwise dependent values swing so much between runs that it looks like a real defect.
+- Check probabilistic behaviour via rates over many runs rather than single outcomes. Numbers from a design document make excellent exact assertions.
+- When fixing a bug, first make sure the new test actually fails **without** the fix. Only then does it really cover the bug.
+
 ## System requirements / dependencies
 - .NET Standard 2.0 (no dependencies)
 

@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 
+using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
 namespace Conspiratio.Lib.Gameplay.Kampf
@@ -74,5 +75,98 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         /// <summary>Unterbreitet dem Besitzer des Stützpunkts ein Kaufangebot (nur einmal pro Jahr möglich).</summary>
         public Task<bool> KaufangebotAbgeben(int stuetzpunktId, int preis) =>
             SW.Dynamisch.GetStuetzpunkte()[stuetzpunktId - 1].KaufangebotAbgeben(preis);
+
+        /// <summary>Liegt für einen Stützpunkt des aktiven Spielers ein Kaufangebot vor?</summary>
+        public bool StehenKaufangeboteAn()
+        {
+            int aktiverSpieler = SW.Dynamisch.GetAktiverSpieler();
+
+            foreach (var stuetzpunkt in SW.Dynamisch.GetStuetzpunkte())
+                if (stuetzpunkt.Besitzer == aktiverSpieler && stuetzpunkt.AngebotVonSpielerID != 0)
+                    return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Legt dem aktiven Spieler zu Zugbeginn alle eingegangenen Kaufangebote seiner Mitspieler vor
+        /// (Annahme verkauft den Stützpunkt, Ablehnung erstattet dem Anbieter den reservierten Betrag).
+        /// </summary>
+        public async Task VerarbeiteEingehendeKaufangebote()
+        {
+            int aktiverSpieler = SW.Dynamisch.GetAktiverSpieler();
+
+            foreach (var stuetzpunkt in SW.Dynamisch.GetStuetzpunkte())
+                if (stuetzpunkt.Besitzer == aktiverSpieler && stuetzpunkt.AngebotVonSpielerID != 0)
+                    await stuetzpunkt.AngebotVorlegen();
+        }
+
+        /// <summary>Ob der Stützpunkt vom Besitzer zum Verkauf angeboten wird.</summary>
+        public bool IstZumVerkaufAngeboten(int stuetzpunktId) =>
+            SW.Dynamisch.GetStuetzpunkte()[stuetzpunktId - 1].ZumVerkaufAngeboten;
+
+        /// <summary>Bietet den Stützpunkt zum Verkauf an bzw. nimmt das Angebot zurück.</summary>
+        public void SetzeZumVerkauf(int stuetzpunktId, bool angeboten) =>
+            SW.Dynamisch.GetStuetzpunkte()[stuetzpunktId - 1].ZumVerkaufAngeboten = angeboten;
+
+        /// <summary>
+        /// Erzeugt zu Zugbeginn für zum Verkauf angebotene Stützpunkte des aktiven Spielers gelegentlich ein
+        /// zufälliges KI-Kaufangebot (Preis um den aktuellen Wert), das anschließend vorgelegt wird.
+        /// </summary>
+        public void GeneriereKiKaufangebote()
+        {
+            int aktiverSpieler = SW.Dynamisch.GetAktiverSpieler();
+
+            foreach (var stuetzpunkt in SW.Dynamisch.GetStuetzpunkte())
+            {
+                if (stuetzpunkt.Besitzer != aktiverSpieler || !stuetzpunkt.ZumVerkaufAngeboten || stuetzpunkt.AngebotVonSpielerID != 0)
+                    continue;
+
+                // Nicht jede Runde meldet sich ein Käufer.
+                if (SW.Statisch.Rnd.Next(0, 100) >= 50)
+                    continue;
+
+                int kiId = SW.Statisch.Rnd.Next(SW.Statisch.GetMinKIID(), SW.Statisch.GetMaxKIID());
+                int preis = stuetzpunkt.BerechneWert() * SW.Statisch.Rnd.Next(70, 116) / 100;
+
+                if (preis < 1)
+                    preis = 1;
+
+                stuetzpunkt.AngebotVonSpielerID = kiId;
+                stuetzpunkt.AngebotPreis = preis;
+            }
+        }
+
+        /// <summary>
+        /// Meldet dem aktiven Spieler zu Zugbeginn die seit seinem letzten Zug aus seinen Zollburgen
+        /// eingenommenen Zölle und setzt den Zähler anschließend zurück.
+        /// </summary>
+        public async Task ZeigeZolleinnahmen()
+        {
+            var spieler = SW.Dynamisch.GetAktHum();
+
+            if (spieler.ZolleinnahmenGesammelt <= 0)
+                return;
+
+            await SW.UI.ShowText.ShowDialog($"Aus Euren Zollburgen habt Ihr {spieler.ZolleinnahmenGesammelt.ToStringGeld()} an Zöllen eingenommen.");
+            spieler.ZolleinnahmenGesammelt = 0;
+        }
+
+        /// <summary>
+        /// Zeigt dem aktiven Spieler zu Zugbeginn die Ergebnisse seiner eigenen Kaufangebote (Annahme oder
+        /// Ablehnung durch den jeweiligen Besitzer) und leert die Nachrichtenliste anschließend.
+        /// </summary>
+        public async Task ZeigeHandelsnachrichten()
+        {
+            var spieler = SW.Dynamisch.GetAktHum();
+
+            if (spieler.HandelsNachrichten.Count == 0)
+                return;
+
+            foreach (string nachricht in spieler.HandelsNachrichten)
+                await SW.UI.ShowText.ShowDialog(nachricht);
+
+            spieler.HandelsNachrichten.Clear();
+        }
     }
 }

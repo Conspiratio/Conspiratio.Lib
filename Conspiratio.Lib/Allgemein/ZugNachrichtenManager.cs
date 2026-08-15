@@ -102,6 +102,7 @@ namespace Conspiratio.Lib.Allgemein
 
             int einkommen = SW.Statisch.GetAmtwithID(spieler.GetAmtID()).GetEinkommen();
             spieler.ErhoeheTaler(einkommen);
+            spieler.GetSpielerStatistik().SoAmtseinkommen += einkommen;  // Statistik (Issue #19)
 
             return einkommen;
         }
@@ -180,17 +181,6 @@ namespace Conspiratio.Lib.Allgemein
         }
 
         /// <summary>
-        /// Führt den Tod des aktiven Spielers durch und entfernt ihn aus dem Spiel.
-        /// </summary>
-        /// <returns>True, wenn kein menschlicher Spieler mehr im Spiel ist (das Spiel ist vorbei).</returns>
-        [PublicAPI]
-        public bool FuehreTodDesAktivenSpielersDurch()
-        {
-            // TODO: Testament und Erbfolge migrieren (aktuell erbt immer das Erzbistum, der Spieler scheidet aus)
-            return SW.Dynamisch.EntferneAktivenSpielerAusDemSpiel();
-        }
-
-        /// <summary>
         /// Prüft, ob sich der aktive Spieler wegen zu hoher Schulden vor seinen Gläubigern
         /// verantworten muss (abhängig von Schuldenhöhe und Ansehen).
         /// </summary>
@@ -254,9 +244,8 @@ namespace Conspiratio.Lib.Allgemein
                 spieler.SetSitztImKerker(true);
                 spieler.SetSpieltKartenGegenSpielerID(0);
 
-                // Von Wahlen ausschließen
-                if (spieler.GetWahlTeilnahme() != 0)
-                    spieler.SetWahlTeilnahme(0);
+                // Von allen Wahlen ausschließen (der Spieler kann sich für mehrere Ämter beworben haben)
+                SW.Dynamisch.SpielerAusAllenWahlenEntfernen(SW.Dynamisch.GetAktiverSpieler());
 
                 // Gesundheit und Ansehen reduzieren
                 spieler.ErhoeheGesundheit(-SW.Statisch.GetKerkerGesundheit());
@@ -520,8 +509,8 @@ namespace Conspiratio.Lib.Allgemein
             else
             {
                 ziel.ErhoeheGesundheit(-10);
-                ergebnis = "Nach kurzer Zeit erholt sich " + ziel.GetName() + " wieder. " + ziel.GetSeinerIhrer() +
-                           " Gesundheit hat gelitten.";
+                ergebnis = "Nach kurzer Zeit erholt sich " + ziel.GetName() + " wieder, doch " + ziel.GetSeinIhr() +
+                           "e Gesundheit hat gelitten.";
             }
 
             return new List<string> { andeutung, ergebnis };

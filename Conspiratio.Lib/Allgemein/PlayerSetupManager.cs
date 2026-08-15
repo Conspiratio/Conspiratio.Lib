@@ -108,14 +108,18 @@ namespace Conspiratio.Lib.Allgemein
         /// <param name="stadtId">Die Heimatstadt oder 0 für eine zufällige Stadt.</param>
         /// <param name="stadtGewaehlt">True, wenn die Stadt bewusst gewählt wurde (kostet Taler); false bei einer zufällig bestimmten Stadt (kostenlos).</param>
         /// <param name="rohstoffPlatz">Der gewählte Rohstoffplatz 1 oder 2 der Heimatstadt (kostet Taler) oder 0 für einen zufälligen Platz (kostenlos).</param>
+        /// <param name="profilId">Optionale Verknüpfung zum spielübergreifenden Profil (GUID) dieses Spielers. Null = ohne Profil.</param>
         [PublicAPI]
-        public PlayerSetupErgebnis ErstelleSpieler(string name, bool maennlich, int banner, int religionId, int stadtId, bool stadtGewaehlt, int rohstoffPlatz)
+        public PlayerSetupErgebnis ErstelleSpieler(string name, bool maennlich, int banner, int religionId, int stadtId, bool stadtGewaehlt, int rohstoffPlatz, string profilId = null)
         {
             var spieler = SW.Dynamisch.GetAktHum();
 
             spieler.SetTaler(SW.Statisch.GetStartgold());
             spieler.SetName(name);
+            spieler.ProfilId = profilId;
             spieler.SetVerbleibendeJahre(SW.Statisch.Rnd.Next(SW.Statisch.GetHumminVerblJahre(), SW.Statisch.GetHummaxVerblJahre()));
+            // Geburtsjahr der menschlichen Spieler zum Start = 1580 (das Alter ergibt sich aus dem Startjahr).
+            spieler.SetAlter(SW.Dynamisch.GetAktuellesJahr() - 1580);
             spieler.SetMaennlich(maennlich);
             spieler.SetBanner(banner);
             spieler.SetReligion(religionId);

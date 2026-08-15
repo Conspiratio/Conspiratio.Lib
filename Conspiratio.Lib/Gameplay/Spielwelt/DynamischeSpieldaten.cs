@@ -586,6 +586,27 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             }
         }
 
+        /// <summary>
+        /// Entfernt einen Spieler als Kandidat aus allen laufenden Wahlen und setzt seine Wahlteilnahme zurück.
+        /// Wird gebraucht, weil sich Spieler für mehrere Ämter gleichzeitig bewerben können: beim Gewinn eines
+        /// Amts, beim Ausscheiden aus dem Spiel oder bei einer Kerkerstrafe verfallen alle offenen Bewerbungen.
+        /// </summary>
+        public void SpielerAusAllenWahlenEntfernen(int spielerId)
+        {
+            for (int i = 1; i < SW.Statisch.GetMaxAnzahlWahlen(); i++)
+            {
+                int[] kandidaten = GetWahlX(i).GetKandidaten();
+
+                for (int u = 0; u < kandidaten.Length; u++)
+                {
+                    if (kandidaten[u] == spielerId)
+                        GetWahlX(i).SetKandidatenXAufY(u, 0);
+                }
+            }
+
+            GetSpWithID(spielerId).SetWahlTeilnahme(0);
+        }
+
         public void AmtAufStufeXGebietYidZanWvergeben(int x, int y, int z, int w)
         {
             GetSpWithID(w).SetAmt(z, y);
@@ -729,7 +750,40 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
 
                     startki = SW.Statisch.Rnd.Next(SW.Statisch.GetMinKIID(), SW.Statisch.GetMaxKIID());
                 }
-                //Dann abkürzen und die Voraussetzungen ignorieren
+                // Gelockerte Prüfung, falls sich unter der strengen Regel nicht genügend Kandidaten finden.
+                else if (gocounter < 200)
+                {
+                    if (CheckBewerbAmtGelockert(GetKIwithID(startki).GetAmtID(), AmtID))
+                    {
+                        if (kandx[0] == 0)
+                        {
+                            kandx[0] = startki;
+                            GetKIwithID(startki).SetNimmtAnWahlTeil(true);
+                        }
+                        else if (kandx[1] == 0)
+                        {
+                            if (startki != kandx[0])
+                            {
+                                kandx[1] = startki;
+                                GetKIwithID(startki).SetNimmtAnWahlTeil(true);
+                            }
+                        }
+
+                        if (kandx[1] != 0)
+                        {
+                            go = false;
+                            break;
+                        }
+                    }
+
+                    if (go == false)
+                    {
+                        break;
+                    }
+
+                    startki = SW.Statisch.Rnd.Next(SW.Statisch.GetMinKIID(), SW.Statisch.GetMaxKIID());
+                }
+                // Als letzte Reserve die Voraussetzungen ignorieren, damit die Wahl garantiert zwei Kandidaten hat.
                 else
                 {
                     if (kandx[0] == 0)
@@ -852,19 +906,16 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         #region GetAnzahlFreieAemterFuerSpX
         public int GetAnzahlFreieAemterFuerSpX(int X)
         {
-            // TODO: Hier den BUg finden
-            // Es gibt gelegentlich einen viel zu hohen amtcounter zurück
-            // speziell wenn sabotiert wird
+            // GetFreieAemterFuerSpX füllt das Array lückenlos von vorne mit den Wahl-IDs (immer >= 1) und
+            // lässt den Rest auf 0. Bis zur ersten 0 zählen genügt daher – so kann kein Rest im Array das
+            // Ergebnis verfälschen (früherer „viel zu hoher amtcounter").
             int[] wahlids = GetFreieAemterFuerSpX(X);
 
             int amtcounter = 0;
 
-            for (int i = 0; i < wahlids.Length; i++)
+            while (amtcounter < wahlids.Length && wahlids[amtcounter] != 0)
             {
-                if (wahlids[i] != 0)
-                {
-                    amtcounter++;
-                }
+                amtcounter++;
             }
             return amtcounter;
         }
@@ -875,7 +926,11 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         {
             WahlAbhalten[] wahlab = GetWahlen();
             int maxWahlen = SW.Statisch.GetMaxAnzahlWahlen();
-            int[] wahlids = new int[50];
+            // Das Ergebnis-Array muss so groß sein wie die maximale Anzahl Wahlen: Ein Spieler kann sich
+            // theoretisch für jede offene Wahl gleichzeitig eignen. Mit einer festen Größe (früher 50)
+            // lief das Array über (IndexOutOfRange), sobald mehr als 50 Ämter gleichzeitig bewerbbar waren
+            // – z. B. wenn durch Todesfälle/Sabotage viele Ämter auf einmal frei werden.
+            int[] wahlids = new int[maxWahlen];
             int amtcounter = 0;
 
             // Alle Wahlen durchgehen
@@ -1023,9 +1078,14 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             //Alle Untergebenen herausfinden
             int amtid = GetSpWithID(bossID).GetAmtID();
             int gebid = GetSpWithID(bossID).GetAmtGebiet();
-            int[] untergebeneAmtids = new int[7];
 
-            int[] ufinalID = new int[7];
+            // Arrays großzügig nach den Max-Konstanten dimensionieren, nicht mit fester Größe 7:
+            // untergebeneAmtids wird über alle Ämter befüllt, ufinalID zusätzlich je Stadt/Land eines
+            // Gebiets – bei einem Land-/Reichsamt mit mehreren untergeordneten Ämtern liefen die früheren
+            // [7]-Arrays über (IndexOutOfRange). Die Obergrenzen decken jeden möglichen Fall sicher ab.
+            int[] untergebeneAmtids = new int[SW.Statisch.GetMaxAmtID()];
+
+            int[] ufinalID = new int[SW.Statisch.GetMaxAmtID() * SW.Statisch.GetMaxStadtID()];
             int ucounter = 0;
 
             if (amtid == 0)
@@ -1559,23 +1619,8 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             // Amt freigeben
             AmtVonXfreigeben(GetAktiverSpieler());
 
-            // Von Wahl abmelden
-            if (GetHumWithID(GetAktiverSpieler()).GetWahlTeilnahme() != 0)
-            {
-                // Position suchen
-                int u = 0;
-                while (true)
-                {
-                    if (GetWahlX(GetHumWithID(GetAktiverSpieler()).GetWahlTeilnahme()).GetKandidaten()[u] == GetAktiverSpieler())
-                    {
-                        GetWahlX(GetHumWithID(GetAktiverSpieler()).GetWahlTeilnahme()).SetKandidatenXAufY(u, 0);
-                        break;
-                    }
-                    u++;
-                }
-
-                GetHumWithID(GetAktiverSpieler()).SetWahlTeilnahme(0);  // Teilnahme zurücksetzen
-            }
+            // Von allen Wahlen abmelden (der Spieler kann sich für mehrere Ämter beworben haben)
+            SpielerAusAllenWahlenEntfernen(GetAktiverSpieler());
 
             CreateSpielerX(GetAktiverSpieler(), 0, "", true, 0, 0);  // Aktuelles Spieler Objekt initialisieren (auf null setzen führt ansonsten z.B. in der Statistik zu Problemen beim Zugriff: NullReference Exception)
             SetAktivSpielerAnzahl(GetAktivSpielerAnzahl() - 1);
@@ -1844,29 +1889,90 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         #endregion
 
         #region Erpressen
-        public void Erpressen(int id)
+        /// <summary>
+        /// Steht dieser Spieler derzeit unter der Fuchtel eines menschlichen Mitspielers (Issue #13)?
+        /// Maßgeblich für den Entzug seiner aktiven Amtsprivilegien und für die Kennzeichnung in den
+        /// Personenlisten.
+        /// </summary>
+        public bool WirdErpresst(int spielerId)
         {
-            if (id >= SW.Statisch.GetMinKIID())
-            {
-                int Delikte = GetHumWithID(GetAktiverSpieler()).GetAktiveSpionage(id).GetDelikte();
-                string Name = GetKIwithID(id).GetKompletterName();
+            return GetErpresserVon(spielerId) != 0;
+        }
 
-                if ((Delikte * 10) > 69)
-                {
-                    //lässt sich erpressen
-                    BelTextAnzeigen(Name + " muss sich den erdrückenden Beweisen beugen und steht nun unter Eurer Fuchtel.");
-                }
-                else
-                {
-                    //lässt sich nicht erpressen
-                    BelTextAnzeigen(Name + " lacht über Eure läppischen Drohungen.");
-                    GetKIwithID(id).ErhoeheBeziehungZuX(GetAktiverSpieler(), -20);
-                }
-            }
-            else
+        /// <summary>
+        /// Die Privilegien, die einem Spieler allein durch sein Amt zustehen (Issue #13). Grundlage der
+        /// Erpressung: Genau diese darf der Erpresser mitnutzen.
+        ///
+        /// Spiegelt die amtsabhängigen Bedingungen aus <see cref="PrivilegienAktualisieren"/> – ein
+        /// Konsolentest vergleicht beide über alle Ämter, damit sie nicht auseinanderlaufen.
+        /// „Amt niederlegen" (2) bleibt bewusst außen vor: Ein fremdes Amt legt man nicht nieder.
+        /// </summary>
+        public List<int> GetAmtsPrivilegien(int spielerId)
+        {
+            var privilegien = new List<int>();
+            int amt = GetSpWithID(spielerId).GetAmtID();
+
+            if (amt == 0)
+                return privilegien;
+
+            privilegien.Add(5);                                                     // Einkommen
+
+            if (GetUntergebene(spielerId)[0] != 0)
+                privilegien.Add(6);                                                 // Untergebene
+
+            if (amt == 15) privilegien.Add(7);                                       // Kerkerklatsch
+            if (amt == 8 || amt == 9) privilegien.Add(8);                            // Confessio
+            if (amt >= SW.Statisch.GetMaxAmtStadtID()) privilegien.Add(10);          // Bauwerk stiften
+            if (amt == 7) privilegien.Add(14);                                       // Umsatzsteuer festlegen
+            if (amt == 4) privilegien.Add(15);                                       // Sparplan
+            if (amt == 10 || (amt >= 23 && amt <= 27) || (amt >= 40 && amt <= 42))
+                privilegien.Add(16);                                                 // Kein Kirchenzehnt
+            if (amt == 23) privilegien.Add(17);                                      // Vergifteter Wein
+            if (amt == 22 || amt == 27 || amt == 33 || amt >= 34) privilegien.Add(18); // Wachen
+            if (amt == 39 || amt == 42 || amt == 48) privilegien.Add(19);            // Leibgarde
+            if (amt == 13) privilegien.Add(20);                                      // HenkersHand
+            if (amt == 11) privilegien.Add(21);                                      // Korruptionsgelder
+            if (amt == 29 || amt == 30 || amt == 32) privilegien.Add(22);            // Schmuggel
+            if (amt == 32) privilegien.Add(23);                                      // Zollkartell
+            if (amt == 42) privilegien.Add(24);                                      // Kirchengesetze festlegen
+            if (amt == 38) privilegien.Add(25);                                      // Finanzgesetze festlegen
+            if (amt == 37) privilegien.Add(26);                                      // Justizgesetze festlegen
+            if (amt == 1 || amt == 2 || amt == 3) privilegien.Add(27);               // Steuerhinterziehung A
+            if (amt == 17 || amt == 18 || amt == 19) privilegien.Add(28);            // Steuerhinterziehung B
+            if (amt == 34 || amt == 35 || amt == 36) privilegien.Add(29);            // Steuerhinterziehung C
+            if (amt == 22) privilegien.Add(30);                                      // Günstige Kredite
+            if (amt == 29 || amt == 30) privilegien.Add(31);                         // Zollfrei
+            if (amt == 8 || amt == 9) privilegien.Add(32);                           // Prediger
+
+            return privilegien;
+        }
+
+        /// <summary>
+        /// Die aktiv nutzbaren Amtsprivilegien – jene, mit denen ein Amtsträger in die Welt eingreift
+        /// (Gesetze, Urteile, Stiftungen, Anschläge). Genau diese verliert ein Erpresster, während seine
+        /// passiven Vorteile (Einkommen, Steuerfreiheiten, Schutz) bestehen bleiben – so im Issue
+        /// vereinbart. Reine Spielbalance, jederzeit anpassbar.
+        /// </summary>
+        private static readonly int[] AktiveAmtsPrivilegien = { 8, 10, 14, 15, 17, 20, 21, 22, 23, 24, 25, 26, 32 };
+
+        /// <summary>Ist dieses Amtsprivileg ein aktives (also dem Erpressten entzogenes)?</summary>
+        public bool IstAktivesAmtsPrivileg(int privilegId)
+        {
+            return System.Array.IndexOf(AktiveAmtsPrivilegien, privilegId) >= 0;
+        }
+
+        /// <summary>ID des Spielers, der das angegebene Opfer erpresst – oder 0, wenn es keinen gibt.</summary>
+        public int GetErpresserVon(int opferId)
+        {
+            for (int i = 1; i < SW.Statisch.GetMinKIID(); i++)
             {
-                BelTextAnzeigen("Ihr könnt keinen menschlichen Mitspieler erpressen");
+                var mensch = GetHumWithID(i);
+
+                if (mensch != null && mensch.ErpresstBereits(opferId))
+                    return i;
             }
+
+            return 0;
         }
         #endregion
 
@@ -2319,12 +2425,11 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             #region 6 - Untergebene
             if (GetAktHum().GetAmtID() != 0)
             {
-                //Wenn auch noch Untergebene vorhanden sind...
+                // Nur mit tatsächlich vorhandenen Untergebenen. Die Zuweisung muss auch den Fall "keine
+                // Untergebenen" abdecken: Sonst bliebe ein true aus einem früheren Amt stehen, und der
+                // Spieler behielte das Privileg in einem Amt ohne Untergebene.
                 int[] uid = SW.Dynamisch.GetUntergebene(SW.Dynamisch.GetAktiverSpieler());
-                if (uid[0] != 0)
-                {
-                    GetAktHum().SetPrivilegX(6, true);
-                }
+                GetAktHum().SetPrivilegX(6, uid[0] != 0);
             }
             else
             {
@@ -2634,6 +2739,19 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
                 GetAktHum().SetPrivilegX(34, false);
             }
             #endregion
+
+            #region Erpressung (Issue #13)
+            // Wer erpresst wird, führt sein Amt nicht mehr frei: Die aktiv nutzbaren Amtsprivilegien
+            // stehen ihm nicht mehr zu (sie liegen beim Erpresser), die passiven Vorteile bleiben.
+            if (WirdErpresst(GetAktiverSpieler()))
+            {
+                foreach (int privilegId in GetAmtsPrivilegien(GetAktiverSpieler()))
+                {
+                    if (IstAktivesAmtsPrivileg(privilegId))
+                        GetAktHum().SetPrivilegX(privilegId, false);
+                }
+            }
+            #endregion
         }
         #endregion
 
@@ -2920,6 +3038,29 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Gelockerte Eignungsprüfung für die KI-Kandidatensuche, wenn sich unter der strengen Regel
+        /// (genau 1–2 Stufen Abstand) nicht genügend Kandidaten finden. Der starre Stufensprung entfällt –
+        /// der Kandidat muss nur unterhalb des Zielamts liegen. Amtslose (Stufe 0) bleiben aber auf
+        /// Einstiegsämter (Stufe 1–2) beschränkt, so wie es auch die strenge Regel zulässt; sie kandidieren
+        /// damit nicht länger für höhere Ämter wie den Regenten.
+        /// </summary>
+        private bool CheckBewerbAmtGelockert(int amtIDKlein, int amtIDGross)
+        {
+            int amtstgr = SW.Statisch.GetAmtwithID(amtIDGross).GetAmtsStufe();
+            int amtstkl = SW.Statisch.GetAmtwithID(amtIDKlein).GetAmtsStufe();
+
+            // Kandidat muss unterhalb des Zielamts liegen.
+            if (amtstgr <= amtstkl)
+                return false;
+
+            // Amtslose nur für Einstiegsämter (Stufe 1-2) zulassen.
+            if (amtIDKlein == 0 && amtstgr > 2)
+                return false;
+
+            return true;
         }
         #endregion
 
