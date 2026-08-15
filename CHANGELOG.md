@@ -1,6 +1,8 @@
 # Changelog Conspiratio.Lib
 
-## [Unreleased]
+## 3.97.0
+
+_15.08.2026_
 
 **[DE]**
 - Fehlerbehebung Ämter: `AemterManager.FuelleRestlicheAemter` würfelte für jede angelegte Wahl blind einen der KI-Plätze als Gewinner aus. `IstDieWahlVoll` besagt aber nur, dass die Wahl überhaupt angelegt ist – nicht, dass sich jemand beworben hat. Traf der Würfel einen leeren Platz (Kandidat 0), scheiterte `VergebeAmt` mit einer NullReferenceException, die den gesamten Jahreswechsel abbrach: Das Spiel blieb hängen. Es wird jetzt nur unter den tatsächlich vorhandenen Bewerbern gewählt; gibt es keinen, bleibt das Amt unbesetzt und die Wahl steht im nächsten Jahr erneut an. Gefunden vom automatischen Spieldurchlauf des Godot-Clients.
