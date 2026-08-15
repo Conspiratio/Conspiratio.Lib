@@ -393,8 +393,22 @@ namespace Conspiratio.Lib.Allgemein
                 if (!wahl.IstDieWahlVoll())
                     continue;
 
-                int gewinnerIndex = SW.Statisch.Rnd.Next(0, SW.Statisch.GetKITeilnehmerProWahl());
-                VergebeAmt(wahl, wahl.GetKandidaten()[gewinnerIndex]);
+                // IstDieWahlVoll heißt nur "die Wahl ist angelegt", nicht "es haben sich genug beworben".
+                // Blind einen der KI-Plätze auszuwürfeln traf daher auch leere Plätze (Kandidat 0) und
+                // führte in VergebeAmt zu einer NullReferenceException, die den ganzen Jahreswechsel abbrach.
+                var bewerber = new List<int>();
+
+                for (int k = 0; k < SW.Statisch.GetKITeilnehmerProWahl(); k++)
+                {
+                    if (wahl.GetKandidaten()[k] != 0)
+                        bewerber.Add(wahl.GetKandidaten()[k]);
+                }
+
+                // Ohne Bewerber bleibt das Amt unbesetzt und die Wahl steht im nächsten Jahr erneut an.
+                if (bewerber.Count == 0)
+                    continue;
+
+                VergebeAmt(wahl, bewerber[SW.Statisch.Rnd.Next(bewerber.Count)]);
             }
         }
 

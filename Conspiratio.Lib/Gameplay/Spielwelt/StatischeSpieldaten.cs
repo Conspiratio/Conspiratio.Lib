@@ -1619,6 +1619,17 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         public int GetStuetzpunktRechteck(int stuetzpunktID, int x) { return StuetzpunktRechtecke[stuetzpunktID - 1, x]; }
         public int GetTippsMaxIndex() { return TippsMaxIndex; }
         public Random Rnd { get; private set; } = new Random();
+
+        /// <summary>
+        /// Setzt den Zufallsgenerator auf einen festen Startwert. Damit läuft ein Spiel reproduzierbar
+        /// ab – gedacht für automatisierte Durchläufe und Tests, in denen ein Fehlschlag sonst nicht
+        /// nachstellbar wäre. Muss nach <see cref="Initialisieren"/> aufgerufen werden, weil dieses den
+        /// Generator neu anlegt.
+        /// </summary>
+        public void SetRnd(int seed)
+        {
+            Rnd = new Random(seed);
+        }
         public double GetMaxZollsatz() { return maxZollsatz; }
         public double GetMinZollsatz() { return minZollsatz; }
         #endregion

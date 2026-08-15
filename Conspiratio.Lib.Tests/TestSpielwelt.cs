@@ -50,11 +50,16 @@ namespace Conspiratio.Lib.Tests
     {
         /// <summary>
         /// Legt ein neues Spiel mit <paramref name="menschen"/> menschlichen Spielern an und macht den
-        /// ersten zum aktiven Spieler.
+        /// ersten zum aktiven Spieler. Mit <paramref name="seed"/> läuft der Aufbau reproduzierbar ab –
+        /// das betrifft alles, was beim Spielstart ausgewürfelt wird (KI-Bosheit, verbleibende Jahre).
         /// </summary>
-        public static void Starte(int menschen = 1, IErpressungDialog erpressungDialog = null)
+        public static void Starte(int menschen = 1, IErpressungDialog erpressungDialog = null, int? seed = null)
         {
             SW.Statisch.Initialisieren();
+
+            // Nach Initialisieren, denn dieses legt den Zufallsgenerator neu an.
+            if (seed.HasValue)
+                SW.Statisch.SetRnd(seed.Value);
 
             string pfad = Path.Combine(Path.GetTempPath(), "conspiratio-tests");
             Directory.CreateDirectory(pfad);
