@@ -1,5 +1,13 @@
 # Changelog Conspiratio.Lib
 
+## [Unreleased]
+
+**[DE]**
+- Karawanen-Sicherheit wirkt jetzt gegen Überfälle: Je höher die Sicherheit der verwundbarsten menschlichen Karawane in einem Land (`DynamischeSpieldaten.GetMinSicherheitVerkaufenderKarawanenInLand`), desto geringer die tatsächliche Angriffswahrscheinlichkeit (`Kampfberechnung.ErmittleAngriffswahrscheinlichkeitsfaktor`; Sicherheit 20 = unverändertes Risiko, Sicherheit 40 = halbes Risiko). Kommt es trotzdem zu einem Kampf und verteidigt bereits eine Zollburg-Patrouille, erhöht die Sicherheit der überfallenen Karawane zusätzlich deren Moral (+0/+5/+10 Prozentpunkte) und stellt Zusatztruppen bereit (neue Einheit `KarawanenWache`, +0/+1/+2; `Kampfberechnung.ErhoeheVerteidigungDurchKarawanenSicherheit`) – ohne weitere Kosten, da die Sicherheit bereits über den höheren Karawanen-Preis bezahlt ist. Ohne vorhandene Verteidigung ergibt sich die Karawane weiterhin kampflos, der Bonus greift dann nicht. Nebenbei behoben: `Einheit`s Konstruktor prüfte die optionalen Parameter `starkGegen`/`schwachGegen` nicht auf `null`, bevor er `IsSubclassOf` darauf aufrief – bislang übergab jede Einheit beide Typen, daher fiel der Fehler nie auf, bis `KarawanenWache` als erste Einheit ohne beide auskam.
+
+**[EN]**
+- Caravan security now affects raids: the higher the security of the most vulnerable human caravan in a region (`DynamischeSpieldaten.GetMinSicherheitVerkaufenderKarawanenInLand`), the lower the actual attack probability (`Kampfberechnung.ErmittleAngriffswahrscheinlichkeitsfaktor`; security 20 = unchanged risk, security 40 = half the risk). If a fight happens anyway and a customs-castle patrol is already defending, the raided caravan's security additionally boosts its morale (+0/+5/+10 percentage points) and supplies extra troops (new `KarawanenWache` unit, +0/+1/+2; `Kampfberechnung.ErhoeheVerteidigungDurchKarawanenSicherheit`) – at no further cost, since the security is already paid for via the higher caravan price. Without an existing defender the caravan still surrenders without a fight, so the bonus does not apply. Also fixed in passing: `Einheit`'s constructor called `IsSubclassOf` on the optional `starkGegen`/`schwachGegen` parameters without a null check – every existing unit always passed both types, so the bug never surfaced until `KarawanenWache` became the first unit to omit them.
+
 ## 3.97.0
 
 _15.08.2026_

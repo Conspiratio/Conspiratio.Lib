@@ -940,9 +940,13 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 if (angriffe.Count == 0)
                     continue;  // Keine Angriffsaktion in diesem Land vorhanden
 
+                // Je höher die Sicherheit der verwundbarsten Karawane im Land, desto geringer die tatsächliche Angriffswahrscheinlichkeit.
+                int minSicherheit = SW.Dynamisch.GetMinSicherheitVerkaufenderKarawanenInLand(oSicherheit.LandID);
+                double sicherheitsfaktor = ErmittleAngriffswahrscheinlichkeitsfaktor(minSicherheit);
+
                 wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 - 100 würfeln
 
-                if (wuerfel > oSicherheit.AngriffsrisikoInProzent)
+                if (wuerfel > oSicherheit.AngriffsrisikoInProzent * sicherheitsfaktor)
                     continue;  // Kein Angriff aufgrund der Wahrscheinlichkeit
 
                 // Es gibt mind. einen Kampf
@@ -996,6 +1000,8 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                                 KampfArt = EnumKampfArt.KarawanenPluenderung,
                                 Karawane = SW.Dynamisch.GetUeberfallOpferInLand(oSicherheit.LandID, SW.Dynamisch.GetStuetzpunkte()[oAktion.StuetzpunktID - 1].Besitzer)
                             };
+
+                            ErhoeheVerteidigungDurchKarawanenSicherheit(oKampf);
                         }
 
                         kaempfe.Add(oKampf);
@@ -1027,6 +1033,8 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                             KampfArt = EnumKampfArt.KarawanenPluenderung,
                             Karawane = SW.Dynamisch.GetUeberfallOpferInLand(oSicherheit.LandID, SW.Dynamisch.GetStuetzpunkte()[angriffe[index].StuetzpunktID - 1].Besitzer)
                         };
+
+                        ErhoeheVerteidigungDurchKarawanenSicherheit(oKampf);
 
                         kaempfe.Add(oKampf);
                         zaehler++;
@@ -1083,6 +1091,43 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             }
 
             return kaempfe;
+        }
+        #endregion
+
+        #region ErmittleAngriffswahrscheinlichkeitsfaktor
+        /// <summary>
+        /// Ermittelt den Faktor, mit dem das Angriffsrisiko eines Landes wegen der Sicherheit einer Karawane
+        /// abgeschwächt wird. Sicherheit 20 (billigste Karawanen-Stufe) ergibt Faktor 1.0 (unverändertes
+        /// Verhalten, dient als Referenzwert), Sicherheit 40 (teuerste Stufe) ergibt Faktor 0.5 (halbes Risiko).
+        /// </summary>
+        /// <param name="sicherheit">Sicherheit der betrachteten Karawane in Prozent (übliche Spanne: 20 - 40)</param>
+        /// <returns>Multiplikator für <see cref="Landsicherheit.AngriffsrisikoInProzent"/></returns>
+        public static double ErmittleAngriffswahrscheinlichkeitsfaktor(int sicherheit)
+        {
+            return 1d - (sicherheit - 20) * 0.025;
+        }
+        #endregion
+
+        #region ErhoeheVerteidigungDurchKarawanenSicherheit
+        /// <summary>
+        /// Verstärkt bei einem Karawanenüberfall die bereits vorhandene Verteidigung (Moral und Zusatztruppen)
+        /// abhängig von der Sicherheit der überfallenen Karawane. Die Sicherheit ist bereits über den höheren
+        /// Karawanen-Preis bezahlt, daher entstehen keine weiteren Kosten. Wirkt nur, wenn der Kampf ohnehin
+        /// eine Verteidigung hat (eine Zollburg-Patrouille bereits vorhanden ist); ohne Verteidiger ergibt sich
+        /// die Karawane kampflos, sodass kein Kampf im Sinne des Nutzers stattfindet.
+        /// </summary>
+        /// <param name="kampf">Der Kampf einer Karawanenplünderung mit bereits vorhandener Verteidigung</param>
+        public static void ErhoeheVerteidigungDurchKarawanenSicherheit(Kampf kampf)
+        {
+            int sicherheit = SW.Statisch.GetKarawane(kampf.Karawane.KarawaneID).Sicherheit;
+
+            if (sicherheit <= 20)
+                return;  // Billigste Stufe: kein Bonus (Referenzwert, unverändertes Verhalten)
+
+            kampf.MoralVerteidiger = Math.Min(100, kampf.MoralVerteidiger + (sicherheit - 20) / 2);  // +0/+5/+10
+
+            for (int i = 0; i < (sicherheit - 20) / 10; i++)  // +0/+1/+2 Wachen
+                kampf.TruppenVerteidiger.Add(new KarawanenWache());
         }
         #endregion
     }

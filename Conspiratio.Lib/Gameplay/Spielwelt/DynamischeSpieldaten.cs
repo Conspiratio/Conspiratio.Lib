@@ -1410,6 +1410,59 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         }
         #endregion
 
+        #region GetMinSicherheitVerkaufenderKarawanenInLand
+        /// <summary>
+        /// Ermittelt die niedrigste Sicherheit unter allen Karawanen menschlicher Spieler, die in einem Land gerade aktiv verkaufen.
+        /// </summary>
+        /// <remarks>
+        /// Dient als Näherung für die Verwundbarkeit eines Landes gegenüber einem Karawanenüberfall, ohne dabei (wie
+        /// <see cref="GetUeberfallOpferInLand"/>) bereits ein konkretes Opfer auszuwürfeln. Ist irgendwo im Land eine
+        /// schwach geschützte Karawane unterwegs, bleibt das Land attraktiv für einen Überfall, unabhängig davon, wie
+        /// gut andere Karawanen dort geschützt sind.
+        /// </remarks>
+        /// <param name="landID">ID des Landes, in dem die Karawanen ermittelt werden sollen</param>
+        /// <returns>Die niedrigste gefundene Sicherheit in Prozent, oder 20 (niedrigste mögliche Stufe), falls keine verkaufende Karawane gefunden wurde</returns>
+        public int GetMinSicherheitVerkaufenderKarawanenInLand(int landID)
+        {
+            int minSicherheit = 20;
+            bool gefunden = false;
+            int stadtID;
+
+            for (int SpCounter = 1; SpCounter <= GetAktivSpielerAnzahl(); SpCounter++)  // Alle menschlichen Spieler durchgehen
+            {
+                for (int StCounter = 0; StCounter < GetLandWithID(landID).GetAnzahlStaedte(); StCounter++)  // Alle Städte in dem Land durchgehen
+                {
+                    stadtID = GetLandWithID(landID).GetStadtX(StCounter);
+
+                    for (int WsCounter = 1; WsCounter <= SW.Statisch.GetMaxWerkstaettenProStadt(); WsCounter++)  // Alle Werkstätten durchgehen
+                    {
+                        if (!GetHumWithID(SpCounter).GetSpielerHatInStadtXWerkstaettenY(WsCounter, stadtID).GetEnabled())  // WS vorhanden?
+                            continue;
+
+                        for (int ProdSlotCounter = 0; ProdSlotCounter < SW.Statisch.GetMaxProdSlots(); ProdSlotCounter++)  // Prüfen, ob ein Produktionsslot auf 'verkaufen' steht
+                        {
+                            Produktionsslot oProduktionsslot = GetHumWithID(SpCounter).GetProduktionsslot(stadtID, ProdSlotCounter);
+
+                            if ((oProduktionsslot.GetTaetigkeit() == (int)EnumProduktionsslotAktionsart.Verkaufen || oProduktionsslot.GetTaetigkeit() == (int)EnumProduktionsslotAktionsart.PermanentVerkaufen) &&
+                                (oProduktionsslot.GetVerkaufAnzahl() > 0))
+                            {
+                                int sicherheit = SW.Statisch.GetKarawane(GetHumWithID(SpCounter).GetKarawaneInStadtX(stadtID)).Sicherheit;
+
+                                if (!gefunden || sicherheit < minSicherheit)
+                                {
+                                    minSicherheit = sicherheit;
+                                    gefunden = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return minSicherheit;
+        }
+        #endregion
+
         #region GetStufeVonAmtmitIDx
         public int GetStufeVonAmtmitIDx(int x)
         {

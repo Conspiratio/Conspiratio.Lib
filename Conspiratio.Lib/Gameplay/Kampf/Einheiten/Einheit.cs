@@ -122,12 +122,12 @@ namespace Conspiratio.Lib.Gameplay.Kampf.Einheiten
             MaximaleLebenspunkte = maximaleLebenspunkte;
             Lebenspunkte = lebenspunkte;
 
-            if (starkGegen.IsSubclassOf(typeof(Einheit)))
+            if (starkGegen != null && starkGegen.IsSubclassOf(typeof(Einheit)))
                 StarkGegen = starkGegen;
             else
                 StarkGegen = null;
 
-            if (schwachGegen.IsSubclassOf(typeof(Einheit)))
+            if (schwachGegen != null && schwachGegen.IsSubclassOf(typeof(Einheit)))
                 SchwachGegen = schwachGegen;
             else
                 SchwachGegen = null;
