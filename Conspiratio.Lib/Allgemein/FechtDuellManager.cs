@@ -1,3 +1,5 @@
+using System;
+
 using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Personen;
 using Conspiratio.Lib.Gameplay.Spielwelt;
@@ -201,6 +203,18 @@ namespace Conspiratio.Lib.Allgemein
         // --- Beleidigung durch die KI -----------------------------------------------------------------
 
         /// <summary>
+        /// Gemeinsame Feindseligkeits-Chance-Formel für spontane feindliche KI-Aktionen gegen einen
+        /// Menschen (Beleidigung hier, Sabotage/Anschwärzen in <c>AggressionManager</c>): hängt vor
+        /// allem an der Beziehung zum Menschen und steigt erst unterhalb von „neutral" (50); Bosheit
+        /// spielt nur eine kleine Rolle.
+        /// </summary>
+        public static int BerechneKiFeindseligkeitChance(int beziehungZuTaeter, int bosheit)
+        {
+            int feindseligkeit = Math.Max(0, NeutraleBeziehung - beziehungZuTaeter);
+            return (feindseligkeit * KiBeleidigtGewichtBeziehung + bosheit * KiBeleidigtGewichtBosheit) / 100;
+        }
+
+        /// <summary>
         /// Prüft, ob in diesem Zug (selten) eine KI den aktiven Spieler beleidigt. Liefert die ID der
         /// beleidigenden KI (ein zufälliger KI-Amtsträger) oder 0. Die Entscheidung über Satisfaktion trifft
         /// dann der Spieler; verzichtet er, verliert er über <see cref="VerweigereSatisfaktion"/> an Ansehen.
@@ -233,11 +247,7 @@ namespace Conspiratio.Lib.Allgemein
 
             // Feindseligkeit zählt erst unterhalb von „neutral"; Bosheit als kleiner Zuschlag.
             var feind = SW.Dynamisch.GetKIwithID(feindKi);
-            int feindseligkeit = NeutraleBeziehung - minBeziehung;
-            if (feindseligkeit < 0)
-                feindseligkeit = 0;
-
-            int chance = (feindseligkeit * KiBeleidigtGewichtBeziehung + feind.GetBosheit() * KiBeleidigtGewichtBosheit) / 100;
+            int chance = BerechneKiFeindseligkeitChance(minBeziehung, feind.GetBosheit());
 
             return SW.Statisch.Rnd.Next(0, 100) < chance ? feindKi : 0;
         }

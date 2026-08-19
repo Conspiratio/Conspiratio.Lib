@@ -126,4 +126,21 @@ namespace Conspiratio.Lib.Tests
             Assert.Empty(WieAusAltemSpielstand().GetAhnentafelListe());
         }
     }
+
+    /// <summary>
+    /// Die KI-Feindseligkeits-Formel (Issue: aggressive KI) wird aus PruefeKiBeleidigtSpieler
+    /// extrahiert, damit AggressionManager sie für Sabotage/Anschwärzen wiederverwenden kann.
+    /// </summary>
+    public class KiFeindseligkeitTests
+    {
+        [Theory]
+        [InlineData(50, 0, 0)]    // neutrale Beziehung, keine Bosheit -> keine Chance
+        [InlineData(0, 0, 6)]     // maximale Feindseligkeit (50), keine Bosheit: 50*13/100 = 6
+        [InlineData(0, 100, 7)]   // wie oben plus volle Bosheit: (650+100)/100 = 7
+        [InlineData(80, 100, 1)]  // gute Beziehung, aber hohe Bosheit: (0*13+100)/100 = 1
+        public void Folgt_der_Formel(int beziehung, int bosheit, int erwarteteChance)
+        {
+            Assert.Equal(erwarteteChance, FechtDuellManager.BerechneKiFeindseligkeitChance(beziehung, bosheit));
+        }
+    }
 }
