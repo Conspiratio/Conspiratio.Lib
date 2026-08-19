@@ -56,12 +56,27 @@ namespace Conspiratio.Lib.Allgemein
                 if (SW.Statisch.Rnd.Next(0, 100) >= chance)
                     continue;
 
-
                 bool laeuftSchonSabotage = mensch.GetGegnerischeSabotage(i).GetDauer() > 0;
+                bool waehleAnschwaerzen = laeuftSchonSabotage || SW.Statisch.Rnd.Next(0, 2) == 0;
 
-                if (laeuftSchonSabotage)
+                if (waehleAnschwaerzen)
                 {
-                    // Anschwärzen-Zweig folgt in Task 6.
+                    int adressat = WaehleAnschwaerzenAdressat(i, menschId);
+
+                    if (adressat == 0)
+                        continue; // keine weitere KI vorhanden (Minimalspiel)
+
+                    string meldung = SW.Dynamisch.AnschwaerzenAusfuehren(i, menschId, adressat);
+
+                    if (meldung != null)
+                    {
+                        var anschwaerzenErgebnis = new AggressionsErgebnis();
+                        anschwaerzenErgebnis.TaeterId = i;
+                        anschwaerzenErgebnis.Aktion = AggressionsAktion.Anschwaerzen;
+                        anschwaerzenErgebnis.Meldung = meldung;
+                        ergebnisse.Add(anschwaerzenErgebnis);
+                    }
+
                     continue;
                 }
 
@@ -73,6 +88,29 @@ namespace Conspiratio.Lib.Allgemein
             }
 
             return ergebnisse;
+        }
+
+        /// <summary>Die KI mit der besten Beziehung zum Ankläger, außer diesem und dem Opfer selbst.</summary>
+        private static int WaehleAnschwaerzenAdressat(int anklaegerId, int opferId)
+        {
+            int besterAdressat = 0;
+            int besteBeziehung = int.MinValue;
+
+            for (int i = SW.Statisch.GetMinKIID(); i < SW.Statisch.GetMaxKIID(); i++)
+            {
+                if (i == anklaegerId || i == opferId)
+                    continue;
+
+                int beziehungZumAnklaeger = SW.Dynamisch.GetKIwithID(i).GetBeziehungZuKIX(anklaegerId);
+
+                if (beziehungZumAnklaeger > besteBeziehung)
+                {
+                    besteBeziehung = beziehungZumAnklaeger;
+                    besterAdressat = i;
+                }
+            }
+
+            return besterAdressat;
         }
     }
 }
