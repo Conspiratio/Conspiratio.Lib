@@ -322,6 +322,34 @@ namespace Conspiratio.Lib.Gameplay.Personen
         }
         #endregion
 
+        #region GegnerischeSabotage
+        // Bewusst NICHT im Konstruktor initialisiert (anders als _aktiveSabotagen): das Feld muss bei
+        // alten Spielständen als null ankommen und erst bei Bedarf angelegt werden (Lazy-Init-
+        // Konvention, siehe CLAUDE.md „Savegame compatibility").
+        private AktiveSabotagen[] _gegnerischeSabotagen;
+
+        /// <summary>
+        /// Sabotage, die die KI <paramref name="taeterKiId"/> gegen diesen Menschen laufen hat —
+        /// Spiegelbild zu <see cref="GetAktiveSabotage"/>.
+        /// </summary>
+        public AktiveSabotagen GetGegnerischeSabotage(int taeterKiId)
+        {
+            if (_gegnerischeSabotagen == null)
+                _gegnerischeSabotagen = new AktiveSabotagen[SW.Statisch.GetMaxKIID()];
+
+            if (_gegnerischeSabotagen[taeterKiId] == null)
+                _gegnerischeSabotagen[taeterKiId] = new AktiveSabotagen(0, 0);
+
+            return _gegnerischeSabotagen[taeterKiId];
+        }
+
+        public void GegnerischeSabotageEntfernen(int taeterKiId)
+        {
+            GetGegnerischeSabotage(taeterKiId).SetDauer(0);
+            GetGegnerischeSabotage(taeterKiId).SetKosten(0);
+        }
+        #endregion
+
         #region Spionage
         public AktiveSpionagen GetAktiveSpionage(int spionageID)
         {

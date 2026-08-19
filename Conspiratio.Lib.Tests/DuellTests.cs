@@ -125,6 +125,22 @@ namespace Conspiratio.Lib.Tests
 
             Assert.Empty(WieAusAltemSpielstand().GetAhnentafelListe());
         }
+
+        [Fact]
+        public void Gegnerische_Sabotage_wird_bei_Bedarf_angelegt()
+        {
+            TestSpielwelt.Starte();
+            var spieler = WieAusAltemSpielstand();
+            int kiId = SW.Statisch.GetMinKIID();
+
+            Assert.Equal(0, spieler.GetGegnerischeSabotage(kiId).GetDauer());
+
+            spieler.GetGegnerischeSabotage(kiId).SetDauer(5);
+            Assert.Equal(5, spieler.GetGegnerischeSabotage(kiId).GetDauer());
+
+            spieler.GegnerischeSabotageEntfernen(kiId);
+            Assert.Equal(0, spieler.GetGegnerischeSabotage(kiId).GetDauer());
+        }
     }
 
     /// <summary>
