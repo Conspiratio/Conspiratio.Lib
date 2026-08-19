@@ -77,15 +77,15 @@ namespace Conspiratio.Lib.Tests
 
             SW.Dynamisch.GetKIwithID(adressat).SetBeziehungZuX(menschId, 0);
 
-            // Opfers Beziehung zum Täter startet zufällig (CreateRndBeziehungen); vorher/nachher
-            // vergleichen statt auf einen absoluten Wert < 0 zu prüfen, den ErhoeheBeziehungZuX
-            // ohnehin bei 0 kappt.
-            int beziehungVorher = SW.Dynamisch.GetKIwithID(opfer).GetBeziehungZuKIX(menschId);
+            // Opfers Beziehung zum Täter startet zufällig (CreateRndBeziehungen) und würde bei einem
+            // Wert nahe 0 von ErhoeheBeziehungZuX gekappt. Auf einen festen, von beiden Grenzen (0/100)
+            // entfernten Startwert setzen, damit die genaue Delta-Größe (-50) geprüft werden kann.
+            SW.Dynamisch.GetKIwithID(opfer).SetBeziehungZuX(menschId, 90);
 
             string meldung = SW.Dynamisch.AnschwaerzenAusfuehren(menschId, opfer, adressat);
 
             Assert.Contains("kein Wort", meldung);
-            Assert.True(SW.Dynamisch.GetKIwithID(opfer).GetBeziehungZuKIX(menschId) < beziehungVorher);
+            Assert.Equal(40, SW.Dynamisch.GetKIwithID(opfer).GetBeziehungZuKIX(menschId)); // 90 - 50
         }
 
         [Fact]
@@ -106,10 +106,10 @@ namespace Conspiratio.Lib.Tests
             int adressat = TestSpielwelt.SetzeKiGegner(1, 0);
             SW.Dynamisch.GetKIwithID(adressat).SetBeziehungZuX(SW.Dynamisch.GetAktiverSpieler(), 100);
 
-            // Adressats Beziehung zum Opfer startet zufällig (CreateRndBeziehungen); vorher/nachher
-            // vergleichen statt auf einen absoluten Wert < 0 zu prüfen, den ErhoeheBeziehungZuX
-            // ohnehin bei 0 kappt.
-            int beziehungVorher = SW.Dynamisch.GetKIwithID(adressat).GetBeziehungZuKIX(opfer);
+            // Adressats Beziehung zum Opfer startet zufällig (CreateRndBeziehungen) und würde bei einem
+            // Wert nahe 0 von ErhoeheBeziehungZuX gekappt. Auf einen festen, von beiden Grenzen (0/100)
+            // entfernten Startwert setzen, damit die genaue Delta-Größe (-30) geprüft werden kann.
+            SW.Dynamisch.GetKIwithID(adressat).SetBeziehungZuX(opfer, 90);
 
             Assert.Equal(0, SW.Dynamisch.GetAnschwaerzID());
             SW.Dynamisch.Anschwaerzen(opfer);
@@ -117,7 +117,7 @@ namespace Conspiratio.Lib.Tests
 
             SW.Dynamisch.Anschwaerzen(adressat);
             Assert.Equal(0, SW.Dynamisch.GetAnschwaerzID()); // zweiter Schritt setzt zurueck
-            Assert.True(SW.Dynamisch.GetKIwithID(adressat).GetBeziehungZuKIX(opfer) < beziehungVorher); // Wirkung kam an
+            Assert.Equal(60, SW.Dynamisch.GetKIwithID(adressat).GetBeziehungZuKIX(opfer)); // 90 - 30, Wirkung kam an
         }
     }
 }
