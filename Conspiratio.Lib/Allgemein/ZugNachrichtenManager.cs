@@ -441,6 +441,51 @@ namespace Conspiratio.Lib.Allgemein
         }
 
         /// <summary>
+        /// Wickelt die Sabotagen ab, die KIs gegen den aktiven Menschen laufen haben — Spiegelbild zu
+        /// <see cref="ErmittleSabotageNachrichten"/>: dieselbe Chance-/Schadensformel, hier gemildert
+        /// durch die Verteidigungsprivilegien des Menschen statt der des KI-Ziels.
+        /// </summary>
+        /// <returns>Die zusammengefasste Meldung oder null, wenn nichts sabotiert wurde.</returns>
+        [PublicAPI]
+        public string ErmittleGegnerischeSabotageNachrichten()
+        {
+            var spieler = SW.Dynamisch.GetAktHum();
+            var zeilen = new List<string>();
+
+            for (int i = SW.Statisch.GetMinKIID(); i < SW.Statisch.GetMaxKIID(); i++)
+            {
+                if (spieler.GetGegnerischeSabotage(i).GetDauer() <= 0)
+                    continue;
+
+                int chance = 2;
+
+                if (spieler.CheckPrivilegX(18))
+                    chance = 3;
+                if (spieler.CheckPrivilegX(19))
+                    chance = 4;
+
+                if (SW.Statisch.Rnd.Next(0, chance) != 1)
+                    continue;
+
+                int sabMaechtigkeit = SW.Statisch.Rnd.Next(1, 9);
+                int schaden = spieler.GetGesamtVermoegen(SW.Dynamisch.GetAktiverSpieler()) * sabMaechtigkeit / 100;
+
+                zeilen.Add("Es gelang " + SW.Dynamisch.GetSpWithID(i).GetKompletterName() +
+                           "s Saboteuren, Euren Besitztümern " + SabotageStaerkeText(sabMaechtigkeit) +
+                           " Schäden in Höhe von " + schaden + " anzurichten.");
+
+                spieler.ErhoeheTaler(-schaden);
+
+                spieler.GetGegnerischeSabotage(i).ReduziereDauerUmEins();
+
+                if (spieler.GetGegnerischeSabotage(i).GetDauer() <= 0)
+                    spieler.GegnerischeSabotageEntfernen(i);
+            }
+
+            return zeilen.Count > 0 ? string.Join("\n\n", zeilen) : null;
+        }
+
+        /// <summary>
         /// Führt eine vom Spieler beauftragte Ermordung eines KI-Spielers aus (mit Erfolgschance).
         /// </summary>
         /// <returns>Die anzuzeigende Meldung oder null, wenn kein Auftrag vorlag.</returns>
