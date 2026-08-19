@@ -51,13 +51,7 @@ namespace Conspiratio.Lib.Allgemein
                     continue;
 
                 var ki = SW.Dynamisch.GetKIwithID(i);
-                int beziehung = ki.GetBeziehungZuKIX(menschId);
-
-                // Nur KIs mit explizit negativer Beziehung können aggredieren
-                if (beziehung >= 0)
-                    continue;
-
-                int chance = FechtDuellManager.BerechneKiFeindseligkeitChance(beziehung, ki.GetBosheit());
+                int chance = FechtDuellManager.BerechneKiFeindseligkeitChance(ki.GetBeziehungZuKIX(menschId), ki.GetBosheit());
 
                 if (SW.Statisch.Rnd.Next(0, 100) >= chance)
                     continue;
