@@ -1758,8 +1758,8 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
 
         /// <summary>
         /// Anschwärzen aus dem Hinterzimmer (zweistufig): Der erste Klick wählt den Anzuschwärzenden X,
-        /// der zweite den Adressaten Y. Glaubt Y (nur KI, ab Beziehung 80) die Anschuldigung, sinkt
-        /// dessen Beziehung zu X; andernfalls berichtet Y dem X davon und die eigene Beziehung leidet.
+        /// der zweite den Adressaten Y. Reine UI-Zustandsführung; die Wirkung steckt in
+        /// <see cref="AnschwaerzenAusfuehren"/>.
         /// </summary>
         public void Anschwaerzen(int id)
         {
@@ -1778,38 +1778,58 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
                 return;
             }
 
-            int x = _anschwaerzID; // der Angeschwärzte
-            int y = id;            // der Adressat
+            string meldung = AnschwaerzenAusfuehren(GetAktiverSpieler(), _anschwaerzID, id);
 
+            if (meldung != null)
+                BelTextAnzeigen(meldung);
+
+            _anschwaerzID = 0;
+        }
+
+        /// <summary>
+        /// Kernlogik des Anschwärzens, UI-frei und mit dem Täter als Parameter (Issue: aggressive KI
+        /// nutzt dieselbe Logik wie der Mensch). Glaubt der Adressat Y (Beziehung zum Täter ≥ Schwelle),
+        /// verliert das Opfer X 30 Beziehungspunkte bei Y, Y verliert 10 bei sich selbst zum Täter.
+        /// Glaubt Y nicht und X ist eine KI, berichtet Y es X (X −50 Beziehung zum Täter, Y −20). Ist X
+        /// ein Mensch und Y glaubt nicht, bleibt es folgenlos (bestehende Asymmetrie, unverändert).
+        /// Beweise senken die Schwelle (nicht den Schaden): siehe Konzept Abschnitt 5.
+        /// </summary>
+        /// <returns>Die anzuzeigende Meldung, oder null, wenn nichts weiter passiert.</returns>
+        public string AnschwaerzenAusfuehren(int taeterId, int x, int y)
+        {
             if (x == y)
-            {
-                BelTextAnzeigen("Ihr könnt nicht jemanden bei sich selbst anschwärzen");
-                _anschwaerzID = 0;
-                return;
-            }
+                return "Ihr könnt nicht jemanden bei sich selbst anschwärzen.";
 
             if (GetGesetzX(22) != 0) // Wenn es verboten ist
-                GetAktHum().ErhoeheGesetzXUmEins(22);
+                GetSpWithID(taeterId).ErhoeheGesetzXUmEins(22);
 
-            GetAktHum().GetSpielerStatistik().HiAnschwaerzungen++;
+            if (taeterId < SW.Statisch.GetMinKIID())
+                GetHumWithID(taeterId).GetSpielerStatistik().HiAnschwaerzungen++;
 
-            bool glaubtAnschuldigung = GetKIwithID(y).GetBeziehungZuKIX(GetAktiverSpieler()) >= 80;
+            int beweispunkte = taeterId < SW.Statisch.GetMinKIID()
+                ? GetHumWithID(taeterId).GetAktiveSpionage(x).GetDelikte()
+                : GetSpWithID(x).GetDeliktpunkte();
+
+            int schwelle = Math.Max(50, 80 - Math.Min(beweispunkte * 3, 30));
+
+            bool glaubtAnschuldigung = GetKIwithID(y).GetBeziehungZuKIX(taeterId) >= schwelle;
 
             if (glaubtAnschuldigung)
             {
                 GetKIwithID(y).ErhoeheBeziehungZuX(x, -30);
-                GetKIwithID(y).ErhoeheBeziehungZuX(GetAktiverSpieler(), -10);
-                BelTextAnzeigen(GetKIwithID(y).GetKompletterName() + " schenkt Euren Worten Glauben.");
-            }
-            else if (x >= SW.Statisch.GetMinKIID()) // Y glaubt nicht; nur wenn X eine KI ist, berichtet Y ihm davon.
-            {
-                GetKIwithID(x).ErhoeheBeziehungZuX(GetAktiverSpieler(), -50);
-                GetKIwithID(y).ErhoeheBeziehungZuX(GetAktiverSpieler(), -20);
-                BelTextAnzeigen(GetSpWithID(y).GetKompletterName() + " glaubt Euch kein Wort und berichtet " +
-                                GetSpWithID(x).GetKompletterName() + " von Euren Anschuldigungen.");
+                GetKIwithID(y).ErhoeheBeziehungZuX(taeterId, -10);
+                return GetKIwithID(y).GetKompletterName() + " schenkt Euren Worten Glauben.";
             }
 
-            _anschwaerzID = 0;
+            if (x >= SW.Statisch.GetMinKIID()) // Y glaubt nicht; nur wenn X eine KI ist, berichtet Y ihm davon.
+            {
+                GetKIwithID(x).ErhoeheBeziehungZuX(taeterId, -50);
+                GetKIwithID(y).ErhoeheBeziehungZuX(taeterId, -20);
+                return GetSpWithID(y).GetKompletterName() + " glaubt Euch kein Wort und berichtet " +
+                       GetSpWithID(x).GetKompletterName() + " von Euren Anschuldigungen.";
+            }
+
+            return null; // X ist Mensch und Y glaubt nicht: bleibt wie im Original folgenlos.
         }
         #endregion
 
