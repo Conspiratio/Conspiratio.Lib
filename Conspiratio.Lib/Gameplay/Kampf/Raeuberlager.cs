@@ -67,14 +67,14 @@ namespace Conspiratio.Lib.Gameplay.Kampf
 
             // Aggressivität der KI als Prozentwert (1–100, Standard 50). 50 % entspricht dem
             // Normalfaktor 1.0, 100 % dem Faktor 2.0.
-            double kiAktivitaetsfaktor = SW.Dynamisch.GetKiAggressivitaetProzent() / 50d;
+            double kiAggressivitaetsfaktor = SW.Dynamisch.GetKiAggressivitaetProzent() / 50d;
 
-            if (wuerfel <= Convert.ToInt32(Math.Round(50 * kiAktivitaetsfaktor, 0)))  // Auswürfeln, ob generell in diesem Zug etwas passieren soll
+            if (wuerfel <= Convert.ToInt32(Math.Round(50 * kiAggressivitaetsfaktor, 0)))  // Auswürfeln, ob generell in diesem Zug etwas passieren soll
             {
                 // Kapazität erhöhen
                 wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
 
-                if (wuerfel <= Convert.ToInt32(Math.Round(30 * kiAktivitaetsfaktor, 0)))  // Soll ausgebaut werden?
+                if (wuerfel <= Convert.ToInt32(Math.Round(30 * kiAggressivitaetsfaktor, 0)))  // Soll ausgebaut werden?
                 {
                     result = KapazitaetErhoehen(2);
 
@@ -85,7 +85,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 // Sicherheit erhöhen
                 wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
 
-                if (wuerfel <= Convert.ToInt32(Math.Round(40 * kiAktivitaetsfaktor, 0)))  // Soll ausgebaut werden?
+                if (wuerfel <= Convert.ToInt32(Math.Round(40 * kiAggressivitaetsfaktor, 0)))  // Soll ausgebaut werden?
                 {
                     if (SicherheitTarnungInProzent < 100)
                     {
@@ -97,7 +97,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 // Reparieren
                 wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
 
-                if (wuerfel <= Convert.ToInt32(Math.Round(50 * kiAktivitaetsfaktor, 0)))  // Soll ausgebaut werden?
+                if (wuerfel <= Convert.ToInt32(Math.Round(50 * kiAggressivitaetsfaktor, 0)))  // Soll ausgebaut werden?
                 {
                     if (ZustandInProzent < 100)
                     {
@@ -109,7 +109,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 // Rekrutierung von neuen Truppen
                 wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
 
-                if (wuerfel <= Convert.ToInt32(Math.Round(60 * kiAktivitaetsfaktor, 0)))  // Soll rekrutiert werden?
+                if (wuerfel <= Convert.ToInt32(Math.Round(60 * kiAggressivitaetsfaktor, 0)))  // Soll rekrutiert werden?
                 {
                     /*
                     Verteilung in Prozent:
@@ -137,7 +137,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 // Manöver durchführen
                 wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
 
-                if (wuerfel <= Convert.ToInt32(Math.Round(40 * kiAktivitaetsfaktor, 0)))  // Soll Manöver durchgeführt werden?
+                if (wuerfel <= Convert.ToInt32(Math.Round(40 * kiAggressivitaetsfaktor, 0)))  // Soll Manöver durchgeführt werden?
                 {
                     result = ManoeverDurchfuehrenKISpieler();
 
@@ -153,8 +153,8 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                         wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
 
                         // Gelegentlich einen gezielten Angriff auf einen anderen Stützpunkt, sonst Plündern.
-                        if (!VersucheKiAngriff(kiAktivitaetsfaktor) &&
-                            wuerfel <= Convert.ToInt32(Math.Round(90 * kiAktivitaetsfaktor, 0)))  // Soll eine neue Aktion Plündern angelegt werden?
+                        if (!VersucheKiAngriff(kiAggressivitaetsfaktor) &&
+                            wuerfel <= Convert.ToInt32(Math.Round(90 * kiAggressivitaetsfaktor, 0)))  // Soll eine neue Aktion Plündern angelegt werden?
                         {
                             Aktionen[0] = new RaeuberlagerAktion(EnumAktionsartRaeuberlager.Plündern, GetLandID(), 0, ID, 0);
                             Aktionen[0].ErhoeheTruppen(Convert.ToInt32(Math.Round(Convert.ToDouble(GetAnzahlTruppen(typeof(RaubRaeuber))) / 2d, 0)), typeof(RaubRaeuber));
@@ -168,8 +168,8 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                         wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
 
                         // Bestehende Aktion gelegentlich durch einen Angriff ersetzen oder als Plündern erneuern.
-                        if (!VersucheKiAngriff(kiAktivitaetsfaktor) &&
-                            wuerfel <= Convert.ToInt32(Math.Round(50 * kiAktivitaetsfaktor, 0)))  // Soll die erste Aktion aktualisiert werden?
+                        if (!VersucheKiAngriff(kiAggressivitaetsfaktor) &&
+                            wuerfel <= Convert.ToInt32(Math.Round(50 * kiAggressivitaetsfaktor, 0)))  // Soll die erste Aktion aktualisiert werden?
                         {
                             Aktionen[0] = new RaeuberlagerAktion(EnumAktionsartRaeuberlager.Plündern, GetLandID(), 0, ID, 0);
                             Aktionen[0].ErhoeheTruppen(Convert.ToInt32(Math.Round(Convert.ToDouble(GetAnzahlTruppen(typeof(RaubRaeuber))) / 2d, 0)), typeof(RaubRaeuber));
@@ -191,13 +191,13 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         /// ("Truppen schicken") auf einen zufälligen gegnerischen Stützpunkt in Slot 0 ein, mit etwa der
         /// Hälfte der Truppen. Gibt zurück, ob ein Angriff eingerichtet wurde.
         /// </summary>
-        private bool VersucheKiAngriff(double kiAktivitaetsfaktor)
+        private bool VersucheKiAngriff(double kiAggressivitaetsfaktor)
         {
             int ziel = KiZufaelligesAngriffsziel();
             if (ziel == 0)
                 return false;
 
-            if (SW.Statisch.Rnd.Next(1, 101) > Convert.ToInt32(Math.Round(20 * kiAktivitaetsfaktor, 0)))
+            if (SW.Statisch.Rnd.Next(1, 101) > Convert.ToInt32(Math.Round(20 * kiAggressivitaetsfaktor, 0)))
                 return false;
 
             var aktion = new RaeuberlagerAktion(EnumAktionsartRaeuberlager.Truppen_schicken, 0, ziel, ID, 0);

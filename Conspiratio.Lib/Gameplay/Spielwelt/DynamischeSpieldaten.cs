@@ -2222,9 +2222,11 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
 
         /// <summary>
         /// Interpoliert einen Wert stufenlos anhand der eingestellten KI-Aggressivität zwischen drei
-        /// Stützpunkten: <paramref name="beiNull"/> bei 0 %, <paramref name="beiFuenfzig"/> bei 50 %
-        /// und <paramref name="beiHundert"/> bei 100 %. Die Stützpunkte entsprechen den früheren
-        /// Stufen Niedrig/Mittel/Hoch, sodass 50 % das bisherige Verhalten reproduziert.
+        /// Stützpunkten: <paramref name="beiNull"/> am unteren Ende (1 %), <paramref name="beiFuenfzig"/>
+        /// bei 50 % und <paramref name="beiHundert"/> bei 100 %. 0 % ist kein einstellbarer Wert – ein
+        /// gespeicherter Wert 0 gilt als „nicht gesetzt" und wird von <see cref="GetKiAggressivitaetProzent"/>
+        /// wie 50 % behandelt. Die Stützpunkte entsprechen den früheren Stufen Niedrig/Mittel/Hoch,
+        /// sodass 50 % das bisherige Verhalten reproduziert.
         /// </summary>
         public int InterpoliereNachAggressivitaet(int beiNull, int beiFuenfzig, int beiHundert)
         {

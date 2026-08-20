@@ -68,9 +68,11 @@ namespace Conspiratio.Lib.Gameplay.Personen
         /// <summary>
         /// Die wirksame Bosheit dieser KI: ihr ausgewürfelter Charakterwert (<c>_boese</c>), verschoben
         /// um die eingestellte KI-Aggressivität. Bei 50 % (Standard) ist das exakt der Charakterwert,
-        /// bei 100 % um 50 Punkte höher, bei 0 % um 50 niedriger – jeweils auf 0–100 begrenzt. Die
-        /// Streuung zwischen den KIs bleibt dabei erhalten: Die Einstellung verschiebt alle Charaktere
-        /// gemeinsam, sie gleicht sie nicht an.
+        /// bei 100 % um 50 Punkte höher, bei 1 % um 49 Punkte niedriger – jeweils auf 0–100 begrenzt
+        /// (ein gespeicherter Wert 0 gilt als „nicht gesetzt" und wird wie 50 % behandelt, siehe
+        /// <see cref="DynamischeSpieldaten.GetKiAggressivitaetProzent"/>). Die Streuung zwischen den
+        /// KIs bleibt dabei erhalten: Die Einstellung verschiebt alle Charaktere gemeinsam, sie gleicht
+        /// sie nicht an.
         ///
         /// Bewusst hier und nicht beim Auswürfeln: Nur so wirkt die Einstellung auch auf bereits
         /// existierende KIs, im laufenden Spiel und in geladenen Spielständen. Der gespeicherte
@@ -83,6 +85,24 @@ namespace Conspiratio.Lib.Gameplay.Personen
             return Math.Max(0, Math.Min(100, _boese + verschiebung));
         }
 
+        /// <summary>
+        /// Der rohe, ausgewürfelte Charakterwert dieser KI (<c>_boese</c>), unbeeinflusst von der
+        /// eingestellten KI-Aggressivität. Gedacht für Mechaniken, die keine Feindseligkeit gegenüber
+        /// dem Menschen ausdrücken (z. B. das Werbegeschenk in <c>FamilieManager.GibGeschenk</c>) und
+        /// deshalb nicht am Aggressivitäts-Regler hängen dürfen. Für alles, was den Menschen
+        /// betrifft, gilt weiterhin <see cref="GetBosheit"/>.
+        /// </summary>
+        public int GetBosheitRoh()
+        {
+            return _boese;
+        }
+
+        /// <summary>
+        /// Setzt den rohen Charakterwert. Achtung: Dieser Wert ist nicht um die KI-Aggressivität
+        /// verschoben – <c>SetBosheit(GetBosheit() + n)</c> würde die aktuelle Aggressivitäts-Verschiebung
+        /// dauerhaft in den gespeicherten Charakterwert einbacken. Für ein Lesen-Ändern-Schreiben
+        /// deshalb <see cref="GetBosheitRoh"/> verwenden, nicht <see cref="GetBosheit"/>.
+        /// </summary>
         public void SetBosheit(int best)
         {
             _boese = best;

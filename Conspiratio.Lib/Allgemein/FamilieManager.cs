@@ -162,7 +162,9 @@ namespace Conspiratio.Lib.Allgemein
             int boniPreis = wg.BonusPreis;
             int boniBoese = wg.BonusBoese;
             int boniRoman = wg.BonusRomantik;
-            int bosheit = partner.GetBosheit();
+            // Rohwert, nicht GetBosheit(): Werbung ist keine Feindseligkeits-Mechanik, die
+            // KI-Aggressivitaets-Einstellung darf hier nicht mitentscheiden, welches Geschenk gefaellt.
+            int bosheit = partner.GetBosheitRoh();
 
             if (boniBoese > 0)
             {

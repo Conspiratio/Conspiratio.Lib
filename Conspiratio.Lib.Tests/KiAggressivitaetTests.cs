@@ -5,8 +5,9 @@ using Xunit;
 namespace Conspiratio.Lib.Tests
 {
     /// <summary>
-    /// Die eine Einstellung für die Aggressivität der KI-Spieler (0–100 %). 50 % muss überall
-    /// exakt das bisherige Verhalten reproduzieren.
+    /// Die eine Einstellung für die Aggressivität der KI-Spieler (1–100 %, ein gespeicherter Wert 0
+    /// gilt als „nicht gesetzt" und wird wie 50 % behandelt). 50 % muss überall exakt das bisherige
+    /// Verhalten reproduzieren.
     /// </summary>
     public class KiAggressivitaetTests
     {
