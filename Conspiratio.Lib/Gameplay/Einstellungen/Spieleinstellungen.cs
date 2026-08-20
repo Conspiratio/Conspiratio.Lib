@@ -1,7 +1,5 @@
 ﻿using System;
 
-using Newtonsoft.Json;
-
 namespace Conspiratio.Lib.Gameplay.Einstellungen
 {
     /// <summary>
@@ -23,14 +21,7 @@ namespace Conspiratio.Lib.Gameplay.Einstellungen
         /// Amtsenthebungen sowie Ausbau und Aktionen der Militärstützpunkte. 50 % entspricht dem
         /// bisherigen Normalwert; alte Spielstände (Wert 0) werden wie 50 % behandelt.
         /// </summary>
-        private int _kiAggressivitaetProzent = 50;
-
-        [JsonProperty("KiAggressivitaetProzent")]
-        public int KiAggressivitaetProzent
-        {
-            get => _kiAggressivitaetProzent <= 0 ? 50 : _kiAggressivitaetProzent;
-            set => _kiAggressivitaetProzent = value;
-        }
+        public int KiAggressivitaetProzent { get; set; } = 50;
 
         /// <summary>
         /// Der bei der Spielerstellung optional gewählte Auftrag (Mission). Standard
