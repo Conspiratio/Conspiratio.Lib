@@ -123,5 +123,28 @@ namespace Conspiratio.Lib.Tests
             Assert.Equal(0, SW.Dynamisch.GetAnschwaerzID()); // zweiter Schritt setzt zurueck
             Assert.Equal(60, SW.Dynamisch.GetKIwithID(adressat).GetBeziehungZuKIX(opfer)); // 90 - 30, Wirkung kam an
         }
+
+        [Fact]
+        public void Ein_menschlicher_Adressat_laesst_den_Vorgang_fuer_einen_neuen_Versuch_offen()
+        {
+            TestSpielwelt.Starte(menschen: 2);
+            int opfer = TestSpielwelt.SetzeKiGegner(0, 0);
+            int mitspielerId = 2; // zweiter Mensch: ungueltiger Adressat
+
+            SW.Dynamisch.Anschwaerzen(opfer);
+            Assert.Equal(opfer, SW.Dynamisch.GetAnschwaerzID());
+
+            SW.Dynamisch.Anschwaerzen(mitspielerId);
+            // Anders als beim Selbst-Ziel-Fehler wird hier NICHT zurueckgesetzt: ein Fehlklick auf einen
+            // Mitspieler soll einen neuen Versuch mit einem gueltigen KI-Adressaten erlauben, ohne den
+            // ersten Schritt (wen anschwaerzen) zu wiederholen.
+            Assert.Equal(opfer, SW.Dynamisch.GetAnschwaerzID());
+
+            int adressat = TestSpielwelt.SetzeKiGegner(1, 0);
+            SW.Dynamisch.GetKIwithID(adressat).SetBeziehungZuX(SW.Dynamisch.GetAktiverSpieler(), 100);
+
+            SW.Dynamisch.Anschwaerzen(adressat);
+            Assert.Equal(0, SW.Dynamisch.GetAnschwaerzID()); // der neue Versuch schliesst den Vorgang ab
+        }
     }
 }

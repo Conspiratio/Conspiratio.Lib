@@ -443,7 +443,9 @@ namespace Conspiratio.Lib.Allgemein
         /// <summary>
         /// Wickelt die Sabotagen ab, die KIs gegen den aktiven Menschen laufen haben — Spiegelbild zu
         /// <see cref="ErmittleSabotageNachrichten"/>: dieselbe Chance-/Schadensformel, hier gemildert
-        /// durch die Verteidigungsprivilegien des Menschen statt der des KI-Ziels.
+        /// durch die Verteidigungsprivilegien des Menschen statt der des KI-Ziels. Wie die Schwestermethode
+        /// muss auch diese während des Zugs des betroffenen Menschen aufgerufen werden – sie liest sein
+        /// Vermögen und seine Privilegien über <see cref="DynamischeSpieldaten.GetAktHum"/>.
         /// </summary>
         /// <returns>Die zusammengefasste Meldung oder null, wenn nichts sabotiert wurde.</returns>
         [PublicAPI]

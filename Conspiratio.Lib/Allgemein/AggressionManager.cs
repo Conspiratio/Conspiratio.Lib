@@ -110,10 +110,11 @@ namespace Conspiratio.Lib.Allgemein
         private static string BaueOpferMeldung(int anklaegerId, int adressatId)
         {
             var anklaeger = SW.Dynamisch.GetSpWithID(anklaegerId);
-            string adressatName = SW.Dynamisch.GetSpWithID(adressatId).GetKompletterName();
+            var adressat = SW.Dynamisch.GetSpWithID(adressatId);
 
-            return anklaeger.GetKompletterName() + " hat Euch bei " + adressatName + " angeschwärzt – und " +
-                   adressatName + " schenkt " + (anklaeger.GetMaennlich() ? "seinen" : "ihren") + " Worten Glauben.";
+            return anklaeger.GetKompletterName() + " hat Euch bei " + adressat.GetKompletterName() + " angeschwärzt – und " +
+                   (adressat.GetMaennlich() ? "er" : "sie") + " schenkt " +
+                   (anklaeger.GetMaennlich() ? "seinen" : "ihren") + " Worten Glauben.";
         }
 
         /// <summary>

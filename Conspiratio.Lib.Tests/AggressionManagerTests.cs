@@ -305,12 +305,18 @@ namespace Conspiratio.Lib.Tests
             TestSpielwelt.Starte(seed: 49);
             int menschId = SW.Dynamisch.GetAktiverSpieler();
             int kiId = TestSpielwelt.SetzeKiGegner(0, 0, bosheit: 0);
-            TestSpielwelt.SetzeKiGegner(1, 1, bosheit: 0); // moeglicher Adressat, mit Amt
+            int adressat = TestSpielwelt.SetzeKiGegner(1, 1, bosheit: 0); // Adressat, mit Amt
 
-            // Reset erst NACH SetzeKiGegner: SetAmt kann fuer die neu vergebenen Aemter bestehende
-            // KI-Amtsinhaber verdraengen, was deren Beziehung/Bosheit als Nebenwirkung veraendert - ein
-            // Reset davor wuerde das nicht mehr erfassen.
+            // SetAmt schreibt nur die Amtsinfo (siehe Spieler.SetAmt), veraendert also weder Beziehung
+            // noch Bosheit anderer KIs - die Reihenfolge zu SetzeKiGegner ist hier unkritisch. Wichtig ist
+            // nur, dass der Reset vor den gezielten Ueberschreibungen unten steht.
             ResetKiRelationships(menschId);
+            // Erzwingt Anschwaerzen (laeuftSchonSabotage), das ueber ResetKiZuKiBeziehungen einen
+            // Adressaten sucht - ohne den Reset waere unkontrolliert, wer als "bester" gefunden wird und
+            // ob er glaubt. Adressat wird danach gezielt ueber die Schwelle (80) gesetzt, sonst glaubt er
+            // bei neutraler (50) Beziehung nicht und die Aktion bliebe folgenlos (Assert.Single schlaegt fehl).
+            ResetKiZuKiBeziehungen();
+            SW.Dynamisch.GetKIwithID(adressat).SetBeziehungZuX(kiId, 90);
             SW.Dynamisch.GetKIwithID(kiId).SetBeziehungZuX(menschId, -1000);
             SW.Dynamisch.GetAktHum().GetGegnerischeSabotage(kiId).SetDauer(3);
 
