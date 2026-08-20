@@ -65,12 +65,9 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             int wuerfel = SW.Statisch.Rnd.Next(1, 101);  // 1 bis 100
             Type truppeneinheit = null;
 
-            // KI-Aktivität als Prozentwert (1–100, Standard 50). 50 % entspricht dem Normalfaktor 1.0,
-            // 100 % dem Faktor 2.0; alte Spielstände (0) werden wie 50 % behandelt.
-            int aktivitaetProzent = SW.Dynamisch.Spielstand.Einstellungen.KiAktivitaetProzent;
-            if (aktivitaetProzent <= 0)
-                aktivitaetProzent = 50;
-            double kiAktivitaetsfaktor = aktivitaetProzent / 50d;
+            // Aggressivität der KI als Prozentwert (1–100, Standard 50). 50 % entspricht dem
+            // Normalfaktor 1.0, 100 % dem Faktor 2.0.
+            double kiAktivitaetsfaktor = SW.Dynamisch.GetKiAggressivitaetProzent() / 50d;
 
             if (wuerfel <= Convert.ToInt32(Math.Round(50 * kiAktivitaetsfaktor, 0)))  // Auswürfeln, ob generell in diesem Zug etwas passieren soll
             {

@@ -2208,6 +2208,19 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         }
         #endregion
 
+        #region KiAggressivitaet
+        /// <summary>
+        /// Die eingestellte Aggressivität der KI-Spieler in Prozent (1–100). Alte Spielstände, in denen
+        /// das Feld fehlt (Wert 0 oder kleiner), werden wie der Standardwert 50 % behandelt.
+        /// </summary>
+        public int GetKiAggressivitaetProzent()
+        {
+            int prozent = Spielstand.Einstellungen.KiAggressivitaetProzent;
+
+            return prozent <= 0 ? 50 : prozent;
+        }
+        #endregion
+
         #region DeliktpunkteBerechnen
         public void DeliktpunkteBerechnen()
         {

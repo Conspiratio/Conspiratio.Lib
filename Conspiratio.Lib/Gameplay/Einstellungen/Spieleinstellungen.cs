@@ -1,5 +1,7 @@
 ﻿using System;
 
+using Newtonsoft.Json;
+
 namespace Conspiratio.Lib.Gameplay.Einstellungen
 {
     /// <summary>
@@ -15,11 +17,20 @@ namespace Conspiratio.Lib.Gameplay.Einstellungen
         public EnumSchwierigkeitsgrad AggressivitaetKISpieler { get; set; } = EnumSchwierigkeitsgrad.Mittel;
 
         /// <summary>
-        /// Aktivität der KI-Spieler in den Militärstützpunkten als Prozentwert (1–100, Standard 50). Bestimmt
-        /// die Häufigkeit von Ausbau, Rekrutierung und Aktionen; 50 % entspricht dem bisherigen Normalwert.
-        /// Alte Spielstände (Wert 0) werden wie 50 % behandelt.
+        /// Aggressivität der KI-Spieler als Prozentwert (1–100, Standard 50). Steuert sämtliche
+        /// feindseligen und militärischen KI-Aktivitäten: die Bosheit der KI-Charaktere (und damit
+        /// Beleidigungen, Duelle, Sabotage, Anschwärzen und KI-Verbrechen), Anklagen, Gerichtsurteile,
+        /// Amtsenthebungen sowie Ausbau und Aktionen der Militärstützpunkte. 50 % entspricht dem
+        /// bisherigen Normalwert; alte Spielstände (Wert 0) werden wie 50 % behandelt.
         /// </summary>
-        public int KiAktivitaetProzent { get; set; } = 50;
+        private int _kiAggressivitaetProzent = 50;
+
+        [JsonProperty("KiAggressivitaetProzent")]
+        public int KiAggressivitaetProzent
+        {
+            get => _kiAggressivitaetProzent <= 0 ? 50 : _kiAggressivitaetProzent;
+            set => _kiAggressivitaetProzent = value;
+        }
 
         /// <summary>
         /// Der bei der Spielerstellung optional gewählte Auftrag (Mission). Standard
