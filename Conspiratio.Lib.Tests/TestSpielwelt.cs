@@ -67,6 +67,12 @@ namespace Conspiratio.Lib.Tests
             var neuesSpiel = new NewGameManager(pfad);
             neuesSpiel.CreateNewGame("Test", menschen, false, true, false, out _);
 
+            // Die KI-Aggressivität wirkt seit ihrer Einführung auf die Bosheit *aller* KIs und damit auf
+            // Duelle, Sabotage und Anschwärzen. Da CreateNewGame die Einstellungen nicht zurücksetzt,
+            // würde ein Wert aus einem vorherigen Test in alle folgenden lecken – hier also explizit auf
+            // den dokumentierten Standard zurück.
+            SW.Dynamisch.Spielstand.Einstellungen.KiAggressivitaetProzent = 50;
+
             SW.UI.Initialisieren(new JaNeinStub(), new TextStub(), null, null, null, null, null, null, null,
                                  null, erpressungDialog);
 
