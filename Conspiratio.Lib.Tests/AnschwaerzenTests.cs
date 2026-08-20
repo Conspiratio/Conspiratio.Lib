@@ -48,10 +48,14 @@ namespace Conspiratio.Lib.Tests
             int anklaeger = TestSpielwelt.SetzeKiGegner(0, 0);
             int adressat = TestSpielwelt.SetzeKiGegner(1, 0);
 
-            SW.Dynamisch.GetHumWithID(menschId).SetDeliktpunkte(10); // Opfer ist der Mensch
+            // Die Verbrechen setzen, nicht die Deliktpunkte: AnschwaerzenAusfuehren berechnet sie auf dem
+            // KI-Pfad frisch (sonst stuenden sie zum Zugbeginn auf 0 und die Beweise waeren wirkungslos).
+            // 2x Gesetz 23 zaehlt 5-fach => 10 Deliktpunkte, min(10*3,30)=30 -> Schwelle 80-30=50.
+            SW.Dynamisch.GetHumWithID(menschId).SetBegingVerbrechenX(23, 2); // Opfer ist der Mensch
             SW.Dynamisch.GetKIwithID(adressat).SetBeziehungZuX(anklaeger, 55);
 
             Assert.Contains("Glauben", SW.Dynamisch.AnschwaerzenAusfuehren(anklaeger, menschId, adressat));
+            Assert.Equal(10, SW.Dynamisch.GetHumWithID(menschId).GetDeliktpunkte());
         }
 
         [Fact]

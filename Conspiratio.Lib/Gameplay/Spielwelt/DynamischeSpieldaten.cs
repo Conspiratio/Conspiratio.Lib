@@ -1806,9 +1806,23 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             if (taeterId < SW.Statisch.GetMinKIID())
                 GetHumWithID(taeterId).GetSpielerStatistik().HiAnschwaerzungen++;
 
-            int beweispunkte = taeterId < SW.Statisch.GetMinKIID()
-                ? GetHumWithID(taeterId).GetAktiveSpionage(x).GetDelikte()
-                : GetSpWithID(x).GetDeliktpunkte();
+            int beweispunkte;
+
+            if (taeterId < SW.Statisch.GetMinKIID())
+            {
+                beweispunkte = GetHumWithID(taeterId).GetAktiveSpionage(x).GetDelikte();
+            }
+            else
+            {
+                // Die Deliktpunkte der Menschen werden nur anlassbezogen neu berechnet (Kirchgang,
+                // KircheManager) und stehen zum Zugbeginn sonst auf einem alten Stand bzw. auf 0 – die
+                // Beweisgewichtung wäre auf dem KI-Pfad also wirkungslos. Der Aufruf schreibt
+                // ausschließlich die Deliktpunkte der menschlichen Spieler neu.
+                if (x < SW.Statisch.GetMinKIID())
+                    DeliktpunkteBerechnen();
+
+                beweispunkte = GetSpWithID(x).GetDeliktpunkte();
+            }
 
             int schwelle = Math.Max(50, 80 - Math.Min(beweispunkte * 3, 30));
 
