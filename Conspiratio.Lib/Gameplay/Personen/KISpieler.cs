@@ -65,9 +65,22 @@ namespace Conspiratio.Lib.Gameplay.Personen
             _verliebt = ver;
         }
 
+        /// <summary>
+        /// Die wirksame Bosheit dieser KI: ihr ausgewürfelter Charakterwert (<c>_boese</c>), verschoben
+        /// um die eingestellte KI-Aggressivität. Bei 50 % (Standard) ist das exakt der Charakterwert,
+        /// bei 100 % um 50 Punkte höher, bei 0 % um 50 niedriger – jeweils auf 0–100 begrenzt. Die
+        /// Streuung zwischen den KIs bleibt dabei erhalten: Die Einstellung verschiebt alle Charaktere
+        /// gemeinsam, sie gleicht sie nicht an.
+        ///
+        /// Bewusst hier und nicht beim Auswürfeln: Nur so wirkt die Einstellung auch auf bereits
+        /// existierende KIs, im laufenden Spiel und in geladenen Spielständen. Der gespeicherte
+        /// Charakterwert bleibt davon unberührt – wer ihn braucht, liest <c>_boese</c> direkt.
+        /// </summary>
         public int GetBosheit()
         {
-            return _boese;
+            int verschiebung = SW.Dynamisch.GetKiAggressivitaetProzent() - 50;
+
+            return Math.Max(0, Math.Min(100, _boese + verschiebung));
         }
 
         public void SetBosheit(int best)
