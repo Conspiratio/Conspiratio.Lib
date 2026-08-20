@@ -2219,6 +2219,21 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
 
             return prozent <= 0 ? 50 : prozent;
         }
+
+        /// <summary>
+        /// Interpoliert einen Wert stufenlos anhand der eingestellten KI-Aggressivität zwischen drei
+        /// Stützpunkten: <paramref name="beiNull"/> bei 0 %, <paramref name="beiFuenfzig"/> bei 50 %
+        /// und <paramref name="beiHundert"/> bei 100 %. Die Stützpunkte entsprechen den früheren
+        /// Stufen Niedrig/Mittel/Hoch, sodass 50 % das bisherige Verhalten reproduziert.
+        /// </summary>
+        public int InterpoliereNachAggressivitaet(int beiNull, int beiFuenfzig, int beiHundert)
+        {
+            int prozent = GetKiAggressivitaetProzent();
+
+            return prozent <= 50
+                ? beiNull + (beiFuenfzig - beiNull) * prozent / 50
+                : beiFuenfzig + (beiHundert - beiFuenfzig) * (prozent - 50) / 50;
+        }
         #endregion
 
         #region DeliktpunkteBerechnen
@@ -2290,18 +2305,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
 
                 int maxAbsetzSympathie = SW.Statisch.GetMaxAbsetzSympathie();
 
-                switch (SW.Dynamisch.Spielstand.Einstellungen.AggressivitaetKISpieler)
-                {
-                    case EnumSchwierigkeitsgrad.Niedrig:
-                        maxAbsetzSympathie -= 2;
-                        break;
-                    case EnumSchwierigkeitsgrad.Mittel:
-                        maxAbsetzSympathie += 10;
-                        break;
-                    case EnumSchwierigkeitsgrad.Hoch:
-                        maxAbsetzSympathie += 20;
-                        break;
-                }
+                maxAbsetzSympathie += InterpoliereNachAggressivitaet(-2, 10, 20);
 
                 for (int j = 1; j < u_len; j++)
                 {
@@ -2869,20 +2873,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             if (deliktpunkte <= 0)  // Man wird nie ohne Deliktpunkte von KI-Spielern angeklagt
                 return;
 
-            int faktor = 5;
-
-            switch (SW.Dynamisch.Spielstand.Einstellungen.AggressivitaetKISpieler)
-            {
-                case EnumSchwierigkeitsgrad.Niedrig:
-                    faktor = 2;
-                    break;
-                case EnumSchwierigkeitsgrad.Mittel:
-                    faktor = 5;
-                    break;
-                case EnumSchwierigkeitsgrad.Hoch:
-                    faktor = 12;
-                    break;
-            }
+            int faktor = InterpoliereNachAggressivitaet(2, 5, 12);
 
             int chanceAufAnklageInProzent = deliktpunkte * faktor;
 

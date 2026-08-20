@@ -102,5 +102,48 @@ namespace Conspiratio.Lib.Tests
             Assert.Equal(40, SW.Dynamisch.GetKIwithID(ersteKi).GetBosheit());
             Assert.Equal(70, SW.Dynamisch.GetKIwithID(zweiteKi).GetBosheit());
         }
+
+        [Theory]
+        [InlineData(1, -2)]     // frueher "Niedrig" (1 % ist der untere Anschlag): -2 + 7*1/50 = -2
+        [InlineData(50, 5)]     // frueher "Mittel" - der Regressionsanker
+        [InlineData(100, 10)]   // frueher "Hoch"
+        [InlineData(25, 1)]     // stufenlos: -2 + (5-(-2))*25/50 = 1,5 -> 1 (Ganzzahl)
+        [InlineData(75, 7)]     // stufenlos: 5 + (10-5)*25/50 = 7,5 -> 7
+        public void Die_Interpolation_trifft_die_alten_Stufen_und_dazwischen(int prozent, int erwartet)
+        {
+            TestSpielwelt.Starte();
+            SW.Dynamisch.Spielstand.Einstellungen.KiAggressivitaetProzent = prozent;
+
+            // Wertetripel des Gerichts-Urteilsfaktors (frueher Niedrig/Mittel/Hoch = -2/+5/+10).
+            Assert.Equal(erwartet, SW.Dynamisch.InterpoliereNachAggressivitaet(-2, 5, 10));
+        }
+
+        [Fact]
+        public void Die_Interpolation_ist_bei_fuenfzig_Prozent_exakt_der_Mittelwert()
+        {
+            // Gilt fuer alle drei realen Wertetripel: bei 50 % aendert sich gegenueber heute nichts.
+            TestSpielwelt.Starte();
+            SW.Dynamisch.Spielstand.Einstellungen.KiAggressivitaetProzent = 50;
+
+            Assert.Equal(5, SW.Dynamisch.InterpoliereNachAggressivitaet(-2, 5, 10));    // Urteilsfaktor
+            Assert.Equal(10, SW.Dynamisch.InterpoliereNachAggressivitaet(-2, 10, 20));  // Absetz-Sympathie
+            Assert.Equal(5, SW.Dynamisch.InterpoliereNachAggressivitaet(2, 5, 12));     // Anklage-Faktor
+        }
+
+        [Fact]
+        public void Die_Interpolation_steigt_monoton()
+        {
+            TestSpielwelt.Starte();
+            int vorheriger = int.MinValue;
+
+            for (int prozent = 1; prozent <= 100; prozent++)
+            {
+                SW.Dynamisch.Spielstand.Einstellungen.KiAggressivitaetProzent = prozent;
+                int wert = SW.Dynamisch.InterpoliereNachAggressivitaet(2, 5, 12);
+
+                Assert.True(wert >= vorheriger, $"Bei {prozent} % sank der Wert von {vorheriger} auf {wert}");
+                vorheriger = wert;
+            }
+        }
     }
 }

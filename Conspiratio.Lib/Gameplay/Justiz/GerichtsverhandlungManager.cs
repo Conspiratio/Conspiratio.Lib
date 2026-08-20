@@ -574,18 +574,7 @@ namespace Conspiratio.Lib.Gameplay.Justiz
             // BeweisGewicht gewichtet, damit echte Beweise im Schnitt zur Verurteilung führen.
             int faktor = (_summeVerbrechen + _beweise) * BeweisGewicht + _aussageUrteilsBonus + _zeugenBonus + _plaedoyerBonus;
 
-            switch (SW.Dynamisch.Spielstand.Einstellungen.AggressivitaetKISpieler)
-            {
-                case EnumSchwierigkeitsgrad.Niedrig:
-                    faktor -= 2;
-                    break;
-                case EnumSchwierigkeitsgrad.Mittel:
-                    faktor += 5;
-                    break;
-                case EnumSchwierigkeitsgrad.Hoch:
-                    faktor += 10;
-                    break;
-            }
+            faktor += SW.Dynamisch.InterpoliereNachAggressivitaet(-2, 5, 10);
 
             // Rnd.Next verlangt eine positive Obergrenze; bei nicht-positiver Sympathie neigt der Richter zu "schuldig".
             int obergrenze = Math.Max(1, sympathie);
