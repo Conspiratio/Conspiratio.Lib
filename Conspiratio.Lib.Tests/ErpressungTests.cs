@@ -151,7 +151,15 @@ namespace Conspiratio.Lib.Tests
             TestSpielwelt.GibBeweise(zielId, 9);
 
             var ki = SW.Dynamisch.GetKIwithID(zielId);
-            int beziehungVorher = ki.GetBeziehungZuKIX(SW.Dynamisch.GetAktiverSpieler());
+
+            // Die Startbeziehung wird je Spiel ausgewürfelt (CreateRndBeziehungen zieht 20–80, danach
+            // verschiebt der Weltaufbau nochmals um −20…+20) und kann damit unter dem Verlustbetrag
+            // liegen. ErhoeheBeziehungZuX kappt bei 0, sodass die erwartete Differenz dann unerreichbar
+            // ist – genau daran scheiterte dieser Test in rund 8 % der Läufe. Deshalb einen festen, von
+            // beiden Grenzen (0/100) entfernten Startwert setzen, damit die exakte Verlusthöhe prüfbar
+            // bleibt, ohne vom Zufall abzuhängen.
+            const int beziehungVorher = 90;
+            ki.SetBeziehungZuX(SW.Dynamisch.GetAktiverSpieler(), beziehungVorher);
 
             var ergebnis = new ErpressungManager().FuehreErpressungDurch(zielId, false);
 
