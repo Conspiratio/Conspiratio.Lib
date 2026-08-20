@@ -15,7 +15,10 @@ namespace Conspiratio.Lib.Tests
         {
             TestSpielwelt.Starte();
 
-            Assert.Equal(50, SW.Dynamisch.Spielstand.Einstellungen.KiAggressivitaetProzent);
+            // Bewusst nur über den Accessor geprüft: Der Spielstand entsteht über einen Pfad, der
+            // Feldinitialisierer umgeht (FormatterServices.GetUninitializedObject, siehe CLAUDE.md),
+            // die rohe Property darf dort also 0 sein. Genau dafür gibt es den Fallback – auf den
+            // Rohwert zu assertieren würde der Prämisse dieses Features widersprechen.
             Assert.Equal(50, SW.Dynamisch.GetKiAggressivitaetProzent());
         }
 
