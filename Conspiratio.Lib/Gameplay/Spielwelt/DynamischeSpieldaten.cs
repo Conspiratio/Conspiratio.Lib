@@ -631,6 +631,62 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             }
         }
 
+        /// <summary>Grundwachstum der Einwohnerzahl je Runde in Promille.</summary>
+        public const int GrundwachstumPromille = 10;
+
+        /// <summary>Zusätzliches Wachstum je Punkt Reichtum – Wohlstand zieht Menschen an.</summary>
+        public const int ReichtumBonusPromille = 2;
+
+        /// <summary>Wachstumsverlust je Punkt Kriminalität – Unsicherheit vertreibt Menschen.</summary>
+        public const int KriminalitaetMalusPromille = 2;
+
+        /// <summary>Zufällige Schwankung des Wachstums je Runde, plus/minus in Promille.</summary>
+        public const int ZufallPromille = 5;
+
+        /// <summary>
+        /// Untergrenze der Einwohnerzahl. Zwingend, weil multiplikatives Wachstum aus der Null nie
+        /// herauskäme – erst dadurch ist eine von Katastrophen verwüstete Stadt wieder erholbar.
+        /// </summary>
+        public const int MindestEinwohner = 250;
+
+        /// <summary>
+        /// Obergrenze der Einwohnerzahl. Bewusst eine globale Konstante statt einer Schranke relativ zum
+        /// Startwert der Stadt: Dieser wird nirgends gespeichert, und ein Feld dafür wäre ein neues
+        /// serialisiertes Feld mit Savegame-Folgen.
+        /// </summary>
+        public const int MaxEinwohner = 12000;
+
+        /// <summary>
+        /// Lässt die Städte wachsen. Ohne dies kennt die Einwohnerzahl nur eine Richtung: Der
+        /// <c>KatastrophenManager</c> senkt sie, niemand hebt sie je an – über eine lange Partie
+        /// schrumpfen damit alle Märkte, und mit ihnen der Warenabsatz.
+        ///
+        /// Gerechnet wird in Promille, damit kein Gleitkomma in den Kern der Ökonomie gerät und
+        /// E2E-Läufe seed-reproduzierbar bleiben.
+        /// </summary>
+        public void EinwohnerWachstumAktRundenEnde()
+        {
+            for (int i = 1; i < SW.Statisch.GetMaxStadtID(); i++)
+            {
+                Stadt stadt = GetStadtwithID(i);
+
+                int wachstumPromille = GrundwachstumPromille
+                                     + stadt.GetReichtum() * ReichtumBonusPromille
+                                     - stadt.GetKriminalitaet() * KriminalitaetMalusPromille
+                                     + SW.Statisch.Rnd.Next(-ZufallPromille, ZufallPromille + 1);
+
+                int neu = stadt.GetEinwohner() + (stadt.GetEinwohner() * wachstumPromille) / 1000;
+
+                if (neu < MindestEinwohner)
+                    neu = MindestEinwohner;
+
+                if (neu > MaxEinwohner)
+                    neu = MaxEinwohner;
+
+                stadt.SetEinwohnerAufX(neu);
+            }
+        }
+
         public void RohBedarfAktRundenEnde()
         {
             //Die von den menschlichen Spielern verkauften Rohstoffe
