@@ -478,17 +478,20 @@ namespace Conspiratio.Lib.Gameplay.Personen
                 // Wohnsitze
                 gesamtVermoegen += _spielerHatHausVonStadtAnArraystelle[i].GetAktuellerWert();
 
-                // Werkstätten und Rohstoffe
-                for (int j = 1; j < SW.Statisch.GetMaxWerkstaettenProStadt(); j++)
+                // Werkstätten und Rohstoffe. _spielerHatInStadtXWerkstaettenY ist 0-basiert (Platz 1
+                // liegt auf Index 0) - die Schleife muss deshalb bei 0 beginnen, sonst fehlt Platz 1
+                // jeder Stadt komplett. GetSingleRohstoff() ist dagegen 1-basiert (wie bei
+                // ErmittleLagerplatzInStadt), daher hier j + 1.
+                for (int j = 0; j < SW.Statisch.GetMaxWerkstaettenProStadt(); j++)
                 {
                     // Werkstätten
                     if (_spielerHatInStadtXWerkstaettenY[i, j].GetEnabled() == true)
                     {
-                        gesamtVermoegen += Convert.ToInt32(SW.Dynamisch.GetRohstoffwithID(SW.Dynamisch.GetStadtwithID(i).GetRohstoffe()[j]).GetWSKaufpreis() * factorWertminderung);
+                        gesamtVermoegen += Convert.ToInt32(SW.Dynamisch.GetRohstoffwithID(SW.Dynamisch.GetStadtwithID(i).GetSingleRohstoff(j + 1)).GetWSKaufpreis() * factorWertminderung);
                     }
 
                     // Rohstoffe
-                    int rohid = SW.Dynamisch.GetStadtwithID(i).GetRohstoffe()[j];
+                    int rohid = SW.Dynamisch.GetStadtwithID(i).GetSingleRohstoff(j + 1);
                     gesamtVermoegen += SW.Dynamisch.GetStadtwithID(i).GetRohstoffPreisVonIDX(rohid) * _hatInStadtXMengeYRohstoffe[i, j];
                 }
             }
