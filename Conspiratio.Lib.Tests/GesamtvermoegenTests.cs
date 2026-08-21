@@ -40,5 +40,67 @@ namespace Conspiratio.Lib.Tests
 
             Assert.Equal(vermoegenOhneWerkstatt + erwarteteSteigerung, vermoegenMitWerkstatt);
         }
+
+        /// <summary>
+        /// Sucht einen Werkstattplatz, dessen Rohstoff-ID über der Zahl der Werkstattplätze je Stadt
+        /// liegt (0..5, s. <c>SW.Statisch.GetMaxWerkstaettenProStadt()</c> = 6). Der fehlerhafte Code in
+        /// <c>GetGesamtVermoegen</c> indiziert <c>_hatInStadtXMengeYRohstoffe</c> versehentlich mit dem
+        /// 0-basierten Werkstattplatz statt der Rohstoff-ID – bei einer solchen ID kann er den echten
+        /// Lagerbestand unmöglich zufällig treffen, was den Test beweiskräftig macht.
+        /// </summary>
+        private static bool FindePlatzMitHochnumerierterRohID(out int stadtId, out int werkstattNr, out int rohId)
+        {
+            for (stadtId = 1; stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
+            {
+                for (werkstattNr = 1; werkstattNr <= SW.Statisch.GetMaxWerkstaettenProStadt(); werkstattNr++)
+                {
+                    rohId = SW.Dynamisch.GetStadtwithID(stadtId).GetSingleRohstoff(werkstattNr);
+
+                    if (rohId >= SW.Statisch.GetMaxWerkstaettenProStadt())
+                        return true;
+                }
+            }
+
+            stadtId = 0;
+            werkstattNr = 0;
+            rohId = 0;
+            return false;
+        }
+
+        /// <summary>
+        /// Nebenbefund aus demselben Review: Zeile 495 liest den Lagerbestand über
+        /// <c>_hatInStadtXMengeYRohstoffe[i, j]</c> mit dem 0-basierten Werkstattindex <c>j</c> (0..5)
+        /// statt über die tatsächliche Rohstoff-ID <c>rohid</c>, die eine Zeile darüber schon berechnet
+        /// wird. Bei einer Rohstoff-ID oberhalb der Werkstattplatzzahl wird der Bestand dadurch am
+        /// falschen Index abgelesen (dort steht 0) und taucht gar nicht im Gesamtvermögen auf.
+        /// </summary>
+        [Fact]
+        public void Rohstoffbestand_auf_einem_hochnumerierten_Platz_zaehlt_ins_Gesamtvermoegen()
+        {
+            TestSpielwelt.Starte();
+
+            Assert.True(FindePlatzMitHochnumerierterRohID(out int stadtId, out int werkstattNr, out int rohId),
+                        "Es muss einen Werkstattplatz geben, dessen Rohstoff-ID die Zahl der " +
+                        "Werkstattplätze je Stadt übersteigt.");
+
+            var spieler = SW.Dynamisch.GetAktHum();
+            int spielerId = SW.Dynamisch.GetAktiverSpieler();
+
+            var werkstatt = spieler.GetSpielerHatInStadtXWerkstaettenY(werkstattNr, stadtId);
+            werkstatt.SetRohstoffID(rohId);
+            werkstatt.SetSkillX(1, 100_000);  // reichlich Lagerraum, damit SetStadtRohstoffAnzahl nicht kappt
+            werkstatt.SetEnabled(true);
+
+            int vermoegenOhneRohstoff = spieler.GetGesamtVermoegen(spielerId);
+
+            int anzahl = spieler.SetStadtRohstoffAnzahl(stadtId, rohId, 50);
+            Assert.True(anzahl > 0, "Der Testaufbau muss tatsächlich Lagerbestand anlegen können.");
+
+            int vermoegenMitRohstoff = spieler.GetGesamtVermoegen(spielerId);
+
+            int erwarteteSteigerung = SW.Dynamisch.GetStadtwithID(stadtId).GetRohstoffPreisVonIDX(rohId) * anzahl;
+
+            Assert.Equal(vermoegenOhneRohstoff + erwarteteSteigerung, vermoegenMitRohstoff);
+        }
     }
 }

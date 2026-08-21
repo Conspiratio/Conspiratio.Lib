@@ -490,9 +490,10 @@ namespace Conspiratio.Lib.Gameplay.Personen
                         gesamtVermoegen += Convert.ToInt32(SW.Dynamisch.GetRohstoffwithID(SW.Dynamisch.GetStadtwithID(i).GetSingleRohstoff(j + 1)).GetWSKaufpreis() * factorWertminderung);
                     }
 
-                    // Rohstoffe
+                    // Rohstoffe. _hatInStadtXMengeYRohstoffe ist über [stadtID, rohID] indiziert (wie
+                    // GetStadtRohstoffAnzahl/SetStadtRohstoffAnzahl) - nicht über den Werkstattplatz j.
                     int rohid = SW.Dynamisch.GetStadtwithID(i).GetSingleRohstoff(j + 1);
-                    gesamtVermoegen += SW.Dynamisch.GetStadtwithID(i).GetRohstoffPreisVonIDX(rohid) * _hatInStadtXMengeYRohstoffe[i, j];
+                    gesamtVermoegen += SW.Dynamisch.GetStadtwithID(i).GetRohstoffPreisVonIDX(rohid) * _hatInStadtXMengeYRohstoffe[i, rohid];
                 }
             }
 
