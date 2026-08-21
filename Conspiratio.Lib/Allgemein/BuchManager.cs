@@ -44,10 +44,21 @@ namespace Conspiratio.Lib.Allgemein
                         ergebnis.ExportierteWaren[rohstoffId] += anzahl;
                         ergebnis.ExportErloese[rohstoffId] += rohstoffpreis * anzahl;
 
-                        // Änderung der Rohstoffvorräte der Stadt speichern
-                        spieler.ErhoeheEinVerkaeufeInStadtXVonRohstoffIDYUmZ(stadtId, rohstoffId, anzahl);
+                        // Die verkaufte Menge geht in den Vorrat der ZIELstadt – dort wurde sie abgesetzt,
+                        // dort sättigt der Markt und dort greift der Mengenabschlag von
+                        // Stadt.GetRohstoffPreisVonIDX.
+                        //
+                        // Bewusste Abweichung vom WinForms-Original: Das bucht hier stadtId, also die
+                        // Herkunftsstadt. Folgenlos war das nur, solange die Vorratsbuchung
+                        // (RohBedarfAktRundenEnde) im Client gar nicht lief. Mit ihr würde der Export den
+                        // Preis in der eigenen Stadt drücken, in der gar nicht verkauft wurde, während die
+                        // Zielstadt nie sättigt – der Sättigungsabschlag griffe auf dem Exportweg nie.
+                        // Nicht "zurückkorrigieren".
+                        spieler.ErhoeheEinVerkaeufeInStadtXVonRohstoffIDYUmZ(zielstadt, rohstoffId, anzahl);
 
-                        // Einnahmen zum Umsatz hinzuzählen
+                        // Einnahmen zum Umsatz hinzuzählen. Der Umsatz bleibt bewusst bei der
+                        // Herkunftsstadt: Er trägt die Verkaufssteuer und den Kirchenzehnt, die am
+                        // Kontor des Spielers erhoben werden – nicht am Marktplatz der Zielstadt.
                         spieler.ErhoeheUmsatzInStadtX(rohstoffpreis * anzahl, stadtId);
 
                         produktionsslot.SetVerkaufAnzahl(0);

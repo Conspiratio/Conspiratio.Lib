@@ -717,6 +717,13 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             {
                 Stadt stadt = GetStadtwithID(stadtId);
 
+                // Der Wurf steht bewusst am Anfang und wird IMMER gezogen, auch wenn er anschließend
+                // nichts bewirken kann. Ein nur bedingt gezogener Wurf (Kurzschlussauswertung) hängt
+                // vom Spielzustand ab und verschiebt damit den gesamten nachfolgenden Zufallsstrom –
+                // Läufe mit festem Startwert wären nicht mehr reproduzierbar. So verbraucht die
+                // Methode je Stadt und Runde genau eine Zufallszahl.
+                int wurf = SW.Statisch.Rnd.Next(0, 100);
+
                 if (stadt.GetReichtum() >= SW.Statisch.GetMaxReichtum())
                     continue;
 
@@ -745,7 +752,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
                     chance = MaxReichtumsChance;
 
                 // SetReichtumToX klemmt nicht von sich aus, die Obergrenze steht oben in der Schleife.
-                if (chance > 0 && SW.Statisch.Rnd.Next(0, 100) < chance)
+                if (chance > 0 && wurf < chance)
                     stadt.SetReichtumToX(stadt.GetReichtum() + 1);
             }
         }

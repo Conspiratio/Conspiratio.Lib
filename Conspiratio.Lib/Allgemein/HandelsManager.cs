@@ -95,10 +95,27 @@ namespace Conspiratio.Lib.Allgemein
             return preis;
         }
 
+        /// <summary>
+        /// Verkaufserlös eines Werkstattplatzes: drei Viertel des <b>ungestaffelten</b> Grundpreises der
+        /// Ware (<see cref="Rohstoffe.Rohstoff.GetWSKaufpreis"/>).
+        ///
+        /// Bewusst <b>ohne</b> die Besitzstaffelung aus <see cref="GetWerkstattKaufpreis"/>: Der
+        /// Staffelfaktor sitzt auf dem Grundpreis der jeweiligen Ware (Stufe 1 = 2 000, Stufe 2 = 10 000,
+        /// Stufe 3 = 40 000), der Zähler läuft aber reichsweit über <i>alle</i> Betriebe. Ein gestaffelter
+        /// Verkaufspreis hinge damit nicht davon ab, was der Betrieb gekostet hat, sondern davon, wie
+        /// viele <i>andere</i> Betriebe man gerade besitzt – daraus ließ sich eine Geldpumpe bauen:
+        /// billige Stufe-1-Betriebe verkaufen (der Zähler sinkt), einen teuren Stufe-3-Betrieb günstig
+        /// kaufen, die billigen zurückkaufen (der Zähler steigt) und den teuren stark überhöht verkaufen.
+        ///
+        /// Am ungestaffelten Grundpreis gemessen verliert jeder Rückkauf-Zyklus, auch über Warenstufen
+        /// hinweg – und die beabsichtigte Expansionsbremse wirkt sogar schärfer.
+        /// </summary>
         [PublicAPI]
         public int GetWerkstattVerkaufspreis(int stadtId, int werkstattNr)
         {
-            return (GetWerkstattKaufpreis(stadtId, werkstattNr) * 3) / 4;
+            int grundpreis = SW.Dynamisch.GetRohstoffwithID(RohstoffIdAnPlatz(stadtId, werkstattNr)).GetWSKaufpreis();
+
+            return (grundpreis * 3) / 4;
         }
 
         /// <summary>

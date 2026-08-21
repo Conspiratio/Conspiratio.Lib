@@ -144,7 +144,9 @@ namespace Conspiratio.Lib.Tests
             sicher.SetKriminalitaetAufX(1);
             unsicher.SetKriminalitaetAufX(5);
 
-            for (int runde = 0; runde < 30; runde++)
+            // Der Wurf ist probabilistisch (20 % gegen 5 % Jahreschance), deshalb eine lange Messreihe:
+            // über wenige Runden entscheidet das Rauschen, nicht der Erwartungswert.
+            for (int runde = 0; runde < 100; runde++)
             {
                 SetzeJahresabsatz(GrosseStadt, 2000);
                 SetzeJahresabsatz(KleineStadt, 2000);
@@ -152,7 +154,8 @@ namespace Conspiratio.Lib.Tests
             }
 
             Assert.True(sicher.GetReichtum() > unsicher.GetReichtum(),
-                        "Bei gleichem Handel muss die sichere Stadt stärker profitieren.");
+                        "Bei gleichem Handel muss die sichere Stadt stärker profitieren (sicher: " +
+                        sicher.GetReichtum() + ", unsicher: " + unsicher.GetReichtum() + ").");
         }
 
         [Fact]
@@ -171,6 +174,29 @@ namespace Conspiratio.Lib.Tests
             }
 
             // SetReichtumToX klemmt nicht von sich aus - die Methode muss es tun.
+            Assert.Equal(SW.Statisch.GetMaxReichtum(), stadt.GetReichtum());
+        }
+
+        /// <summary>
+        /// Ergänzt den Fall, den der Test darüber nicht trifft: Er startet <b>am</b> Limit und prüft damit
+        /// nur den Frühausstieg. Hier steigt der Reichtum tatsächlich noch <b>auf</b> das Limit und bleibt
+        /// dann stehen – das ist die Grenze, an der ein Abbruch um eins danebenliegen könnte.
+        /// </summary>
+        [Fact]
+        public void Der_Reichtum_steigt_genau_bis_auf_die_Obergrenze()
+        {
+            TestSpielwelt.Starte(seed: 1);
+
+            var stadt = SW.Dynamisch.GetStadtwithID(GrosseStadt);
+            stadt.SetReichtumToX(SW.Statisch.GetMaxReichtum() - 1);
+            stadt.SetKriminalitaetAufX(1);
+
+            for (int runde = 0; runde < 60; runde++)
+            {
+                SetzeJahresabsatz(GrosseStadt, 100000);
+                SW.Dynamisch.ReichtumWachstumAktRundenEnde();
+            }
+
             Assert.Equal(SW.Statisch.GetMaxReichtum(), stadt.GetReichtum());
         }
 
