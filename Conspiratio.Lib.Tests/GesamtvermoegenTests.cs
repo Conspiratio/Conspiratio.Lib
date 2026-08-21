@@ -1,5 +1,4 @@
-using System;
-
+using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
 using Xunit;
@@ -33,10 +32,11 @@ namespace Conspiratio.Lib.Tests
 
             int vermoegenMitWerkstatt = spieler.GetGesamtVermoegen(spielerId);
 
-            // Stadt 1, Platz 1 produziert Holz (Stufe 1) => Grundpreis 2000 (siehe
-            // HandelsbalancingTests.Der_erste_Betrieb_kostet_unveraendert_den_Grundpreis).
-            // GetGesamtVermoegen bewertet eine besessene Werkstatt mit 70 % dieses Grundpreises.
-            int erwarteteSteigerung = Convert.ToInt32(2000 * 0.7);
+            // Das Gesamtvermögen muss eine besessene Werkstatt genau mit dem Betrag zählen, den ihr
+            // Verkauf tatsächlich einbringt (HandelsManager.GetWerkstattVerkaufspreis) - nicht gegen
+            // eine fest eingetippte Zahl, sonst prüft der Test nur sich selbst statt die Übereinstimmung
+            // von Bewertung und echtem Verkaufserlös.
+            int erwarteteSteigerung = new HandelsManager().GetWerkstattVerkaufspreis(Stadt1, 1);
 
             Assert.Equal(vermoegenOhneWerkstatt + erwarteteSteigerung, vermoegenMitWerkstatt);
         }

@@ -113,9 +113,7 @@ namespace Conspiratio.Lib.Allgemein
         [PublicAPI]
         public int GetWerkstattVerkaufspreis(int stadtId, int werkstattNr)
         {
-            int grundpreis = SW.Dynamisch.GetRohstoffwithID(RohstoffIdAnPlatz(stadtId, werkstattNr)).GetWSKaufpreis();
-
-            return (grundpreis * 3) / 4;
+            return SW.Dynamisch.GetRohstoffwithID(RohstoffIdAnPlatz(stadtId, werkstattNr)).GetWSVerkaufspreis();
         }
 
         /// <summary>

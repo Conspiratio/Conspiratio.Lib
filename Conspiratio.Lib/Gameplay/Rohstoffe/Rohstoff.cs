@@ -98,6 +98,18 @@ namespace Conspiratio.Lib.Gameplay.Rohstoffe
             return _WSKaufpreis;
         }
 
+        /// <summary>
+        /// Erlös beim Verkauf einer Werkstätte dieser Ware: drei Viertel des Kaufpreises. Die Regel
+        /// steht hier statt in der Managerschicht, weil Kauf- und Verkaufswert derselben Ware
+        /// zusammengehören - so können Vermögensbewertung (<see cref="Gameplay.Personen.HumSpieler.GetGesamtVermoegen"/>)
+        /// und der tatsächliche Verkauf (<see cref="Allgemein.HandelsManager.GetWerkstattVerkaufspreis"/>)
+        /// nicht mehr auseinanderlaufen.
+        /// </summary>
+        public int GetWSVerkaufspreis()
+        {
+            return (_WSKaufpreis * 3) / 4;
+        }
+
         public int GetWSEinzelpreis()
         {
             return _WSEinzelpreis;

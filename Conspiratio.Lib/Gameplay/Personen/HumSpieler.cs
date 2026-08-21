@@ -468,7 +468,6 @@ namespace Conspiratio.Lib.Gameplay.Personen
         public override int GetGesamtVermoegen(int spielerID)
         {
             int gesamtVermoegen = 0;
-            double factorWertminderung = 0.7;  // Der Faktor stellt die Wertminderung einer Werkstatt dar (sofern sie verkauft werden würde)
 
             gesamtVermoegen += Taler;  // Bargeld
 
@@ -487,7 +486,10 @@ namespace Conspiratio.Lib.Gameplay.Personen
                     // Werkstätten
                     if (_spielerHatInStadtXWerkstaettenY[i, j].GetEnabled() == true)
                     {
-                        gesamtVermoegen += Convert.ToInt32(SW.Dynamisch.GetRohstoffwithID(SW.Dynamisch.GetStadtwithID(i).GetSingleRohstoff(j + 1)).GetWSKaufpreis() * factorWertminderung);
+                        // Bewertung mit dem tatsächlichen Verkaufserlös (siehe Rohstoff.GetWSVerkaufspreis),
+                        // damit Vermögensbewertung und echter Verkauf (HandelsManager.GetWerkstattVerkaufspreis)
+                        // nicht auseinanderlaufen.
+                        gesamtVermoegen += SW.Dynamisch.GetRohstoffwithID(SW.Dynamisch.GetStadtwithID(i).GetSingleRohstoff(j + 1)).GetWSVerkaufspreis();
                     }
 
                     // Rohstoffe. _hatInStadtXMengeYRohstoffe ist über [stadtID, rohID] indiziert (wie
