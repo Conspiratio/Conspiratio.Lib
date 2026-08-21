@@ -1,3 +1,4 @@
+using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Gameplay.Gebiete;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
@@ -83,6 +84,110 @@ namespace Conspiratio.Lib.Tests
             // Gleicher Vorrat, halber Bedarf => doppelter Abschlag: 10 % gegen 20 %.
             Assert.Equal(7, gross);
             Assert.Equal(6, klein);
+        }
+
+        /// <summary>
+        /// Setzt genau <paramref name="anzahl"/> Werkstätten des aktiven Spielers auf aktiv und alle
+        /// übrigen auf inaktiv. Gültige Stadt-IDs sind 1 bis <c>GetMaxStadtID() - 1</c>.
+        /// </summary>
+        private static void SetzeWerkstaetten(int anzahl)
+        {
+            var spieler = SW.Dynamisch.GetAktHum();
+            int gesetzt = 0;
+
+            for (int stadtId = 1; stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
+            {
+                for (int nr = 1; nr <= SW.Statisch.GetMaxWerkstaettenProStadt(); nr++)
+                {
+                    bool aktiv = gesetzt < anzahl;
+                    spieler.GetSpielerHatInStadtXWerkstaettenY(nr, stadtId).SetEnabled(aktiv);
+
+                    if (aktiv)
+                        gesetzt++;
+                }
+            }
+        }
+
+        [Fact]
+        public void Der_erste_Betrieb_kostet_unveraendert_den_Grundpreis()
+        {
+            TestSpielwelt.Starte();
+            SetzeWerkstaetten(0);
+
+            // Stadt 1, Platz 1 produziert Holz (Stufe 1) => Grundpreis 2000.
+            Assert.Equal(2000, new HandelsManager().GetWerkstattKaufpreis(GrosseStadt, 1));
+        }
+
+        /// <summary>
+        /// Die Staffelung rechnet in Ganzzahlen und schneidet dabei je Schritt ab; das Ergebnis liegt
+        /// daher etwas unter <c>2000 * 1,25^n</c>. Geprüft wird gegen die tatsächliche Schrittfolge.
+        /// </summary>
+        [Theory]
+        [InlineData(0, 2000)]
+        [InlineData(4, 4882)]
+        [InlineData(9, 14895)]
+        [InlineData(14, 45452)]
+        public void Jeder_weitere_Betrieb_wird_teurer(int besessen, int erwarteterPreis)
+        {
+            TestSpielwelt.Starte();
+            SetzeWerkstaetten(besessen);
+
+            Assert.Equal(erwarteterPreis, new HandelsManager().GetWerkstattKaufpreis(GrosseStadt, 1));
+        }
+
+        /// <summary>
+        /// Ohne Deckel liefe <c>int</c> ab etwa dem 62. Betrieb über – besitzbar sind 84.
+        /// </summary>
+        [Fact]
+        public void Jenseits_des_Deckels_bleibt_der_Preis_endlich()
+        {
+            TestSpielwelt.Starte();
+            SetzeWerkstaetten(84);
+
+            int preis = new HandelsManager().GetWerkstattKaufpreis(GrosseStadt, 1);
+
+            Assert.Equal(173382, preis);
+        }
+
+        [Fact]
+        public void Der_Zaehler_erfasst_Betriebe_ueber_Stadtgrenzen_hinweg()
+        {
+            TestSpielwelt.Starte();
+            SetzeWerkstaetten(0);
+
+            var spieler = SW.Dynamisch.GetAktHum();
+            spieler.GetSpielerHatInStadtXWerkstaettenY(1, GrosseStadt).SetEnabled(true);
+            spieler.GetSpielerHatInStadtXWerkstaettenY(3, KleineStadt).SetEnabled(true);
+
+            Assert.Equal(2, spieler.ZaehleWerkstaetten());
+        }
+
+        [Fact]
+        public void Deaktivierte_Plaetze_zaehlen_nicht_mit()
+        {
+            TestSpielwelt.Starte();
+            SetzeWerkstaetten(5);
+
+            SW.Dynamisch.GetAktHum().GetSpielerHatInStadtXWerkstaettenY(1, GrosseStadt).SetEnabled(false);
+
+            Assert.Equal(4, SW.Dynamisch.GetAktHum().ZaehleWerkstaetten());
+        }
+
+        /// <summary>
+        /// Der Verkaufspreis bleibt an den Kaufpreis gekoppelt (¾) und erbt die Staffelung damit
+        /// automatisch. Beabsichtigt: Wer verkauft, bekommt anteilig zurück, was er bezahlt hat. Eine
+        /// Rückkauf-Arbitrage entsteht nicht, weil ¾ kleiner als 1 ist.
+        /// </summary>
+        [Fact]
+        public void Der_Verkaufspreis_folgt_der_Staffelung()
+        {
+            TestSpielwelt.Starte();
+            SetzeWerkstaetten(4);
+
+            var handel = new HandelsManager();
+
+            Assert.Equal(4882, handel.GetWerkstattKaufpreis(GrosseStadt, 1));
+            Assert.Equal(4882 * 3 / 4, handel.GetWerkstattVerkaufspreis(GrosseStadt, 1));
         }
     }
 }

@@ -1,3 +1,5 @@
+using System;
+
 using Conspiratio.Lib.Gameplay.Niederlassung;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
@@ -14,6 +16,19 @@ namespace Conspiratio.Lib.Allgemein
     public class HandelsManager
     {
         #region Werkstätten
+
+        /// <summary>
+        /// Aufschlag je bereits besessenem Betrieb, in Prozent des bisherigen Preises (125 = +25 %).
+        /// Balancing-Startwert – siehe Spec „Handelsbalancing".
+        /// </summary>
+        public const int SteigerungProzent = 125;
+
+        /// <summary>
+        /// Obergrenze der Staffelstufen. Zwingend als Überlaufschutz: Ohne Deckel überschreitet
+        /// <c>2000 * 1,25^n</c> ab etwa dem 62. Betrieb <c>int.MaxValue</c>, und 84 sind besitzbar.
+        /// Beim Kalibrieren nicht ersatzlos anheben.
+        /// </summary>
+        public const int MaxSteigerungsstufen = 20;
 
         [PublicAPI]
         public int RohstoffIdAnPlatz(int stadtId, int werkstattNr)
@@ -60,10 +75,24 @@ namespace Conspiratio.Lib.Allgemein
             return false;
         }
 
+        /// <summary>
+        /// Kaufpreis des Werkstattplatzes, gestaffelt nach der Zahl der reichsweit bereits besessenen
+        /// Betriebe. Der erste bleibt beim Grundpreis der Ware; jeder weitere kostet
+        /// <see cref="SteigerungProzent"/> des vorherigen.
+        ///
+        /// Bewusst als Ganzzahlschleife statt <c>Math.Pow</c>: exakt, deterministisch und ohne
+        /// Gleitkomma im Kern der Ökonomie – E2E-Läufe müssen seed-reproduzierbar bleiben.
+        /// </summary>
         [PublicAPI]
         public int GetWerkstattKaufpreis(int stadtId, int werkstattNr)
         {
-            return SW.Dynamisch.GetRohstoffwithID(RohstoffIdAnPlatz(stadtId, werkstattNr)).GetWSKaufpreis();
+            int preis = SW.Dynamisch.GetRohstoffwithID(RohstoffIdAnPlatz(stadtId, werkstattNr)).GetWSKaufpreis();
+            int besessen = Math.Min(SW.Dynamisch.GetAktHum().ZaehleWerkstaetten(), MaxSteigerungsstufen);
+
+            for (int i = 0; i < besessen; i++)
+                preis = (preis * SteigerungProzent) / 100;
+
+            return preis;
         }
 
         [PublicAPI]

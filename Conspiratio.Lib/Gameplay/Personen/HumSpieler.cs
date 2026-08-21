@@ -294,6 +294,31 @@ namespace Conspiratio.Lib.Gameplay.Personen
         }
         #endregion
 
+        #region ZaehleWerkstaetten
+        /// <summary>
+        /// Zahl der aktiven Werkstätten dieses Spielers über alle Städte. Grundlage der Kaufpreis-
+        /// staffelung in <c>HandelsManager.GetWerkstattKaufpreis</c>.
+        ///
+        /// Das Feld ist als <c>[stadtID, werkstattIndex]</c> mit 0-basiertem Werkstattindex angelegt –
+        /// anders als der öffentliche Zugriff, der 1-basiert zählt und die Parameter vertauscht.
+        /// </summary>
+        public int ZaehleWerkstaetten()
+        {
+            int anzahl = 0;
+
+            for (int stadtId = 1; stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
+            {
+                for (int i = 0; i < SW.Statisch.GetMaxWerkstaettenProStadt(); i++)
+                {
+                    if (_spielerHatInStadtXWerkstaettenY[stadtId, i].GetEnabled())
+                        anzahl++;
+                }
+            }
+
+            return anzahl;
+        }
+        #endregion
+
         #region Produktionsslot
         public Produktionsslot GetProduktionsslot(int stadtID, int nr0Oder1)
         {
