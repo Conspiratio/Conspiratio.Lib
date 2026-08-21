@@ -38,6 +38,18 @@ namespace Conspiratio.Lib.Gameplay.Gebiete
         private int[] _rohstoffVorrat;
         private int[] _rohstoffPreis;
 
+        /// <summary>
+        /// Preisabschlag in Prozent je Jahresbedarf, der als Überhang im Stadtlager liegt.
+        /// Balancing-Startwert – siehe Spec „Handelsbalancing".
+        /// </summary>
+        public const int AbschlagJeBedarfsjahrProzent = 10;
+
+        /// <summary>
+        /// Obergrenze des Mengenabschlags. Sie ersetzt den früheren <c>preisMin</c>-Boden: Dieser lag
+        /// je nach Ware nur ~12 % unter dem Standardpreis und machte den Abschlag damit folgenlos.
+        /// </summary>
+        public const int MaxAbschlagProzent = 50;
+
         #endregion
 
         #region Konstruktor
@@ -105,15 +117,25 @@ namespace Conspiratio.Lib.Gameplay.Gebiete
 
         #region Getter und Setter
 
+        /// <summary>
+        /// Der Marktpreis der Ware in dieser Stadt: Basispreis abzüglich eines Mengenabschlags, der sich
+        /// danach richtet, wie viele Jahre lokalen Bedarfs bereits als Überhang im Stadtlager liegen.
+        ///
+        /// Der Bezug auf <c>Einwohner / 10</c> (denselben Verbrauch, den
+        /// <c>DynamischeSpieldaten.RohBedarfAktRundenEnde</c> jährlich abzieht) lässt den Abschlag mit der
+        /// Stadtgröße skalieren: Ein großer Markt verkraftet mehr Absatz als ein kleiner.
+        ///
+        /// Bewusst **ohne** <c>preisMin</c>-Klemme – die begrenzt den Basispreis in den Settern. Als Boden
+        /// des Abschlags dient <see cref="MaxAbschlagProzent"/>.
+        /// </summary>
         public int GetRohstoffPreisVonIDX(int X)
         {
-            int temp = _rohstoffPreis[X];
-            temp -= Convert.ToInt32(_rohstoffVorrat[X] / 1000);
+            int jahresbedarf = Math.Max(1, _einwohner / 10);
 
-            if (temp < SW.Dynamisch.GetRohstoffwithID(X).GetPreisMin())
-                temp = SW.Dynamisch.GetRohstoffwithID(X).GetPreisMin();
+            int abschlagProzent = Math.Min(MaxAbschlagProzent,
+                                           (_rohstoffVorrat[X] * AbschlagJeBedarfsjahrProzent) / jahresbedarf);
 
-            return temp;
+            return (_rohstoffPreis[X] * (100 - abschlagProzent)) / 100;
         }
 
         public void SetRohstoffPreisVonIDXToY(int X, int Y)
