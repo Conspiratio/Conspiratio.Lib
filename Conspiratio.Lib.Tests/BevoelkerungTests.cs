@@ -1,3 +1,4 @@
+using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
 using Xunit;
@@ -82,6 +83,119 @@ namespace Conspiratio.Lib.Tests
             SW.Dynamisch.EinwohnerWachstumAktRundenEnde();
 
             Assert.Equal(DynamischeSpieldaten.MindestEinwohner, stadt.GetEinwohner());
+        }
+
+        private const int Korn = 1;
+
+        /// <summary>
+        /// Trägt einen Jahresabsatz in der Stadt ein, so wie ihn <c>VerkaufeRohstoff</c> hinterlässt –
+        /// ohne den vollen Handelsweg nachzuspielen.
+        /// </summary>
+        private static void SetzeJahresabsatz(int stadtId, int menge)
+        {
+            SW.Dynamisch.GetAktHum().SetEinVerkaeufeInStadtXVonRohstoffIDYAufZ(stadtId, Korn, menge);
+        }
+
+        [Fact]
+        public void Ohne_Handel_steigt_der_Reichtum_nicht()
+        {
+            TestSpielwelt.Starte(seed: 1);
+
+            var stadt = SW.Dynamisch.GetStadtwithID(GrosseStadt);
+            SetzeJahresabsatz(GrosseStadt, 0);
+            stadt.SetReichtumToX(4);
+
+            for (int runde = 0; runde < 20; runde++)
+                SW.Dynamisch.ReichtumWachstumAktRundenEnde();
+
+            Assert.Equal(4, stadt.GetReichtum());
+        }
+
+        [Fact]
+        public void Reger_Handel_macht_die_Stadt_reicher()
+        {
+            TestSpielwelt.Starte(seed: 1);
+
+            var stadt = SW.Dynamisch.GetStadtwithID(GrosseStadt);
+            stadt.SetReichtumToX(3);
+            stadt.SetKriminalitaetAufX(1);
+
+            // Der Wurf ist probabilistisch, deshalb über mehrere Runden prüfen statt über eine.
+            for (int runde = 0; runde < 20; runde++)
+            {
+                SetzeJahresabsatz(GrosseStadt, 2400);
+                SW.Dynamisch.ReichtumWachstumAktRundenEnde();
+            }
+
+            Assert.True(stadt.GetReichtum() > 3,
+                        "Zwanzig Jahre regen Handels müssen den Reichtum der Stadt heben.");
+        }
+
+        [Fact]
+        public void Kriminalitaet_bremst_den_Reichtumszuwachs()
+        {
+            TestSpielwelt.Starte(seed: 1);
+
+            var sicher = SW.Dynamisch.GetStadtwithID(GrosseStadt);
+            var unsicher = SW.Dynamisch.GetStadtwithID(KleineStadt);
+
+            sicher.SetReichtumToX(3);
+            unsicher.SetReichtumToX(3);
+            sicher.SetKriminalitaetAufX(1);
+            unsicher.SetKriminalitaetAufX(5);
+
+            for (int runde = 0; runde < 30; runde++)
+            {
+                SetzeJahresabsatz(GrosseStadt, 2000);
+                SetzeJahresabsatz(KleineStadt, 2000);
+                SW.Dynamisch.ReichtumWachstumAktRundenEnde();
+            }
+
+            Assert.True(sicher.GetReichtum() > unsicher.GetReichtum(),
+                        "Bei gleichem Handel muss die sichere Stadt stärker profitieren.");
+        }
+
+        [Fact]
+        public void Der_Reichtum_ueberschreitet_die_Obergrenze_nie()
+        {
+            TestSpielwelt.Starte(seed: 1);
+
+            var stadt = SW.Dynamisch.GetStadtwithID(GrosseStadt);
+            stadt.SetReichtumToX(SW.Statisch.GetMaxReichtum());
+            stadt.SetKriminalitaetAufX(1);
+
+            for (int runde = 0; runde < 40; runde++)
+            {
+                SetzeJahresabsatz(GrosseStadt, 100000);
+                SW.Dynamisch.ReichtumWachstumAktRundenEnde();
+            }
+
+            // SetReichtumToX klemmt nicht von sich aus - die Methode muss es tun.
+            Assert.Equal(SW.Statisch.GetMaxReichtum(), stadt.GetReichtum());
+        }
+
+        /// <summary>
+        /// Hält die bindende Aufrufreihenfolge fest: <c>RohBedarfAktRundenEnde</c> nullt die
+        /// Verkaufsmengen. Liefe es zuerst, misst das Reichtumswachstum dauerhaft ein Volumen von null
+        /// und wäre wirkungslos. Dieser Test schlägt an, falls die Reihenfolge je vertauscht wird.
+        /// </summary>
+        [Fact]
+        public void Nach_der_Vorratsbuchung_ist_das_Handelsvolumen_verbraucht()
+        {
+            TestSpielwelt.Starte(seed: 1);
+
+            var stadt = SW.Dynamisch.GetStadtwithID(GrosseStadt);
+            stadt.SetReichtumToX(3);
+            stadt.SetKriminalitaetAufX(1);
+
+            for (int runde = 0; runde < 20; runde++)
+            {
+                SetzeJahresabsatz(GrosseStadt, 2400);
+                SW.Dynamisch.RohBedarfAktRundenEnde();      // verbraucht und nullt die Menge
+                SW.Dynamisch.ReichtumWachstumAktRundenEnde();
+            }
+
+            Assert.Equal(3, stadt.GetReichtum());
         }
     }
 }

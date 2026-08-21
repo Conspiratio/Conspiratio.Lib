@@ -657,6 +657,18 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         public const int MaxEinwohner = 12000;
 
         /// <summary>
+        /// Abgesetzte Stückzahl je Prozentpunkt Chance auf einen Reichtumspunkt. 100 bedeutet: Ein
+        /// Jahresabsatz von 2 400 Stück ergibt 24 Prozentpunkte.
+        /// </summary>
+        public const int HandelsvolumenJeReichtumsChance = 100;
+
+        /// <summary>Abzug auf die Chance je Punkt Kriminalität – Unsicherheit schreckt Kaufleute ab.</summary>
+        public const int KriminalitaetReichtumsMalus = 3;
+
+        /// <summary>Obergrenze der Jahreschance, damit auch ein Riesenmarkt nicht jedes Jahr zulegt.</summary>
+        public const int MaxReichtumsChance = 40;
+
+        /// <summary>
         /// Lässt die Städte wachsen. Ohne dies kennt die Einwohnerzahl nur eine Richtung: Der
         /// <c>KatastrophenManager</c> senkt sie, niemand hebt sie je an – über eine lange Partie
         /// schrumpfen damit alle Märkte, und mit ihnen der Warenabsatz.
@@ -684,6 +696,57 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
                     neu = MaxEinwohner;
 
                 stadt.SetEinwohnerAufX(neu);
+            }
+        }
+
+        /// <summary>
+        /// Lässt den Reichtum einer Stadt mit ihrem Handel wachsen. Wie die Einwohnerzahl kannte auch
+        /// der Reichtum bisher nur eine Richtung: Der <c>KatastrophenManager</c> senkt ihn, angehoben
+        /// hat ihn nie jemand.
+        ///
+        /// Gewürfelt statt aufsummiert, weil <c>Reichtum</c> ein kleiner Ganzzahlwert ist (Obergrenze
+        /// <c>GetMaxReichtum()</c> = 14): Ein Bruchteil-Zähler für langsames Wachstum wäre ein neues
+        /// serialisiertes Feld und damit ein Savegame-Thema.
+        ///
+        /// **Muss vor <see cref="RohBedarfAktRundenEnde"/> laufen** – jenes bucht die Verkaufsmengen in
+        /// den Stadtvorrat und nullt sie danach. Umgekehrt gerufen misst diese Methode dauerhaft null.
+        /// </summary>
+        public void ReichtumWachstumAktRundenEnde()
+        {
+            for (int stadtId = 1; stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
+            {
+                Stadt stadt = GetStadtwithID(stadtId);
+
+                if (stadt.GetReichtum() >= SW.Statisch.GetMaxReichtum())
+                    continue;
+
+                // Handelsvolumen der Stadt in diesem Jahr. Einkaeufe stehen negativ in derselben Zahl
+                // (KaufeRohstoff bucht -gekauft), deshalb der Boden bei 0.
+                int volumen = 0;
+
+                for (int spielerId = 1; spielerId <= GetAktivSpielerAnzahl(); spielerId++)
+                {
+                    HumSpieler spieler = GetHumWithID(spielerId);
+
+                    if (spieler == null)
+                        continue;
+
+                    for (int rohId = 1; rohId < SW.Statisch.GetMaxRohID(); rohId++)
+                        volumen += spieler.GetEinVerkaeufeInStadtXVonRohstoffIDY(stadtId, rohId);
+                }
+
+                if (volumen < 0)
+                    volumen = 0;
+
+                int chance = volumen / HandelsvolumenJeReichtumsChance
+                           - stadt.GetKriminalitaet() * KriminalitaetReichtumsMalus;
+
+                if (chance > MaxReichtumsChance)
+                    chance = MaxReichtumsChance;
+
+                // SetReichtumToX klemmt nicht von sich aus, die Obergrenze steht oben in der Schleife.
+                if (chance > 0 && SW.Statisch.Rnd.Next(0, 100) < chance)
+                    stadt.SetReichtumToX(stadt.GetReichtum() + 1);
             }
         }
 
