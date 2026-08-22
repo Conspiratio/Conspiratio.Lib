@@ -654,7 +654,11 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             NeuerSpielerStadtwahlkosten = 150;
 
             ChanceFuerKind = 3;
-            ChanceFuerKindStirbt = 10;
+            // Kehrwert der Wahrscheinlichkeit, mit der ein Kind je Jahr am frühen Kindestod stirbt:
+            // 33 entspricht rund 3 %. Der ursprüngliche Wert 10 (= 10 % pro Jahr, lebenslang) ließ ein
+            // Kind das 18. Lebensjahr nur mit etwa 15 % Wahrscheinlichkeit erreichen. Im WinForms-Original
+            // lief die Prüfschleife wegen eines falschen Startindex nie – der Wert war nie erprobt.
+            ChanceFuerKindStirbt = 33;
 
             StartGold = 1000;
             Startlagerraum = 30;

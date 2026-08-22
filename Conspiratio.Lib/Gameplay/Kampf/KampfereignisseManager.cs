@@ -13,6 +13,21 @@ namespace Conspiratio.Lib.Gameplay.Kampf
     public class KampfereignisseManager
     {
         /// <summary>
+        /// Gehört die Spieler-ID einem menschlichen Spieler? Menschen tragen die IDs 1 bis
+        /// <c>GetMinKIID() - 1</c>, KIs alles ab <c>GetMinKIID()</c>.
+        ///
+        /// Die Null ist ausdrücklich kein Mensch: Sie steht für "keine Beteiligung" – ein Überfall ohne
+        /// Verteidiger trägt die Verteidiger-ID 0 (siehe <see cref="KampfErgebnis.SpielerIDVerteidiger"/>).
+        /// Eine Prüfung über <c>id &lt;= GetMinKIID()</c> zählte diesen Fall fälschlich als menschliche
+        /// Beteiligung, wodurch jeder wehrlose KI-Überfall trotz abgeschalteter KI-Militärereignisse
+        /// erschien – und zählte obendrein die KI mit genau <c>GetMinKIID()</c> zu den Menschen.
+        /// </summary>
+        public static bool IstMenschlicherSpieler(int spielerId)
+        {
+            return spielerId >= 1 && spielerId < SW.Statisch.GetMinKIID();
+        }
+
+        /// <summary>
         /// Wickelt die Kampfereignisse ab und gibt die Meldungen (KI-Aktionen und Kampf-Zusammenfassungen)
         /// in der Reihenfolge des Originals zurück. Gab es nichts, enthält die Liste eine Standardmeldung.
         /// </summary>
@@ -30,14 +45,14 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             foreach (var stuetzpunkt in SW.Dynamisch.GetStuetzpunkte())
             {
                 string angeworben = stuetzpunkt.GeworbeneTruppenEinstellen();
-                if (!string.IsNullOrEmpty(angeworben) && stuetzpunkt.Besitzer < SW.Statisch.GetMinKIID())
+                if (!string.IsNullOrEmpty(angeworben) && IstMenschlicherSpieler(stuetzpunkt.Besitzer))
                     meldungen.Add(angeworben);
             }
 
             // KI-Aktionen je KI-Stützpunkt ausführen (menschliche Stützpunkte werden übersprungen).
             foreach (var stuetzpunkt in SW.Dynamisch.GetStuetzpunkte())
             {
-                if (stuetzpunkt.Besitzer <= SW.Statisch.GetMinKIID())
+                if (IstMenschlicherSpieler(stuetzpunkt.Besitzer))
                     continue;
 
                 string text = stuetzpunkt.Art == EnumStuetzpunktArt.Zollburg
@@ -60,9 +75,9 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 // Kampf immer anwenden; die Zusammenfassung nur zeigen, wenn KI-Militärereignisse gewünscht sind
                 // oder ein menschlicher Spieler beteiligt ist (Angreifer, Verteidiger oder überfallene Karawane).
                 bool menschlicherSpielerBeteiligt =
-                    ergebnis.SpielerIDAngreifer <= SW.Statisch.GetMinKIID() ||
-                    ergebnis.SpielerIDVerteidiger <= SW.Statisch.GetMinKIID() ||
-                    (ergebnis.Karawane != null && ergebnis.Karawane.SpielerID <= SW.Statisch.GetMinKIID());
+                    IstMenschlicherSpieler(ergebnis.SpielerIDAngreifer) ||
+                    IstMenschlicherSpieler(ergebnis.SpielerIDVerteidiger) ||
+                    (ergebnis.Karawane != null && IstMenschlicherSpieler(ergebnis.Karawane.SpielerID));
 
                 // Die Zusammenfassung enthält Spielernamen in |...|-Markern (die Markup-Konvention der Lib).
                 // Sie bleiben erhalten, damit die Ansicht die Namen hervorheben kann (fett, menschliche Spieler
@@ -106,7 +121,7 @@ namespace Conspiratio.Lib.Gameplay.Kampf
             stuetzpunkt.MoralBonusBezahlt = 0;
 
             // Nur menschliche Besitzer bezahlen (und erhalten einen ungenutzten Bonus zurück).
-            if (stuetzpunkt.Besitzer >= SW.Statisch.GetMinKIID())
+            if (!IstMenschlicherSpieler(stuetzpunkt.Besitzer))
                 return null;
 
             if (!erstatten)

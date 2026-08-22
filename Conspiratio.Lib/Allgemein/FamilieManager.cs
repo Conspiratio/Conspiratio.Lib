@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 using Conspiratio.Lib.Gameplay.Kirche;
@@ -116,19 +116,32 @@ namespace Conspiratio.Lib.Allgemein
         }
 
         /// <summary>
+        /// Anteil des Gesamtvermögens (in Prozent), den der Basispreis des teuersten angebotenen Geschenks
+        /// höchstens ausmachen darf.
+        /// </summary>
+        private const int MaxAnteilVermoegenTeuresGeschenkProzent = 10;
+
+        /// <summary>
         /// Erzeugt die drei zufälligen Werbegeschenke (billig, mittelteuer, teuer) samt Preisen für dieses Jahr.
+        ///
+        /// Die teure Stufe reicht von 1 000 bis 10 000 Talern Basispreis. Gleichverteilt gezogen bekam damit
+        /// auch ein bettelarmer Spieler ein königliches Diadem für über 10 000 Taler angeboten – bei einem
+        /// Nutzen, der längst nicht im selben Maß mitwächst. Die Auswahl der teuren Stufe richtet sich
+        /// deshalb nach dem Vermögen des Spielers; das billigste Geschenk der Stufe bleibt immer im Angebot,
+        /// damit es auch für einen mittellosen Spieler drei Wünsche zur Auswahl gibt.
         /// </summary>
         [PublicAPI]
         public GeschenkAuswahl ErstelleGeschenkAuswahl()
         {
             var partner = SW.Dynamisch.GetKIwithID(AktHum.WirbtUmSpielerID);
             int kiTaler = partner.GetTaler();
-            int zuschlag = Convert.ToInt32(0.001 * AktHum.GetGesamtVermoegen(SW.Dynamisch.GetAktiverSpieler()));
+            int gesamtvermoegen = AktHum.GetGesamtVermoegen(SW.Dynamisch.GetAktiverSpieler());
+            int zuschlag = Convert.ToInt32(0.001 * gesamtvermoegen);
 
             int[] geschenkIds = new int[4];
             geschenkIds[1] = SW.Statisch.Rnd.Next(1, SW.Statisch.GetWerbegeschenkGrenzeBillig());
             geschenkIds[2] = SW.Statisch.Rnd.Next(SW.Statisch.GetWerbegeschenkGrenzeBillig(), SW.Statisch.GetWerbegeschenkGrenzeMittelteuer());
-            geschenkIds[3] = SW.Statisch.Rnd.Next(SW.Statisch.GetWerbegeschenkGrenzeMittelteuer(), SW.Statisch.GetMaxWerbegeschenke());
+            geschenkIds[3] = WaehleTeuresGeschenk(gesamtvermoegen);
 
             var geschenke = new List<WerbeGeschenk>();
 
@@ -140,6 +153,30 @@ namespace Conspiratio.Lib.Allgemein
             }
 
             return new GeschenkAuswahl(partner.GetKompletterName(), geschenke, SW.Statisch.GetWerbegeschenk(0).Text);
+        }
+
+        /// <summary>
+        /// Wählt das Geschenk der teuren Stufe. Berücksichtigt werden nur Geschenke, deren Basispreis
+        /// <see cref="MaxAnteilVermoegenTeuresGeschenkProzent"/> des Gesamtvermögens nicht übersteigt;
+        /// reicht das für keines, bleibt das billigste der Stufe übrig.
+        /// </summary>
+        private static int WaehleTeuresGeschenk(int gesamtvermoegen)
+        {
+            int untergrenze = SW.Statisch.GetWerbegeschenkGrenzeMittelteuer();
+            int obergrenze = SW.Statisch.GetMaxWerbegeschenke();
+            long preisgrenze = (long)gesamtvermoegen * MaxAnteilVermoegenTeuresGeschenkProzent / 100;
+
+            // Die Tabelle ist innerhalb der Stufe nach Basispreis aufsteigend sortiert; gesucht ist der
+            // letzte Eintrag, den sich der Spieler noch leisten kann.
+            int letzterBezahlbarer = untergrenze;
+
+            for (int id = untergrenze; id < obergrenze; id++)
+            {
+                if (SW.Statisch.GetWerbegeschenk(id).Basispreis <= preisgrenze)
+                    letzterBezahlbarer = id;
+            }
+
+            return SW.Statisch.Rnd.Next(untergrenze, letzterBezahlbarer + 1);
         }
 
         /// <summary>

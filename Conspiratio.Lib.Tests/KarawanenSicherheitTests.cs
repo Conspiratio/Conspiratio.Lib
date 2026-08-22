@@ -1,4 +1,7 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+
+// Die Kampfeinheiten liegen aus Savegame-Kompatibilitaetsgruenden im Namespace Conspiratio.Kampf.
+using Conspiratio.Kampf;
 
 using Conspiratio.Lib.Gameplay.Kampf;
 using Conspiratio.Lib.Gameplay.Kampf.Einheiten;
@@ -90,6 +93,99 @@ namespace Conspiratio.Lib.Tests
             Kampfberechnung.ErhoeheVerteidigungDurchKarawanenSicherheit(kampf);
 
             Assert.Equal(100, kampf.MoralVerteidiger);
+        }
+
+        [Fact]
+        public void Ohne_Patrouille_stellt_die_billigste_Karawane_keine_eigenen_Wachen()
+        {
+            TestSpielwelt.Starte();
+
+            var kampf = ErzeugeKampfOhneVerteidigung(karawaneID: 0);  // Sicherheit 20
+
+            Kampfberechnung.ErhoeheVerteidigungDurchKarawanenSicherheit(kampf);
+
+            Assert.True(kampf.TruppenVerteidiger == null || kampf.TruppenVerteidiger.Count == 0);
+            Assert.Equal(0, kampf.SpielerIDVerteidiger);
+        }
+
+        [Theory]
+        [InlineData(1, 2, 50)]  // Sicherheit 30: 2 Wachen, Moral 50
+        [InlineData(2, 4, 60)]  // Sicherheit 40: 4 Wachen, Moral 60
+        public void Ohne_Patrouille_stellt_eine_gesicherte_Karawane_eigene_Wachen(int karawaneID, int erwarteteWachen, int erwarteteMoral)
+        {
+            TestSpielwelt.Starte();
+
+            var kampf = ErzeugeKampfOhneVerteidigung(karawaneID);
+
+            Kampfberechnung.ErhoeheVerteidigungDurchKarawanenSicherheit(kampf);
+
+            Assert.Equal(erwarteteWachen, kampf.TruppenVerteidiger.Count);
+            Assert.Equal(erwarteteWachen, kampf.TruppenVerteidiger.FindAll(e => e is KarawanenWache).Count);
+            Assert.Equal(erwarteteMoral, kampf.MoralVerteidiger);
+        }
+
+        [Fact]
+        public void Die_eigenen_Wachen_verteidigen_fuer_den_Besitzer_der_Karawane()
+        {
+            TestSpielwelt.Starte();
+
+            var kampf = ErzeugeKampfOhneVerteidigung(karawaneID: 2);
+
+            Kampfberechnung.ErhoeheVerteidigungDurchKarawanenSicherheit(kampf);
+
+            // Damit der Sieg der Wachen die Beute beim Besitzer laesst und nicht beim Angreifer.
+            Assert.Equal(kampf.Karawane.SpielerID, kampf.SpielerIDVerteidiger);
+            Assert.Equal(0, kampf.StuetzpunktIDVerteidiger);  // Die Wachen gehoeren zu keinem Stuetzpunkt
+        }
+
+        [Fact]
+        public void Eine_von_eigenen_Wachen_geschuetzte_Karawane_ergibt_sich_nicht_kampflos()
+        {
+            TestSpielwelt.Starte();
+
+            var kampf = ErzeugeKampfOhneVerteidigung(karawaneID: 2);
+            Kampfberechnung.ErhoeheVerteidigungDurchKarawanenSicherheit(kampf);
+            kampf.TruppenAngreifer.Add(new RaubRaeuber());
+
+            var ergebnis = new Kampfberechnung().BerechneKampfErgebnis(kampf);
+
+            Assert.DoesNotContain("keine Beschuetzer in Sicht", ergebnis.Zusammenfassung.Replace("ü", "ue"));
+            Assert.Contains("Wachen", ergebnis.Zusammenfassung);
+        }
+
+        [Fact]
+        public void Eine_ungesicherte_Karawane_ergibt_sich_weiterhin_kampflos()
+        {
+            TestSpielwelt.Starte();
+
+            var kampf = ErzeugeKampfOhneVerteidigung(karawaneID: 0);
+            Kampfberechnung.ErhoeheVerteidigungDurchKarawanenSicherheit(kampf);
+            kampf.TruppenAngreifer.Add(new RaubRaeuber());
+
+            var ergebnis = new Kampfberechnung().BerechneKampfErgebnis(kampf);
+
+            Assert.Contains("keine Beschuetzer in Sicht", ergebnis.Zusammenfassung.Replace("ü", "ue"));
+        }
+
+        /// <summary>Ein Ueberfall ohne jede Patrouille in der Naehe: kein verteidigender Stuetzpunkt, keine Truppen.</summary>
+        private static KampfObjekt ErzeugeKampfOhneVerteidigung(int karawaneID)
+        {
+            return new KampfObjekt
+            {
+                SpielerIDAngreifer = SW.Statisch.GetMinKIID(),
+                SpielerIDVerteidiger = 0,
+                MoralAngreifer = 50,
+                MoralVerteidiger = 0,
+                TruppenAngreifer = new List<Einheit>(),
+                TruppenVerteidiger = null,
+                StuetzpunktIDAngreifer = 1,
+                StuetzpunktIDVerteidiger = 0,
+                AktionIndexAngreifer = 0,
+                AktionIndexVerteidiger = 0,
+                LandID = LandWattern,
+                KampfArt = EnumKampfArt.KarawanenPluenderung,
+                Karawane = new KampfKarawane(1, StadtInWattern, karawaneID, 0, 0, 0, 0)
+            };
         }
 
         private static KampfObjekt ErzeugeKampfMitVerteidigung(int karawaneID, int moralVerteidiger)

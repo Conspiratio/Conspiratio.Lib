@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 using Conspiratio.Lib.Gameplay.Privilegien;
@@ -50,6 +50,63 @@ namespace Conspiratio.Lib.Allgemein
         public int GetRestlicheBauzeit(int stadtId)
         {
             return GetHaus(stadtId).GetRestlicheBauzeit();
+        }
+
+        /// <summary>
+        /// Anteil des Hauspreises (in Prozent), den ein abgekauftes Baujahr kostet. Bei einer Villa
+        /// (20 000 Taler, 6 Jahre Bauzeit) sind das 4 000 Taler je Jahr, für die vollen fünf abkaufbaren
+        /// Jahre also noch einmal der Preis des Hauses – eine Abkürzung für Ungeduldige, kein Schnäppchen.
+        /// </summary>
+        private const int BaubeschleunigungProzentProJahr = 20;
+
+        /// <summary>
+        /// Das Jahr, in dem der Wohnsitz bezugsfertig ist. Die Restbauzeit sinkt zu jedem Zugbeginn um eins
+        /// (siehe ZugNachrichtenManager), ein fertiger Wohnsitz liefert daher das laufende Jahr.
+        /// </summary>
+        [PublicAPI]
+        public int GetFertigstellungsjahr(int stadtId)
+        {
+            return SW.Dynamisch.GetAktuellesJahr() + GetRestlicheBauzeit(stadtId);
+        }
+
+        /// <summary>
+        /// Lässt sich der Bau noch beschleunigen? Nur, wenn ein Wohnsitz im Bau ist und dabei mehr als ein
+        /// Jahr zu gewinnen wäre – das letzte Baujahr bleibt immer stehen.
+        /// </summary>
+        [PublicAPI]
+        public bool KannBauBeschleunigen(int stadtId)
+        {
+            return HatHaus(stadtId) && GetRestlicheBauzeit(stadtId) > 1;
+        }
+
+        /// <summary>
+        /// Was es kostet, dem Baumeister alle Baujahre bis auf das letzte abzukaufen. Der Preis richtet sich
+        /// nach der Zahl der gesparten Jahre und dem Wert des Haustyps, reduziert um den Sparplan-Faktor.
+        /// </summary>
+        [PublicAPI]
+        public int GetBaubeschleunigungsPreis(int stadtId)
+        {
+            if (!KannBauBeschleunigen(stadtId))
+                return 0;
+
+            int gesparteJahre = GetRestlicheBauzeit(stadtId) - 1;
+            int hauspreis = SW.Statisch.GetHaus(GetHausID(stadtId)).Kaufpreis;
+
+            return Convert.ToInt32(gesparteJahre * hauspreis * (BaubeschleunigungProzentProJahr * 0.01) * GetReduzierungsFaktor());
+        }
+
+        /// <summary>
+        /// Besticht den Baumeister: zieht den Preis ab und kürzt die Restbauzeit auf ein Jahr. Der Wohnsitz
+        /// ist damit nicht sofort fertig, sondern zum nächsten Zugbeginn – wie ein regulärer letzter Bauabschnitt.
+        /// </summary>
+        [PublicAPI]
+        public void BeschleunigeBau(int stadtId)
+        {
+            if (!KannBauBeschleunigen(stadtId))
+                return;
+
+            SW.Dynamisch.GetAktHum().ErhoeheTaler(-GetBaubeschleunigungsPreis(stadtId));
+            GetHaus(stadtId).SetRestlicheBauzeit(1);
         }
 
         [PublicAPI]

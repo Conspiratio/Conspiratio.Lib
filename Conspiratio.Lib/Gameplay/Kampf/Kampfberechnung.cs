@@ -59,7 +59,15 @@ namespace Conspiratio.Lib.Gameplay.Kampf
 
             bool AngreiferBeginnt = false;
             bool KampfBeendet = false;
-            bool VerteidigerVorhanden = (kampf.StuetzpunktIDVerteidiger != 0);  // Gibt es Verteidigungstruppen (oder nur Angreifer und Karawane)?
+            // Gibt es Verteidigungstruppen (oder nur Angreifer und Karawane)? Üblicherweise steht dahinter ein
+            // verteidigender Stützpunkt; eine gut gesicherte Karawane stellt aber auch ohne Patrouille eigene
+            // Wachen (siehe ErhoeheVerteidigungDurchKarawanenSicherheit) – dann gibt es Truppen ohne Stützpunkt.
+            bool VerteidigerVorhanden = kampf.StuetzpunktIDVerteidiger != 0
+                                        || (kampf.TruppenVerteidiger != null && kampf.TruppenVerteidiger.Count > 0);
+
+            // Verteidigen ausschließlich die mitgeführten Wachen der Karawane, gibt es keinen Stützpunkt,
+            // dessen Name, Art oder Garnison abgefragt werden dürfte.
+            bool NurKarawanenWachenVerteidigen = VerteidigerVorhanden && kampf.StuetzpunktIDVerteidiger == 0;
 
             #region Bezeichnung der Truppen ermitteln
 
@@ -91,7 +99,12 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                 }
             }
 
-            if (VerteidigerVorhanden)
+            if (NurKarawanenWachenVerteidigen)
+            {
+                BezeichnungTruppenVerteidigerDativ = kampf.TruppenVerteidiger.Count == 1 ? "Wache" : "Wachen";
+                BezeichnungTruppenVerteidigerNominativ = kampf.TruppenVerteidiger.Count == 1 ? "Wache" : "Wachen";
+            }
+            else if (VerteidigerVorhanden)
             {
                 if (SW.Dynamisch.GetStuetzpunkte()[StuetzpunktIndexVerteidiger].Art == EnumStuetzpunktArt.Raeuberlager)
                 {
@@ -157,7 +170,14 @@ namespace Conspiratio.Lib.Gameplay.Kampf
 
                 Zusammenfassung += $"\nWarenwert der Karawane: {kampf.Karawane.Warenwert.ToStringGeld()}\n\n";
 
-                if (VerteidigerVorhanden)
+                if (NurKarawanenWachenVerteidigen)
+                {
+                    MoralVerteidigerAdjektiv = ErmittleMoralAdjektiv(kampf.MoralVerteidiger, (kampf.TruppenVerteidiger.Count > 1), true);
+
+                    Zusammenfassung += $"Doch die Karawane führt {kampf.TruppenVerteidiger.Count} {MoralVerteidigerAdjektiv} " +
+                                       $"{BezeichnungTruppenVerteidigerDativ} mit sich, die sich sofort zur Wehr setzen. Ein erbitterter Kampf entbrennt.\n\n";
+                }
+                else if (VerteidigerVorhanden)
                 {
                     MoralVerteidigerAdjektiv = ErmittleMoralAdjektiv(kampf.MoralVerteidiger, (kampf.TruppenVerteidiger.Count > 1), true);
 
@@ -602,7 +622,10 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                     SW.Dynamisch.GetStuetzpunkte()[ergebnis.StuetzpunktIDAngreifer - 1].Aktionen[ergebnis.AktionIndexAngreifer] = new ZollburgAktion(EnumAktionsartZollburg.Kein_Auftrag, 0, 0, ergebnis.StuetzpunktIDAngreifer, ergebnis.AktionIndexAngreifer, new List<Einheit>());
             }
 
-            if (ergebnis.SpielerIDVerteidiger > 0)  // Gibt es einen Verteidiger?
+            // Nur ein Stützpunkt hat Moral und Garnison zu aktualisieren. Die Wachen einer gesicherten Karawane
+            // verteidigen zwar für ihren Besitzer (SpielerIDVerteidiger), gehören aber zu keinem Stützpunkt –
+            // ihre Verluste werden deshalb bewusst nirgends abgezogen (siehe KarawanenWache).
+            if (ergebnis.StuetzpunktIDVerteidiger > 0)  // Gibt es einen verteidigenden Stützpunkt?
             {
                 // Verteidiger aktualisieren
                 SW.Dynamisch.GetStuetzpunkte()[ergebnis.StuetzpunktIDVerteidiger - 1].MoralTruppeInProzent = ergebnis.MoralVerteidiger;
@@ -976,6 +999,9 @@ namespace Conspiratio.Lib.Gameplay.Kampf
                                 KampfArt = EnumKampfArt.KarawanenPluenderung,
                                 Karawane = SW.Dynamisch.GetUeberfallOpferInLand(oSicherheit.LandID, SW.Dynamisch.GetStuetzpunkte()[oAktion.StuetzpunktID - 1].Besitzer)
                             };
+
+                            // Auch ohne Patrouille: eine gesicherte Karawane führt eigene Wachen mit.
+                            ErhoeheVerteidigungDurchKarawanenSicherheit(oKampf);
                         }
                         else
                         {
@@ -1109,20 +1135,46 @@ namespace Conspiratio.Lib.Gameplay.Kampf
         #endregion
 
         #region ErhoeheVerteidigungDurchKarawanenSicherheit
+        /// <summary>Basismoral der Wachen, die eine Karawane ohne fremde Hilfe ins Gefecht führt.</summary>
+        private const int BasismoralEigeneWachen = 40;
+
         /// <summary>
-        /// Verstärkt bei einem Karawanenüberfall die bereits vorhandene Verteidigung (Moral und Zusatztruppen)
-        /// abhängig von der Sicherheit der überfallenen Karawane. Die Sicherheit ist bereits über den höheren
-        /// Karawanen-Preis bezahlt, daher entstehen keine weiteren Kosten. Wirkt nur, wenn der Kampf ohnehin
-        /// eine Verteidigung hat (eine Zollburg-Patrouille bereits vorhanden ist); ohne Verteidiger ergibt sich
-        /// die Karawane kampflos, sodass kein Kampf im Sinne des Nutzers stattfindet.
+        /// Berücksichtigt bei einem Karawanenüberfall die bezahlte Sicherheit der überfallenen Karawane. Die
+        /// Sicherheit ist über den höheren Karawanen-Preis bereits bezahlt, daher entstehen keine weiteren Kosten.
+        ///
+        /// Zwei Fälle:
+        /// <list type="bullet">
+        /// <item>Eine Zollburg-Patrouille verteidigt bereits: Die Sicherheit gibt ihr einen Moralbonus und
+        /// stellt ihr zusätzliche Wachen zur Seite (+0/+1/+2).</item>
+        /// <item>Es ist keine Patrouille in der Nähe: Die Karawane führt ihre eigenen Wachen ins Gefecht
+        /// (0/2/4) statt sich kampflos zu ergeben. Verteidigt wird für den Besitzer der Karawane, damit ein
+        /// Sieg der Wachen die Ladung bei ihm belässt; einen Stützpunkt gibt es dabei nicht.</item>
+        /// </list>
+        /// Die billigste Stufe (Sicherheit 20) bleibt in beiden Fällen ohne Wirkung – sie ist der Referenzwert.
         /// </summary>
-        /// <param name="kampf">Der Kampf einer Karawanenplünderung mit bereits vorhandener Verteidigung</param>
+        /// <param name="kampf">Der Kampf einer Karawanenplünderung</param>
         public static void ErhoeheVerteidigungDurchKarawanenSicherheit(Kampf kampf)
         {
             int sicherheit = SW.Statisch.GetKarawane(kampf.Karawane.KarawaneID).Sicherheit;
 
             if (sicherheit <= 20)
                 return;  // Billigste Stufe: kein Bonus (Referenzwert, unverändertes Verhalten)
+
+            bool ohnePatrouille = kampf.StuetzpunktIDVerteidiger == 0;
+
+            if (ohnePatrouille)
+            {
+                // Ohne Patrouille sind die eigenen Wachen die gesamte Verteidigung, nicht nur eine Zugabe –
+                // entsprechend größer fällt ihre Zahl aus, sonst wäre der Kampf reine Formsache.
+                kampf.TruppenVerteidiger = new List<Einheit>();
+                kampf.SpielerIDVerteidiger = kampf.Karawane.SpielerID;
+                kampf.MoralVerteidiger = Math.Min(100, BasismoralEigeneWachen + (sicherheit - 20));  // 50/60
+
+                for (int i = 0; i < (sicherheit - 20) / 5; i++)  // 2/4 Wachen
+                    kampf.TruppenVerteidiger.Add(new KarawanenWache());
+
+                return;
+            }
 
             kampf.MoralVerteidiger = Math.Min(100, kampf.MoralVerteidiger + (sicherheit - 20) / 2);  // +0/+5/+10
 

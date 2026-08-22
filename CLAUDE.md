@@ -54,11 +54,15 @@ cache**:
 ```bash
 dotnet build                                          # 1. after bumping <Version>
 rm -rf ~/.nuget/packages/conspiratio.lib/<version>    # 2. NuGet won't re-extract a version it has
-dotnet restore --source "D:/Projekte/C# Projekte/Conspiratio.Lib/Conspiratio.Lib/bin/Debug"  # 3. from the harness
+dotnet restore --source "D:/Projekte/C# Projekte/Conspiratio.Lib/Conspiratio.Lib/bin/Debug"  # 3. see below
 ```
 
 Step 2 is the one that bites: rebuilding without purging leaves the old code in the cache and the Godot
 build silently keeps using it.
+
+Step 3 needs a **throwaway project that references the Lib as a `<PackageReference>` at the exact
+version**. A ProjectReference (as in `Conspiratio.Lib.Tests`) restores fine but leaves the global cache
+untouched — a silent no-op. Verify with `ls ~/.nuget/packages/conspiratio.lib/`.
 
 ## Tests
 
