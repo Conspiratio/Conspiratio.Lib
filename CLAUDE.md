@@ -87,6 +87,12 @@ the UI. Conventions that the suite depends on:
 - **Regression-compare a refactor against the original** over the whole input space. When
   `GetAmtsPrivilegien` was extracted to mirror the office conditions of `PrivilegienAktualisieren`, the
   suite compares both across all offices — that proved equivalence and now guards against drift.
+- **Draw random numbers unconditionally, then compare.** `if (chance > 0 && Rnd.Next(0, 100) < chance)`
+  consumes the shared `SW.Statisch.Rnd` only sometimes, so every later draw shifts with game state and
+  seeded runs stop reproducing. Draw first, branch after.
+- **Test across resource tiers** whenever a formula multiplies a per-good base price by a global counter.
+  Same-tier round-trips looked correct while a cross-tier buy/sell cycle printed +758 314 talers per
+  repetition — every existing test was single-tier and missed it.
 
 ## Exploring a change
 
@@ -155,6 +161,13 @@ Discovered the hard way; check these before designing around an assumption:
 - **Fixed-size arrays are a recurring bug source.** Several arrays were sized by a hard-coded number
   instead of the matching `GetMax…()` constant, which overflows once the game data grows
   (`GetFreieAemterFuerSpX`, `GetUntergebene`). When touching such code, size arrays from the constants.
+- **Two-dimensional player arrays don't share an index convention.** `_spielerHatInStadtXWerkstaettenY`
+  is `[stadtID, werkstattIndex]` with a **0-based** slot, while its accessor
+  `GetSpielerHatInStadtXWerkstaettenY(werkstaettenNr, stadtID)` swaps the parameters and takes the slot
+  **1-based**; `_hatInStadtXMengeYRohstoffe` is `[stadtID, rohID]`. Carrying one loop variable across
+  them produced two separate wealth bugs in `GetGesamtVermoegen`. Translate the index, never reuse it.
+- **City setters neither clamp nor share a naming scheme**: `SetReichtumToX` (no bound against
+  `GetMaxReichtum()`), `SetKriminalitaetAufX`, `SetEinwohnerAufX`. Callers own the limits.
 
 ### Savegame compatibility
 
