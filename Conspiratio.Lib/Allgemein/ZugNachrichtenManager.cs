@@ -17,6 +17,14 @@ namespace Conspiratio.Lib.Allgemein
     {
         private const int AnzahlGeschworene = 11;
 
+        /// <summary>Anteil des Gesamtvermögens, den das Überschreiten der Vermögensgrenze kostet.</summary>
+        private const double StrafanteilVermoegen = 0.15;
+
+        /// <summary>
+        /// Ab welchem Anteil der Vermögensgrenze (in Prozent) gewarnt wird, statt zu strafen.
+        /// </summary>
+        private const int WarnschwelleProzent = 80;
+
         /// <summary>
         /// Prüft die Gesetzesverstöße des aktiven Spielers (Höchstzahl Anwesen, maximale Taler,
         /// Schlösserverbot), verbucht Strafen und Deliktpunkte.
@@ -45,16 +53,34 @@ namespace Conspiratio.Lib.Allgemein
                 meldungen.Add("Ihr besitzt " + anzahlAnwesen + " Anwesen und habt damit die maximal erlaubte Anzahl\nan Anwesen überschritten. Ihr müsst daher " + geldabzug.ToStringGeld() + " Strafe zahlen");
             }
 
-            // #3 Maximale Taler
-            if (spieler.GetTaler() > SW.Dynamisch.GetGesetzX(3) * 100000)
+            // #3 Maximale Taler. Gemessen wird das *Gesamtvermögen*, nicht die Barschaft: bemessen wurde
+            // die Strafe schon immer daran, geprüft aber nur das Bargeld – wer sein Vermögen in Betrieben
+            // und Waren hielt, war von der einzigen vermögensproportionalen Bremse des Spiels ausgenommen.
+            int vermoegensgrenze = SW.Dynamisch.GetGesetzX(3) * 100000;
+            int vermoegen = spieler.GetGesamtVermoegen(SW.Dynamisch.GetAktiverSpieler());
+
+            if (vermoegen > vermoegensgrenze)
             {
                 spieler.ErhoeheGesetzXUmEins(3);
 
-                int geldabzug = Convert.ToInt32(spieler.GetGesamtVermoegen(SW.Dynamisch.GetAktiverSpieler()) * 0.15);
+                // Gepfändet wird aus der Barschaft, und nie mehr, als dort liegt: Strafe und
+                // Schuldenprozess laufen im Client im selben Zugbeginn ab (Kontor.ZeigeZugnachrichten),
+                // der Spieler kann zwischen beiden also nichts verkaufen. Ohne diese Klemme triebe ihn
+                // die Strafe allein vor die Gläubiger.
+                int geldabzug = Math.Min(Convert.ToInt32(vermoegen * StrafanteilVermoegen), Math.Max(0, spieler.GetTaler()));
 
-                string meldung = "Ihr besitzt " + spieler.GetTaler().ToStringGeld() + " und habt damit die maximale Anzahl an Taler überschritten.\n\nIhr müsst daher " + geldabzug.ToStringGeld() + " Strafe zahlen";
+                string meldung = "Euer Vermögen von " + vermoegen.ToStringGeld() + " übersteigt die gesetzlich erlaubten " +
+                                 vermoegensgrenze.ToStringGeld() + ".\n\nIhr müsst daher " + geldabzug.ToStringGeld() + " Strafe zahlen";
                 spieler.ErhoeheTaler(-geldabzug);
                 meldungen.Add(meldung);
+            }
+            else if (vermoegen > (long)vermoegensgrenze * WarnschwelleProzent / 100)
+            {
+                // Die Vorwarnung macht die Regel fair: Der Spieler sieht sie ein Jahr vorher und hat
+                // eine volle Runde Zeit, zu verkaufen oder das Geld anzulegen.
+                meldungen.Add("Euer Vermögen von " + vermoegen.ToStringGeld() + " nähert sich der gesetzlich erlaubten Höchstgrenze von " +
+                              vermoegensgrenze.ToStringGeld() + ".\n\nÜberschreitet Ihr sie, wird der Kämmerer " +
+                              Convert.ToInt32(StrafanteilVermoegen * 100) + " Prozent Eures Vermögens einziehen.");
             }
 
             // #42 Schlösserverbot

@@ -305,9 +305,12 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             //Hoechstzahl Anwesen
             GesetzDefUntergrenze[2] = 4;
             GesetzDefObergrenze[2] = 14;
-            //Maxmimale Taler
-            GesetzDefUntergrenze[3] = 5;
-            GesetzDefObergrenze[3] = 30;
+            //Maxmimale Taler (in Hunderttausend, gemessen am Gesamtvermoegen). Die Bandbreite liegt
+            //hoeher als zu Zeiten der reinen Bargeldpruefung: Betriebe, Waren und Anwesen zaehlen jetzt
+            //mit, dieselben Zahlen wuerden also viel frueher greifen. 20 = 2 Mio. ist die strengste
+            //Gesetzeslage - ein Wert, den ein Einsteiger nie sieht.
+            GesetzDefUntergrenze[3] = 20;
+            GesetzDefObergrenze[3] = 60;
             //Gluecksspiel
             GesetzDefUntergrenze[4] = 0;
             GesetzDefObergrenze[4] = 1;

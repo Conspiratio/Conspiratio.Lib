@@ -331,8 +331,8 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             Gesetze[1] = 1;
             //Höchstzahl Niederlassungen
             Gesetze[2] = 3;
-            //Maxmimale Taler
-            Gesetze[3] = 10;
+            //Maxmimale Taler: 30 = 3 Mio. Gesamtvermoegen (siehe GesetzDefUntergrenze[3])
+            Gesetze[3] = 30;
             //Gluecksspiel
             Gesetze[4] = 0;
             #endregion
@@ -2280,6 +2280,13 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         #endregion
 
         #region RundenBestechungenAbwickeln
+        /// <summary>
+        /// Hoechster Beziehungsgewinn, den eine Bestechung bei einem Empfaenger in einem Jahr bewirken
+        /// kann. Begrenzt bewusst die Wirkung, nicht die Summe: Wer den Hof kaufen will, kann das
+        /// weiterhin - er braucht dafuer aber Jahre statt einer einzigen Zahlung.
+        /// </summary>
+        public const int MaxBeziehungsgewinnProJahr = 10;
+
         public void RundenBestechungenAbwickeln()
         {
             for (int i = 1; i <= GetAktivSpielerAnzahl(); i++)
@@ -2321,12 +2328,19 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
                                 produkt /= 2;
                             }
 
-                            int verbesserung = Convert.ToInt32(produkt / 10);
+                            // Der Jahresertrag ist gedeckelt: ohne Deckel kaufte eine einzige Zahlung
+                            // die Hoechstbeziehung (bei einer amtlosen KI reichten dafuer 1 000 Taler,
+                            // weil "produkt" dort ungeteilt bleibt). Kleine Bestechungen bleiben davon
+                            // unberuehrt, grosse wirken weiter - nur ueber mehrere Jahre verteilt.
+                            int verbesserung = Math.Min(MaxBeziehungsgewinnProJahr, Convert.ToInt32(produkt / 10));
 
                             GetKIwithID(j).ErhoeheBeziehungZuX(i, verbesserung);
                         }
 
-                        GetHumWithID(i).SetBestechungVonSpielerMitIDXAufY(i, 0);
+                        // Zurueckgesetzt wird der Eintrag des *Empfaengers*. Stand hier frueher "i"
+                        // (die eigene Spieler-ID), blieb die Bestechung stehen und wurde Jahr fuer Jahr
+                        // erneut ausgezahlt und verrechnet - eine Dauerrente aus dem Nichts.
+                        GetHumWithID(i).SetBestechungVonSpielerMitIDXAufY(j, 0);
                         GetSpWithID(j).ErhoeheTaler(summe);
                     }
                 }
