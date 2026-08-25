@@ -329,8 +329,10 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             Gesetze[0] = 0;
             //Bestechungen
             Gesetze[1] = 1;
-            //Höchstzahl Niederlassungen
-            Gesetze[2] = 3;
+            //Höchstzahl Niederlassungen: 4 = die eigene Untergrenze (GesetzDefUntergrenze[2]). Stand hier
+            //die 3, lag der Startwert unterhalb des überhaupt Einstellbaren – der erste Ministerwurf in
+            //GesetzXschaltenUmY zog ihn dauerhaft auf 4 hoch, selbst wenn gar nichts geändert werden sollte.
+            Gesetze[2] = 4;
             //Maxmimale Taler: 30 = 3 Mio. Gesamtvermoegen (siehe GesetzDefUntergrenze[3])
             Gesetze[3] = 30;
             //Gluecksspiel
