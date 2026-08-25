@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 using Conspiratio.Lib.Gameplay.Kampf;
 using Conspiratio.Lib.Gameplay.Kampf.Einheiten;
@@ -190,6 +190,17 @@ namespace Conspiratio.Lib.Allgemein
             }
 
             ergebnis.Gesamtkosten += ergebnis.Sold;
+
+            #endregion
+
+            #region Hofhaltung
+
+            // Die einzige laufende Ausgabe, die nicht an der Aktivität hängt, sondern am Stand. Sie ist
+            // der Preis für das, was der Titel öffnet: die höheren Ämterebenen (GetMinTitelStadtEbene
+            // und Geschwister) - und damit die Privilegien, mit denen sich Steuer, Zehnt und Zoll wieder
+            // abschalten lassen. Titellose Spieler zahlen nichts, der Spielanfang bleibt unberührt.
+            ergebnis.Hofhaltung = SW.Statisch.GetTitelX(spieler.GetTitel()).GetJahresaufwand();
+            ergebnis.Gesamtkosten += ergebnis.Hofhaltung;
 
             #endregion
 

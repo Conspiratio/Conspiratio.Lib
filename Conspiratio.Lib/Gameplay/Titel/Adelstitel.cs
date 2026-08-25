@@ -29,6 +29,27 @@ namespace Conspiratio.Lib.Gameplay.Titel
         /// </summary>
         public int BonusAnsehen { get; }
 
+        /// <summary>
+        /// Anteil von <see cref="AbTaler"/> (in Prozent), den der standesgemäße Aufwand eines Titels
+        /// jährlich kostet.
+        ///
+        /// Bewusst aus der Talerschwelle abgeleitet statt als eigene Tabelle: So können Rang und Kosten
+        /// nicht auseinanderlaufen, und wer die Schwelle gerade hält, braucht genau diese Rendite, nur
+        /// um sie zu halten. Die beiden titellosen Ränge (Herr, Bürger) haben Schwelle 0 und kosten
+        /// damit von selbst nichts – der Spielanfang bleibt unberührt.
+        /// </summary>
+        public const int AufwandProzent = 10;
+
+        /// <summary>
+        /// Was das Führen dieses Titels den Träger im Jahr kostet (Hofhaltung, Gesinde,
+        /// Repräsentation). Fällt in der Jahresabrechnung an, siehe
+        /// <c>AbrechnungsManager.ErstelleAbrechnungFuerAktivenSpieler</c>.
+        /// </summary>
+        public int GetJahresaufwand()
+        {
+            return AbTaler * AufwandProzent / 100;
+        }
+
         public Adelstitel(int id, string nameMaennlich, string nameWeiblich, int abTaler, int bonusAnsehen)
         {
             Id = id;

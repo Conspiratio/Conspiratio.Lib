@@ -1,4 +1,4 @@
-namespace Conspiratio.Lib.Allgemein
+﻿namespace Conspiratio.Lib.Allgemein
 {
     /// <summary>
     /// Die einzelnen Kostenpositionen der Jahresabrechnung eines Spielers.
@@ -27,6 +27,9 @@ namespace Conspiratio.Lib.Allgemein
         public int Zollkosten { get; internal set; }
 
         public int Sold { get; internal set; }
+
+        /// <summary>Der standesgemäße Aufwand des Adelstitels, siehe <c>Adelstitel.GetJahresaufwand</c>.</summary>
+        public int Hofhaltung { get; internal set; }
 
         public int Gesamtkosten { get; internal set; }
     }

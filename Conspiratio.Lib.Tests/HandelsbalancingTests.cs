@@ -1,4 +1,4 @@
-using Conspiratio.Lib.Allgemein;
+﻿using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Gameplay.Gebiete;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
@@ -23,6 +23,9 @@ namespace Conspiratio.Lib.Tests
 
         /// <summary>Basispreis, den die Tests setzen – innerhalb von Korns Korridor [7, 20].</summary>
         private const int Basispreis = 8;
+
+        /// <summary>Alle besitzbaren Betriebe: 14 Städte mal 6 Werkstattplätze.</summary>
+        private const int MaxBetriebe = 84;
 
         private static Stadt BereiteStadtVor(int stadtId, int vorrat)
         {
@@ -136,17 +139,75 @@ namespace Conspiratio.Lib.Tests
         }
 
         /// <summary>
-        /// Ohne Deckel liefe <c>int</c> ab etwa dem 62. Betrieb über – besitzbar sind 84.
+        /// Die steile Staffel (+25 %) endet nach <see cref="HandelsManager.MaxSteigerungsstufen"/>
+        /// Betrieben, danach läuft eine flache weiter. Ein harter Deckel löste die Bremse
+        /// ausgerechnet dort, wo das Endspiel beginnt: Ab dem 21. Betrieb bliebe der Grenzpreis
+        /// konstant, während der Grenzertrag weiter steigt.
         /// </summary>
         [Fact]
-        public void Jenseits_des_Deckels_bleibt_der_Preis_endlich()
+        public void Jenseits_der_steilen_Staffel_steigt_der_Preis_weiter()
         {
             TestSpielwelt.Starte();
-            SetzeWerkstaetten(84);
 
-            int preis = new HandelsManager().GetWerkstattKaufpreis(GrosseStadt, 1);
+            var handel = new HandelsManager();
 
-            Assert.Equal(173382, preis);
+            SetzeWerkstaetten(HandelsManager.MaxSteigerungsstufen);
+            int amDeckel = handel.GetWerkstattKaufpreis(GrosseStadt, 1);
+
+            SetzeWerkstaetten(HandelsManager.MaxSteigerungsstufen + 1);
+            int einerDarueber = handel.GetWerkstattKaufpreis(GrosseStadt, 1);
+
+            SetzeWerkstaetten(MaxBetriebe);
+            int beiAllen = handel.GetWerkstattKaufpreis(GrosseStadt, 1);
+
+            Assert.True(einerDarueber > amDeckel, "Der Preis muss auch jenseits der steilen Staffel steigen.");
+            Assert.True(beiAllen > einerDarueber, "Und er muss bis zum letzten besitzbaren Betrieb weiter steigen.");
+        }
+
+        /// <summary>
+        /// Die flache Staffel muss flacher sein als die steile – sonst wäre sie keine Fortsetzung
+        /// der Bremse, sondern eine Verschärfung.
+        /// </summary>
+        [Fact]
+        public void Die_flache_Staffel_steigt_langsamer_als_die_steile()
+        {
+            TestSpielwelt.Starte();
+
+            var handel = new HandelsManager();
+
+            SetzeWerkstaetten(HandelsManager.MaxSteigerungsstufen - 2);
+            int vorletzter = handel.GetWerkstattKaufpreis(GrosseStadt, 1);
+            SetzeWerkstaetten(HandelsManager.MaxSteigerungsstufen - 1);
+            int letzterSteilerSchritt = handel.GetWerkstattKaufpreis(GrosseStadt, 1) - vorletzter;
+
+            SetzeWerkstaetten(HandelsManager.MaxSteigerungsstufen);
+            int amDeckel = handel.GetWerkstattKaufpreis(GrosseStadt, 1);
+            SetzeWerkstaetten(HandelsManager.MaxSteigerungsstufen + 1);
+            int ersterFlacherSchritt = handel.GetWerkstattKaufpreis(GrosseStadt, 1) - amDeckel;
+
+            Assert.True(ersterFlacherSchritt > 0, "Die flache Staffel muss steigen.");
+            Assert.True(ersterFlacherSchritt < letzterSteilerSchritt, "Sie muss aber flacher sein als die steile.");
+        }
+
+        /// <summary>
+        /// Der Überlaufschutz, den <see cref="HandelsManager.MaxSteigerungsstufen"/> früher allein
+        /// getragen hat. Geprüft wird der teuerste Fall: eine Stufe-3-Ware (Grundpreis 40 000) bei
+        /// allen besitzbaren Betrieben.
+        /// </summary>
+        [Fact]
+        public void Auch_bei_allen_Betrieben_bleibt_der_Preis_im_int_Bereich()
+        {
+            TestSpielwelt.Starte();
+
+            Assert.True(FindePlatzMitGrundpreis(40000, out int stadtId, out int werkstattNr),
+                        "Es muss einen Werkstattplatz mit einer Stufe-3-Ware geben.");
+
+            SetzeWerkstaetten(MaxBetriebe);
+            int preis = new HandelsManager().GetWerkstattKaufpreis(stadtId, werkstattNr);
+
+            Assert.True(preis > 0, "Ein Überlauf würde den Preis negativ machen (Ergebnis: " + preis + ").");
+            Assert.True(preis < int.MaxValue / 2,
+                        "Der Preis muss deutlich unter der int-Grenze bleiben (Ergebnis: " + preis + ").");
         }
 
         [Fact]

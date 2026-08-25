@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 using Conspiratio.Lib.Gameplay.Niederlassung;
 using Conspiratio.Lib.Gameplay.Spielwelt;
@@ -29,6 +29,18 @@ namespace Conspiratio.Lib.Allgemein
         /// Beim Kalibrieren nicht ersatzlos anheben.
         /// </summary>
         public const int MaxSteigerungsstufen = 20;
+
+        /// <summary>
+        /// Aufschlag je Betrieb <i>jenseits</i> von <see cref="MaxSteigerungsstufen"/>, wieder in Prozent
+        /// des bisherigen Preises (105 = +5 %).
+        ///
+        /// Ohne diese Fortsetzung endete die Expansionsbremse genau dort, wo das Endspiel beginnt: Ab dem
+        /// 21. Betrieb blieb der Grenzpreis konstant, während der Grenzertrag weiter stieg. Der flache
+        /// Satz hält den Überlaufschutz trotzdem: Besitzbar sind 84 Betriebe (14 Städte mal 6
+        /// Plätze), der teuerste Fall ist damit 40 000 * 1,25^20 * 1,05^64, also rund 83 Millionen –
+        /// zwei Größenordnungen unter <c>int.MaxValue</c>.
+        /// </summary>
+        public const int SteigerungProzentDanach = 105;
 
         [PublicAPI]
         public int RohstoffIdAnPlatz(int stadtId, int werkstattNr)
@@ -77,8 +89,10 @@ namespace Conspiratio.Lib.Allgemein
 
         /// <summary>
         /// Kaufpreis des Werkstattplatzes, gestaffelt nach der Zahl der reichsweit bereits besessenen
-        /// Betriebe. Der erste bleibt beim Grundpreis der Ware; jeder weitere kostet
-        /// <see cref="SteigerungProzent"/> des vorherigen.
+        /// Betriebe. Der erste bleibt beim Grundpreis der Ware; die nächsten
+        /// <see cref="MaxSteigerungsstufen"/> kosten je
+        /// <see cref="SteigerungProzent"/> des vorherigen, alle danach je
+        /// <see cref="SteigerungProzentDanach"/>.
         ///
         /// Bewusst als Ganzzahlschleife statt <c>Math.Pow</c>: exakt, deterministisch und ohne
         /// Gleitkomma im Kern der Ökonomie – E2E-Läufe müssen seed-reproduzierbar bleiben.
@@ -87,10 +101,14 @@ namespace Conspiratio.Lib.Allgemein
         public int GetWerkstattKaufpreis(int stadtId, int werkstattNr)
         {
             int preis = SW.Dynamisch.GetRohstoffwithID(RohstoffIdAnPlatz(stadtId, werkstattNr)).GetWSKaufpreis();
-            int besessen = Math.Min(SW.Dynamisch.GetAktHum().ZaehleWerkstaetten(), MaxSteigerungsstufen);
+            int besessen = SW.Dynamisch.GetAktHum().ZaehleWerkstaetten();
+            int steileStufen = Math.Min(besessen, MaxSteigerungsstufen);
 
-            for (int i = 0; i < besessen; i++)
+            for (int i = 0; i < steileStufen; i++)
                 preis = (preis * SteigerungProzent) / 100;
+
+            for (int i = steileStufen; i < besessen; i++)
+                preis = (preis * SteigerungProzentDanach) / 100;
 
             return preis;
         }
