@@ -219,7 +219,8 @@ namespace Conspiratio.Lib.Allgemein
             // der Preis für das, was der Titel öffnet: die höheren Ämterebenen (GetMinTitelStadtEbene
             // und Geschwister) - und damit die Privilegien, mit denen sich Steuer, Zehnt und Zoll wieder
             // abschalten lassen. Titellose Spieler zahlen nichts, der Spielanfang bleibt unberührt.
-            ergebnis.Hofhaltung = SW.Statisch.GetTitelX(spieler.GetTitel()).GetJahresaufwand();
+            ergebnis.Hofhaltung = SW.Statisch.GetTitelX(spieler.GetTitel()).GetJahresaufwand()
+                                  * HofhaltungFaktorProzent(spieler.GetHofhaltungAbweichung()) / 100;
             ergebnis.Gesamtkosten += ergebnis.Hofhaltung;
 
             #endregion
@@ -240,6 +241,18 @@ namespace Conspiratio.Lib.Allgemein
             }
 
             return ergebnis;
+        }
+
+        /// <summary>
+        /// Der Aufwand als Prozentsatz des standesgemaessen: sparsam die Haelfte, standesgemaess genau,
+        /// aufwendig das Doppelte.
+        /// </summary>
+        public static int HofhaltungFaktorProzent(int abweichung)
+        {
+            if (abweichung < 0)
+                return 50;
+
+            return abweichung > 0 ? 200 : 100;
         }
 
         /// <summary>

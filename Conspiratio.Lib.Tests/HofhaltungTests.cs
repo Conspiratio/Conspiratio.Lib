@@ -90,5 +90,46 @@ namespace Conspiratio.Lib.Tests
 
             Assert.Equal(0, new AbrechnungsManager().ErstelleAbrechnungFuerAktivenSpieler().Hofhaltung);
         }
+
+        /// <summary>
+        /// Der Spieler waehlt die Stufe selbst. Gespeichert wird die Abweichung von der Mitte, damit die
+        /// 0 aus einem alten Spielstand "standesgemaess" bedeutet - siehe den Savegame-Test unten.
+        /// </summary>
+        [Theory]
+        [InlineData(-1, 50)]
+        [InlineData(0, 100)]
+        [InlineData(1, 200)]
+        public void Die_Stufe_skaliert_den_standesgemaessen_Aufwand(int abweichung, int prozent)
+        {
+            TestSpielwelt.Starte();
+
+            var spieler = SW.Dynamisch.GetAktHum();
+            spieler.SetTitel(Herzog);
+            spieler.SetTaler(1000000);
+            spieler.SetHofhaltungAbweichung(abweichung);
+
+            var ergebnis = new AbrechnungsManager().ErstelleAbrechnungFuerAktivenSpieler();
+
+            Assert.Equal(50000 * prozent / 100, ergebnis.Hofhaltung);
+        }
+
+        /// <summary>
+        /// Der Savegame-Test: Ein alter Stand kennt das Feld nicht, es kommt als 0 an - und 0 muss
+        /// exakt das bisherige Verhalten bedeuten, sonst aendert sich fuer bestehende Spieler
+        /// stillschweigend die Abrechnung.
+        /// </summary>
+        [Fact]
+        public void Ein_alter_Spielstand_haelt_standesgemaess_Hof()
+        {
+            TestSpielwelt.Starte();
+
+            var spieler = SW.Dynamisch.GetAktHum();
+            spieler.SetTitel(Herzog);
+            spieler.SetTaler(1000000);
+
+            // Kein SetHofhaltungAbweichung: Das Feld steht auf seinem Standardwert, wie nach dem Laden.
+            Assert.Equal(0, spieler.GetHofhaltungAbweichung());
+            Assert.Equal(50000, new AbrechnungsManager().ErstelleAbrechnungFuerAktivenSpieler().Hofhaltung);
+        }
     }
 }

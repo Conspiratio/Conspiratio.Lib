@@ -165,6 +165,13 @@ namespace Conspiratio.Lib.Gameplay.Personen
         private bool _privilegKaufmannBenutzt;
         private List<string> _handelsNachrichten;
 
+        /// <summary>
+        /// Abweichung vom standesgemaessen Hofhaltungsaufwand: -1 sparsam, 0 standesgemaess,
+        /// +1 aufwendig. Bewusst als Abweichung gespeichert und nicht als Stufe: Serialisierung ist
+        /// feldbasiert, ein aelterer Spielstand liefert 0 - und 0 bedeutet so das bisherige Verhalten.
+        /// </summary>
+        private int _hofhaltungAbweichung;
+
         private SpielerStatistik _spielerStatistik;
         private Produktionsslot[,] _produktionsslotsInStadtX;
         private AktiveSabotagen[] _aktiveSabotagen = new AktiveSabotagen[SW.Statisch.GetMaxKIID()];
@@ -438,6 +445,16 @@ namespace Conspiratio.Lib.Gameplay.Personen
         public void ErhoeheBestechungVonSpielerMitIDXUmY(int X, int Y)
         {
             _bestechungen[X] += Y;
+        }
+
+        public int GetHofhaltungAbweichung()
+        {
+            return _hofhaltungAbweichung;
+        }
+
+        public void SetHofhaltungAbweichung(int wert)
+        {
+            _hofhaltungAbweichung = System.Math.Max(-1, System.Math.Min(1, wert));
         }
 
         public int GetEinVerkaeufeInStadtXVonRohstoffIDY(int X, int Y)
