@@ -43,10 +43,22 @@ namespace Conspiratio.Lib.Allgemein
         public const int AnsehenJeTalerHofhaltung = 10000;
 
         /// <summary>
-        /// Obergrenze des Ansehensgewinns pro Jahr. Einstellige Werte, keine Zehner: Nach dem Wegfall
-        /// des Geldansehens liegen KI-Werte bei 15 bis 60, Aemterboni bei 3 bis 12. Bei 5 Punkten im
-        /// Jahr braucht ein Spieler drei bis zwoelf Jahre, um dorthin aufzuschliessen - Geltung waechst
-        /// ueber Jahre und nicht in einem Zug.
+        /// Obergrenze des Ansehensgewinns pro Jahr - <b>je Quelle</b>, nicht fuer beide zusammen:
+        /// Hofhaltung und Auslastung werden getrennt gedeckelt und erst danach addiert. Im Jahr sind
+        /// damit hoechstens <c>2 * AnsehenMaxProJahr</c> Punkte zu gewinnen (je der Deckel aus jeder
+        /// Quelle) und hoechstens <c>AnsehenMaxProJahr</c> zu verlieren, denn abziehen kann nur die
+        /// Hofhaltung.
+        ///
+        /// Ein gemeinsamer Topf haette die beiden Wege gegeneinander ausgespielt, obwohl Geltung sich
+        /// erwirtschaften <i>oder</i> erkaufen laesst: Wer schon so viele Werke gut auslastet, wie der
+        /// Deckel zulaesst, haette fuer aufwendige Hofhaltung 25 000 bis 50 000 Taler im Jahr gezahlt
+        /// und nichts dafuer bekommen - und die Staffelung nach Betriebszahl waere genau dort stehen
+        /// geblieben.
+        ///
+        /// Einstellige Werte, keine Zehner: Nach dem Wegfall des Geldansehens liegen KI-Werte bei 15
+        /// bis 60, Aemterboni bei 3 bis 12. Bei 5 Punkten im Jahr braucht ein Spieler auf einem Weg
+        /// allein drei bis zwoelf Jahre, um dorthin aufzuschliessen - Geltung waechst ueber Jahre und
+        /// nicht in einem Zug.
         /// </summary>
         public const int AnsehenMaxProJahr = 5;
 
@@ -277,33 +289,40 @@ namespace Conspiratio.Lib.Allgemein
 
             // Der Mehr- oder Minderaufwand gegenueber dem standesgemaessen Satz sowie eine gut
             // ausgelastete Werkstattflotte schlagen sich in permanentem Ansehen nieder - der Waehrung, in
-            // der auch Kirchenaustritt (-100), Kerker und Pranger rechnen. Beide Anteile teilen sich
-            // dieselbe Jahresobergrenze und werden deshalb erst summiert und dann gemeinsam gedeckelt,
-            // damit Geltung ueber Jahre waechst und nicht in einem Zug.
+            // der auch Kirchenaustritt (-100), Kerker und Pranger rechnen. Jeder Anteil wird fuer sich
+            // auf AnsehenMaxProJahr gedeckelt und erst danach addiert - damit Geltung ueber Jahre
+            // waechst und nicht in einem Zug, ohne dass die beiden Wege einander verdraengen.
             int standesgemaess = SW.Statisch.GetTitelX(spieler.GetTitel()).GetJahresaufwand();
             int abweichungTaler = ergebnis.Hofhaltung - standesgemaess;
-            int punkte = 0;
+            int hofhaltungPunkte = 0;
 
             if (abweichungTaler != 0)
             {
-                punkte = abweichungTaler / AnsehenJeTalerHofhaltung;
+                hofhaltungPunkte = abweichungTaler / AnsehenJeTalerHofhaltung;
 
                 // Sparen kostet auch dann Geltung, wenn der Betrag fuer einen vollen Punkt nicht reicht.
-                if (punkte == 0)
-                    punkte = abweichungTaler > 0 ? 1 : -1;
+                if (hofhaltungPunkte == 0)
+                    hofhaltungPunkte = abweichungTaler > 0 ? 1 : -1;
             }
+
+            if (hofhaltungPunkte > AnsehenMaxProJahr)
+                hofhaltungPunkte = AnsehenMaxProJahr;
+            else if (hofhaltungPunkte < -AnsehenMaxProJahr)
+                hofhaltungPunkte = -AnsehenMaxProJahr;
 
             // Gut gefuehrte Werke bringen Geltung, und zwar je Betrieb: Wer zwanzig Werke gut auslastet,
             // hat mehr geleistet als wer eines auslastet. Bewusst mit hoher Schwelle - eine Auszeichnung,
             // kein Grundzustand. Nur nach oben wirksam: Ein stillgelegter oder schlecht besetzter Betrieb
-            // bringt nichts, kann den Wert aber auch nie heben. Den gemeinsamen Jahresdeckel zieht der
-            // Block darunter.
-            punkte += gutAusgelasteteBetriebe;
+            // bringt nichts, kann den Wert aber auch nie heben.
+            int auslastungPunkte = gutAusgelasteteBetriebe > AnsehenMaxProJahr
+                ? AnsehenMaxProJahr
+                : gutAusgelasteteBetriebe;
 
-            if (punkte > AnsehenMaxProJahr)
-                punkte = AnsehenMaxProJahr;
-            else if (punkte < -AnsehenMaxProJahr)
-                punkte = -AnsehenMaxProJahr;
+            // Erst nach dem Deckel addieren, siehe AnsehenMaxProJahr: Erwirtschaften und Erkaufen sind
+            // zwei Wege zur Geltung und nicht einer - aus einem gemeinsamen Topf verdraengten sie sich
+            // gegenseitig, und die Hofhaltung waere fuer genau den Spieler wertlos geworden, auf den sie
+            // zielt: den reichen, der seine Werke ohnehin gut fuehrt.
+            int punkte = hofhaltungPunkte + auslastungPunkte;
 
             if (punkte != 0)
                 spieler.ErhoehePermaAnsehen(punkte);

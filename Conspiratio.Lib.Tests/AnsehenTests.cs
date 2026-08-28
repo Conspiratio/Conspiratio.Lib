@@ -19,17 +19,12 @@ namespace Conspiratio.Lib.Tests
 
         /// <summary>
         /// Richtet <paramref name="gut"/> voll besetzte und <paramref name="schwach"/> halb besetzte
-        /// Betriebe ein und liefert die Geltung zurueck, die die Jahresabrechnung dafuer gutschreibt.
-        /// Der Spieler bleibt Buerger, damit der Hofhaltungsanteil 0 ist und allein die Auslastung
-        /// gemessen wird.
+        /// Betriebe ein. Waren mit weniger als zwei Arbeitern je Staette werden dabei uebersprungen
+        /// (siehe unten), der Aufbau greift also auf so viele Staedte zu, wie er braucht.
         /// </summary>
-        private static int GeltungAusAuslastung(int gut, int schwach)
+        private static void RichteBetriebeEin(int gut, int schwach)
         {
-            TestSpielwelt.Starte();
-
             var spieler = SW.Dynamisch.GetAktHum();
-            spieler.SetTitel(Buerger);
-            spieler.SetTaler(1000000);
 
             int eingerichtet = 0;
 
@@ -59,6 +54,22 @@ namespace Conspiratio.Lib.Tests
             }
 
             Assert.Equal(gut + schwach, eingerichtet);
+        }
+
+        /// <summary>
+        /// Die Geltung, die die Jahresabrechnung fuer <paramref name="gut"/> voll und
+        /// <paramref name="schwach"/> halb besetzte Betriebe gutschreibt. Der Spieler bleibt Buerger,
+        /// damit der Hofhaltungsanteil 0 ist und allein die Auslastung gemessen wird.
+        /// </summary>
+        private static int GeltungAusAuslastung(int gut, int schwach)
+        {
+            TestSpielwelt.Starte();
+
+            var spieler = SW.Dynamisch.GetAktHum();
+            spieler.SetTitel(Buerger);
+            spieler.SetTaler(1000000);
+
+            RichteBetriebeEin(gut, schwach);
 
             int vorher = spieler.GetPermaAnsehen();
             new AbrechnungsManager().ErstelleAbrechnungFuerAktivenSpieler();
@@ -100,38 +111,45 @@ namespace Conspiratio.Lib.Tests
 
         /// <summary>
         /// Der Gewinn ist gedeckelt: Geltung waechst ueber Jahre, nicht in einem Zug. Ohne Deckel liesse
-        /// sich mit einem einzigen aufwendigen Jahr jedes Ansehensniveau kaufen. Hofhaltung und
-        /// Auslastung teilen sich dieselbe Obergrenze - deshalb traegt die Zuchtprobe hier zusaetzlich
-        /// einen voll ausgelasteten Betrieb, sonst wuerde die Deckelung der Wechselwirkung beider
-        /// Quellen nie geprueft.
+        /// sich mit einem einzigen aufwendigen Jahr jedes Ansehensniveau kaufen. Geprueft wird hier die
+        /// Auslastung fuer sich - mehr gut gefuehrte Betriebe, als der Deckel zulaesst, bringen genau
+        /// den Deckel.
         /// </summary>
         [Fact]
-        public void Der_Ansehensgewinn_ist_auf_das_Jahresmaximum_gedeckelt()
+        public void Die_Geltung_aus_Auslastung_ist_auf_das_Jahresmaximum_gedeckelt()
+        {
+            int ueberDemDeckel = GeltungAusAuslastung(gut: AbrechnungsManager.AnsehenMaxProJahr + 2, schwach: 0);
+
+            Assert.Equal(AbrechnungsManager.AnsehenMaxProJahr, ueberDemDeckel);
+        }
+
+        /// <summary>
+        /// Der Deckel gilt je Quelle und nicht fuer beide zusammen. Das ist keine Feinheit, sondern der
+        /// Kern des Entwurfs: Geltung laesst sich erwirtschaften <i>oder</i> erkaufen. Aus einem
+        /// gemeinsamen Topf verdraengten sich die beiden Wege - wer ohnehin genug Werke gut auslastet,
+        /// haette fuer aufwendige Hofhaltung 50 000 Taler im Jahr gezahlt und nichts dafuer bekommen,
+        /// und die Staffelung nach Betriebszahl waere am Deckel stehen geblieben. Dieser Test ist die
+        /// Sperre dagegen, die beiden Toepfe spaeter wieder zusammenzulegen.
+        /// </summary>
+        [Fact]
+        public void Hofhaltung_und_Auslastung_werden_getrennt_gedeckelt()
         {
             TestSpielwelt.Starte();
 
             var spieler = SW.Dynamisch.GetAktHum();
-            var slot = spieler.GetProduktionsslot(1, 0);
-            int rohstoffId = SW.Dynamisch.GetStadtwithID(1).GetSingleRohstoff(1);
-            var ware = SW.Dynamisch.GetRohstoffwithID(rohstoffId);
-            int proStaette = ware.GetWerkstaetten() > 0 ? ware.GetArbeiter() / ware.GetWerkstaetten() : 1;
 
+            // Herzog auf "aufwendig" schoepft den Hofhaltungsdeckel genau aus (50 000 Taler Mehraufwand
+            // bei 10 000 je Punkt), die Betriebe ueberschreiten den ihren.
             spieler.SetTitel(Herzog);
             spieler.SetTaler(100000000);
             spieler.SetHofhaltungAbweichung(1);
 
-            spieler.GetSpielerHatInStadtXWerkstaettenY(1, 1).SetEnabled(true);
-            slot.SetTaetigkeit((int)EnumProduktionsslotAktionsart.Produzieren);
-            slot.SetProduktionRohstoff(rohstoffId);
-            slot.SetProduktionStaetten(1);
-            slot.SetProduktionArbeiter(proStaette);
+            RichteBetriebeEin(gut: AbrechnungsManager.AnsehenMaxProJahr + 2, schwach: 0);
 
             int vorher = spieler.GetPermaAnsehen();
             new AbrechnungsManager().ErstelleAbrechnungFuerAktivenSpieler();
 
-            Assert.True(spieler.GetPermaAnsehen() - vorher <= AbrechnungsManager.AnsehenMaxProJahr,
-                        "Der Jahresgewinn darf das Maximum nicht ueberschreiten.");
-            Assert.Equal(AbrechnungsManager.AnsehenMaxProJahr, spieler.GetPermaAnsehen() - vorher);
+            Assert.Equal(2 * AbrechnungsManager.AnsehenMaxProJahr, spieler.GetPermaAnsehen() - vorher);
         }
 
         /// <summary>
@@ -213,11 +231,13 @@ namespace Conspiratio.Lib.Tests
             int mitSchwachem = GeltungAusAuslastung(gut: 2, schwach: 1);
             int ohneSchwachen = GeltungAusAuslastung(gut: 2, schwach: 0);
 
-            Assert.True(mitSchwachem > 0,
-                        "Die gut gefuehrten Betriebe muessen auch neben einem schwachen zaehlen.");
-            Assert.True(ohneSchwachen <= mitSchwachem,
-                        "Stilllegen darf die Geltung nicht heben (gemessen: " + ohneSchwachen +
-                        " nach dem Stilllegen gegen " + mitSchwachem + " davor).");
+            // Beide gut gefuehrten Betriebe muessen einzeln zaehlen. Nur "groesser als 0" haette der
+            // alte Mittelwert je nach Ware zufaellig auch erfuellt: Bei drei Arbeitern je Staette fiel
+            // (1 + 1 + 1/3) / 3 unter die Schwelle, bei zwei, vier oder fuenf lag es darueber.
+            Assert.True(mitSchwachem >= 2,
+                        "Beide gut gefuehrten Betriebe muessen auch neben einem schwachen zaehlen " +
+                        "(gemessen: " + mitSchwachem + ").");
+            Assert.Equal(ohneSchwachen, mitSchwachem);
         }
 
         /// <summary>Ein stillgelegter Betrieb bringt nichts - die Belohnung wirkt nur nach oben.</summary>
