@@ -146,5 +146,29 @@ namespace Conspiratio.Lib.Tests
 
             Assert.Equal(vorher, spieler.GetPermaAnsehen());
         }
+
+        /// <summary>
+        /// Ansehen war faktisch der Kontostand: 2 500 Taler ergaben einen Punkt, bei 2,9 Mio. also
+        /// 1 160 - gegen 3 bis 12 fuer ein Amt und 15 bis 60 fuer einen KI-Spieler insgesamt. In der
+        /// Wahl (AemterManager, Ansehen/10) war das ein Vorsprung, den kein Gegner einholen konnte.
+        /// AnsehenAktualisieren gibt es zudem nur auf HumSpieler - es war ein reiner Spielervorteil.
+        /// </summary>
+        [Fact]
+        public void Der_Geldbestand_kauft_kein_Ansehen_mehr()
+        {
+            TestSpielwelt.Starte();
+
+            var spieler = SW.Dynamisch.GetAktHum();
+
+            spieler.SetTaler(10000);
+            spieler.AnsehenAktualisieren();
+            int arm = spieler.GetAnsehen();
+
+            spieler.SetTaler(5000000);
+            spieler.AnsehenAktualisieren();
+            int reich = spieler.GetAnsehen();
+
+            Assert.Equal(arm, reich);
+        }
     }
 }

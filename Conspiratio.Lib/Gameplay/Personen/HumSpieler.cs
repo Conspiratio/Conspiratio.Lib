@@ -862,8 +862,11 @@ namespace Conspiratio.Lib.Gameplay.Personen
             int perm_ans = GetPermaAnsehen();
             int ans_plus = 0;
 
-            // Geldansehen
-            ans_plus += Convert.ToInt32(GetTaler() / SW.Statisch.GetAnsehenProTaler());
+            // Kein Geldansehen mehr: Der Kontostand ergab bei 2 500 Talern je Punkt Werte um 1 160,
+            // waehrend ein Amt 3 bis 12 und ein ganzer KI-Spieler 15 bis 60 erreicht. Geltung war damit
+            // gekauft statt verdient - und weil AnsehenAktualisieren nur auf HumSpieler existiert, war
+            // es ein Vorteil, den die KI nie hatte. Ansehen kommt jetzt aus Taten (PermaAnsehen), Amt
+            // und Wohnsitzen.
 
             // Amtansehen
             int amt_id = GetAmtID();
