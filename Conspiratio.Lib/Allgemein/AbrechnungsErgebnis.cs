@@ -31,6 +31,12 @@
         /// <summary>Der standesgemäße Aufwand des Adelstitels, siehe <c>Adelstitel.GetJahresaufwand</c>.</summary>
         public int Hofhaltung { get; internal set; }
 
+        /// <summary>
+        /// Jaehrlicher Unterhalt der besessenen Werkstaetten, progressiv in ihrer Zahl. Haengt bewusst
+        /// nicht an der Produktion: Sonst waere Horten gratis und Wirtschaften teuer.
+        /// </summary>
+        public int Unterhalt { get; internal set; }
+
         public int Gesamtkosten { get; internal set; }
     }
 }

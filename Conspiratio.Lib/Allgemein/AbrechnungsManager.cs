@@ -16,6 +16,13 @@ namespace Conspiratio.Lib.Allgemein
     public class AbrechnungsManager
     {
         /// <summary>
+        /// Unterhalt des ersten Betriebs; der n-te kostet das n-Fache. Kalibriert gegen zwei Schranken:
+        /// Zwei Betriebe duerfen einen Einsteiger nicht spuerbar belasten, und der Unterhalt muss klar
+        /// unter dem Deckungsbeitrag einer ausgelasteten Werkstatt liegen, sonst lohnt Expansion nie.
+        /// </summary>
+        public const int GrundunterhaltProWerkstatt = 40;
+
+        /// <summary>
         /// Berechnet alle Kostenpositionen des aktiven Spielers, zahlt Zölle an die
         /// Zollburg-Besitzer aus, zieht die Gesamtkosten von den Talern des Spielers ab
         /// und setzt seine Umsätze zurück.
@@ -190,6 +197,19 @@ namespace Conspiratio.Lib.Allgemein
             }
 
             ergebnis.Gesamtkosten += ergebnis.Sold;
+
+            #endregion
+
+            #region Unterhalt
+
+            // Progressiv statt linear: Der n-te Betrieb kostet das n-Fache des ersten, die Summe waechst
+            // also quadratisch. Bewusst linear-progressiv und nicht geometrisch wie die Kaufpreisstaffel
+            // (HandelsManager.SteigerungProzent, 125 % je Betrieb) - ueber zwanzig Stufen waere das
+            // Faktor 86 und wuerde Expansion nicht bremsen, sondern verbieten.
+            int werkstaetten = spieler.ZaehleWerkstaetten();
+
+            ergebnis.Unterhalt = GrundunterhaltProWerkstatt * werkstaetten * (werkstaetten + 1) / 2;
+            ergebnis.Gesamtkosten += ergebnis.Unterhalt;
 
             #endregion
 
