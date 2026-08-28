@@ -13,8 +13,58 @@ namespace Conspiratio.Lib.Tests
     /// </summary>
     public class AnsehenTests
     {
+        private const int Buerger = 1;
         private const int Edelmann = 2;
         private const int Herzog = 9;
+
+        /// <summary>
+        /// Richtet <paramref name="gut"/> voll besetzte und <paramref name="schwach"/> halb besetzte
+        /// Betriebe ein und liefert die Geltung zurueck, die die Jahresabrechnung dafuer gutschreibt.
+        /// Der Spieler bleibt Buerger, damit der Hofhaltungsanteil 0 ist und allein die Auslastung
+        /// gemessen wird.
+        /// </summary>
+        private static int GeltungAusAuslastung(int gut, int schwach)
+        {
+            TestSpielwelt.Starte();
+
+            var spieler = SW.Dynamisch.GetAktHum();
+            spieler.SetTitel(Buerger);
+            spieler.SetTaler(1000000);
+
+            int eingerichtet = 0;
+
+            for (int stadtId = 1; stadtId < SW.Statisch.GetMaxStadtID() && eingerichtet < gut + schwach; stadtId++)
+            {
+                for (int slot = 0; slot < SW.Statisch.GetMaxProdSlots() && eingerichtet < gut + schwach; slot++)
+                {
+                    int rohstoffId = SW.Dynamisch.GetStadtwithID(stadtId).GetSingleRohstoff(slot + 1);
+                    var ware = SW.Dynamisch.GetRohstoffwithID(rohstoffId);
+                    int proStaette = ware.GetWerkstaetten() > 0 ? ware.GetArbeiter() / ware.GetWerkstaetten() : 0;
+
+                    // Waren mit weniger als zwei Arbeitern je Staette taugen hier nicht: Bei 0 kennt die
+                    // Abrechnung gar keinen Bedarf, bei 1 laesst sich keine halbe Besetzung stellen.
+                    if (proStaette < 2)
+                        continue;
+
+                    var produktionsslot = spieler.GetProduktionsslot(stadtId, slot);
+
+                    spieler.GetSpielerHatInStadtXWerkstaettenY(slot + 1, stadtId).SetEnabled(true);
+                    produktionsslot.SetTaetigkeit((int)EnumProduktionsslotAktionsart.Produzieren);
+                    produktionsslot.SetProduktionRohstoff(rohstoffId);
+                    produktionsslot.SetProduktionStaetten(1);
+                    produktionsslot.SetProduktionArbeiter(eingerichtet < gut ? proStaette : proStaette / 2);
+
+                    eingerichtet++;
+                }
+            }
+
+            Assert.Equal(gut + schwach, eingerichtet);
+
+            int vorher = spieler.GetPermaAnsehen();
+            new AbrechnungsManager().ErstelleAbrechnungFuerAktivenSpieler();
+
+            return spieler.GetPermaAnsehen() - vorher;
+        }
 
         [Fact]
         public void Aufwendige_Hofhaltung_bringt_permanentes_Ansehen()
@@ -87,7 +137,7 @@ namespace Conspiratio.Lib.Tests
         /// <summary>
         /// Auch ein Mehraufwand, der fuer keinen vollen Punkt reicht, muss Geltung bringen - sonst waere
         /// aufwendige Hofhaltung fuer die unteren Raenge wirkungslos. Edelmann: standesgemaess 500,
-        /// aufwendig 1000, Differenz 500 - unter der Schwelle von 2000 Talern je Punkt.
+        /// aufwendig 1000, Differenz 500 - weit unter dem Kurs von 10 000 Talern je Punkt.
         /// </summary>
         [Fact]
         public void Kleiner_Mehraufwand_bringt_trotzdem_einen_Punkt()
@@ -130,6 +180,44 @@ namespace Conspiratio.Lib.Tests
             new AbrechnungsManager().ErstelleAbrechnungFuerAktivenSpieler();
 
             Assert.True(spieler.GetPermaAnsehen() > vorher, "Volle Auslastung muss Geltung bringen.");
+        }
+
+        /// <summary>
+        /// Die Belohnung muss mit der Betriebszahl wachsen. Zuvor war sie ein Mittelwert ueber die
+        /// produzierenden Betriebe und damit massstabsfrei: Ein einziger gut besetzter Betrieb brachte
+        /// genauso viel wie zwanzig - das Gegenteil der Absicht, die Geltung nach Auslastung *und*
+        /// Betriebszahl zu staffeln.
+        /// </summary>
+        [Fact]
+        public void Mehr_gut_gefuehrte_Betriebe_bringen_mehr_Geltung()
+        {
+            int einer = GeltungAusAuslastung(gut: 1, schwach: 0);
+            int dreie = GeltungAusAuslastung(gut: 3, schwach: 0);
+
+            Assert.True(einer > 0, "Ein gut gefuehrter Betrieb muss Geltung bringen.");
+            Assert.True(dreie > einer,
+                        "Drei gut gefuehrte Betriebe muessen mehr bringen als einer (gemessen: " +
+                        dreie + " gegen " + einer + ").");
+        }
+
+        /// <summary>
+        /// Die Gegenprobe zur Staffelung, und der eigentliche Fehler des Mittelwerts: Ein schwacher
+        /// Betrieb zog den Schnitt unter die Schwelle, sein Stilllegen hob ihn wieder darueber. Der
+        /// Anreiz war, die Messbasis zu verkleinern statt gut zu wirtschaften. Jetzt zaehlt jeder
+        /// Betrieb fuer sich - der schwache bringt nichts, kostet aber auch nichts, und die guten
+        /// zaehlen neben ihm unveraendert.
+        /// </summary>
+        [Fact]
+        public void Stilllegen_eines_schwachen_Betriebs_hebt_die_Geltung_nicht()
+        {
+            int mitSchwachem = GeltungAusAuslastung(gut: 2, schwach: 1);
+            int ohneSchwachen = GeltungAusAuslastung(gut: 2, schwach: 0);
+
+            Assert.True(mitSchwachem > 0,
+                        "Die gut gefuehrten Betriebe muessen auch neben einem schwachen zaehlen.");
+            Assert.True(ohneSchwachen <= mitSchwachem,
+                        "Stilllegen darf die Geltung nicht heben (gemessen: " + ohneSchwachen +
+                        " nach dem Stilllegen gegen " + mitSchwachem + " davor).");
         }
 
         /// <summary>Ein stillgelegter Betrieb bringt nichts - die Belohnung wirkt nur nach oben.</summary>

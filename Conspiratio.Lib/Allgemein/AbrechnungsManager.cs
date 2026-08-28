@@ -16,22 +16,41 @@ namespace Conspiratio.Lib.Allgemein
     public class AbrechnungsManager
     {
         /// <summary>
-        /// Unterhalt des ersten Betriebs; der n-te kostet das n-Fache. Kalibriert gegen zwei Schranken:
-        /// Zwei Betriebe duerfen einen Einsteiger nicht spuerbar belasten, und der Unterhalt muss klar
-        /// unter dem Deckungsbeitrag einer ausgelasteten Werkstatt liegen, sonst lohnt Expansion nie.
+        /// Unterhalt des ersten Betriebs; der n-te kostet das n-Fache. Zwischen zwei Schranken gemessen:
+        ///
+        /// Nach unten: Zwei Betriebe kosten drei Grundeinheiten, also 300 Taler - Rauschen gemessen am
+        /// Startkapital, und mit Abstand unter den 500 Talern, die der Einsteigertest zulaesst.
+        ///
+        /// Nach oben: der Deckungsbeitrag einer ausgelasteten Werkstatt. Aus
+        /// <see cref="Rohstoffe.Rohstoff.GetWSProdProWS"/> (90 % davon bei richtiger Arbeiterzahl) gegen
+        /// <see cref="Rohstoffe.Rohstoff.GetWSEinzelpreis"/> und
+        /// <see cref="Rohstoffe.Rohstoff.GetWSArbeiterpreis"/> traegt die schwaechste Ware in einem bis
+        /// zum Arbeiterdeckel besetzten Produktionsplatz 8 474 Taler im Jahr, die staerkste 20 438. Bei
+        /// 100 Talern Grundunterhalt kostet selbst der 28. Betrieb - so viele Produktionsplaetze, wie
+        /// 14 Staedte mal <c>GetMaxProdSlots</c> ueberhaupt hergeben - 2 800 Taler und damit ein Drittel
+        /// des schwaechsten und ein Siebtel des staerksten Deckungsbeitrags. Expansion bleibt damit
+        /// lohnend, wird aber spuerbar teurer.
         /// </summary>
-        public const int GrundunterhaltProWerkstatt = 40;
-
-        /// <summary>Taler Mehraufwand je Punkt permanenten Ansehens. Kalibriert in Aufgabe 5.</summary>
-        public const int AnsehenJeTalerHofhaltung = 2000;
+        public const int GrundunterhaltProWerkstatt = 100;
 
         /// <summary>
-        /// Obergrenze des Ansehensgewinns pro Jahr. Zehnerbetraege, keine Hunderter: Nach dem Wegfall
-        /// des Geldansehens liegen KI-Werte bei 15 bis 60, Aemterboni bei 3 bis 12.
+        /// Taler Mehraufwand je Punkt permanenten Ansehens. Der Kurs staffelt die Geltung nach Rang:
+        /// Ein Herzog gewinnt mit aufwendiger Hofhaltung 5 Punkte im Jahr (50 000 Taler Mehraufwand),
+        /// ein Fuerst 3, ein Graf 2, die Raenge darunter je einen. Ueber zehn Jahre sind das 50 bzw. 20
+        /// Punkte - die Groessenordnung eines KI-Ansehens (Amtsbonus mal 5, also 15 bis 60), erreichbar
+        /// nur ueber Jahre.
         /// </summary>
-        public const int AnsehenMaxProJahr = 15;
+        public const int AnsehenJeTalerHofhaltung = 10000;
 
-        /// <summary>Ab dieser mittleren Auslastung gilt ein Betrieb als gut gefuehrt.</summary>
+        /// <summary>
+        /// Obergrenze des Ansehensgewinns pro Jahr. Einstellige Werte, keine Zehner: Nach dem Wegfall
+        /// des Geldansehens liegen KI-Werte bei 15 bis 60, Aemterboni bei 3 bis 12. Bei 5 Punkten im
+        /// Jahr braucht ein Spieler drei bis zwoelf Jahre, um dorthin aufzuschliessen - Geltung waechst
+        /// ueber Jahre und nicht in einem Zug.
+        /// </summary>
+        public const int AnsehenMaxProJahr = 5;
+
+        /// <summary>Ab dieser Auslastung gilt ein einzelner Betrieb als gut gefuehrt.</summary>
         public const int AuslastungsschwelleProzent = 80;
 
         /// <summary>
@@ -47,8 +66,7 @@ namespace Conspiratio.Lib.Allgemein
 
             #region Arbeiter-, Betriebs- und Transportkosten
 
-            double auslastungSumme = 0;
-            int bewerteteSlots = 0;
+            int gutAusgelasteteBetriebe = 0;
 
             for (int stadtId = 1; stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
             {
@@ -64,20 +82,23 @@ namespace Conspiratio.Lib.Allgemein
                         ergebnis.Betriebskosten += produktionsslot.GetProduktionStaetten() * SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetWSEinzelpreis();
 
                         // Auslastung = gesetzte zu benoetigten Arbeitern, dasselbe Verhaeltnis, mit dem
-                        // Produktionsslot.GetProduktion den Ertrag anteilig senkt.
+                        // Produktionsslot.GetProduktion den Ertrag anteilig senkt. Jeder Betrieb wird
+                        // fuer sich bewertet, nicht als Mittel ueber alle produzierenden: Ein Mittel
+                        // waere massstabsfrei gewesen - ein einziger gut besetzter Betrieb haette so
+                        // viel gebracht wie zwanzig - und das Stilllegen eines schwachen Betriebs haette
+                        // den eigenen Schnitt sogar gehoben, weil er aus der Messbasis fiel. Der Anreiz
+                        // waere gewesen, die Messbasis zu verkleinern statt gut zu wirtschaften.
                         var wareSlot = SW.Dynamisch.GetRohstoffwithID(rohstoffId);
                         int proStaette = wareSlot.GetWerkstaetten() > 0
                             ? wareSlot.GetArbeiter() / wareSlot.GetWerkstaetten()
                             : 1;
                         int benoetigt = produktionsslot.GetProduktionStaetten() * proStaette;
 
-                        if (benoetigt > 0)
-                        {
-                            double quote = (double)produktionsslot.GetProduktionArbeiter() / benoetigt;
-
-                            auslastungSumme += quote > 1 ? 1 : quote;
-                            bewerteteSlots++;
-                        }
+                        // Ganzzahlig statt in Gleitkomma: Der Arbeiterdeckel liegt bei 99, ein Ueberlauf
+                        // ist ausgeschlossen, und der Kern der Oekonomie bleibt exakt reproduzierbar.
+                        if (benoetigt > 0 &&
+                            100 * produktionsslot.GetProduktionArbeiter() / benoetigt >= AuslastungsschwelleProzent)
+                            gutAusgelasteteBetriebe++;
                     }
 
                     if (produktionsslot.GetTaetigkeit() == (int)EnumProduktionsslotAktionsart.Verkaufen ||
@@ -272,15 +293,12 @@ namespace Conspiratio.Lib.Allgemein
                     punkte = abweichungTaler > 0 ? 1 : -1;
             }
 
-            // Gut gefuehrte Werke bringen Geltung. Bewusst mit hoher Schwelle: eine Auszeichnung, kein
-            // Grundzustand. Nur nach oben wirksam, es gibt also nichts auszunutzen.
-            if (bewerteteSlots > 0)
-            {
-                int auslastungProzent = (int)(100 * auslastungSumme / bewerteteSlots);
-
-                if (auslastungProzent >= AuslastungsschwelleProzent)
-                    punkte++;
-            }
+            // Gut gefuehrte Werke bringen Geltung, und zwar je Betrieb: Wer zwanzig Werke gut auslastet,
+            // hat mehr geleistet als wer eines auslastet. Bewusst mit hoher Schwelle - eine Auszeichnung,
+            // kein Grundzustand. Nur nach oben wirksam: Ein stillgelegter oder schlecht besetzter Betrieb
+            // bringt nichts, kann den Wert aber auch nie heben. Den gemeinsamen Jahresdeckel zieht der
+            // Block darunter.
+            punkte += gutAusgelasteteBetriebe;
 
             if (punkte > AnsehenMaxProJahr)
                 punkte = AnsehenMaxProJahr;
