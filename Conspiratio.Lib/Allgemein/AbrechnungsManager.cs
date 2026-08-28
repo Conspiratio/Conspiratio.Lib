@@ -22,6 +22,18 @@ namespace Conspiratio.Lib.Allgemein
         /// </summary>
         public const int GrundunterhaltProWerkstatt = 40;
 
+        /// <summary>Taler Mehraufwand je Punkt permanenten Ansehens. Kalibriert in Aufgabe 5.</summary>
+        public const int AnsehenJeTalerHofhaltung = 2000;
+
+        /// <summary>
+        /// Obergrenze des Ansehensgewinns pro Jahr. Zehnerbetraege, keine Hunderter: Nach dem Wegfall
+        /// des Geldansehens liegen KI-Werte bei 15 bis 60, Aemterboni bei 3 bis 12.
+        /// </summary>
+        public const int AnsehenMaxProJahr = 15;
+
+        /// <summary>Ab dieser mittleren Auslastung gilt ein Betrieb als gut gefuehrt.</summary>
+        public const int AuslastungsschwelleProzent = 80;
+
         /// <summary>
         /// Berechnet alle Kostenpositionen des aktiven Spielers, zahlt Zölle an die
         /// Zollburg-Besitzer aus, zieht die Gesamtkosten von den Talern des Spielers ab
@@ -35,6 +47,9 @@ namespace Conspiratio.Lib.Allgemein
 
             #region Arbeiter-, Betriebs- und Transportkosten
 
+            double auslastungSumme = 0;
+            int bewerteteSlots = 0;
+
             for (int stadtId = 1; stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
             {
                 for (int slot = 0; slot < SW.Statisch.GetMaxProdSlots(); slot++)
@@ -47,6 +62,22 @@ namespace Conspiratio.Lib.Allgemein
 
                         ergebnis.Arbeiterkosten += produktionsslot.GetProduktionArbeiter() * SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetWSArbeiterpreis();
                         ergebnis.Betriebskosten += produktionsslot.GetProduktionStaetten() * SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetWSEinzelpreis();
+
+                        // Auslastung = gesetzte zu benoetigten Arbeitern, dasselbe Verhaeltnis, mit dem
+                        // Produktionsslot.GetProduktion den Ertrag anteilig senkt.
+                        var wareSlot = SW.Dynamisch.GetRohstoffwithID(rohstoffId);
+                        int proStaette = wareSlot.GetWerkstaetten() > 0
+                            ? wareSlot.GetArbeiter() / wareSlot.GetWerkstaetten()
+                            : 1;
+                        int benoetigt = produktionsslot.GetProduktionStaetten() * proStaette;
+
+                        if (benoetigt > 0)
+                        {
+                            double quote = (double)produktionsslot.GetProduktionArbeiter() / benoetigt;
+
+                            auslastungSumme += quote > 1 ? 1 : quote;
+                            bewerteteSlots++;
+                        }
                     }
 
                     if (produktionsslot.GetTaetigkeit() == (int)EnumProduktionsslotAktionsart.Verkaufen ||
@@ -222,6 +253,38 @@ namespace Conspiratio.Lib.Allgemein
             ergebnis.Hofhaltung = SW.Statisch.GetTitelX(spieler.GetTitel()).GetJahresaufwand()
                                   * HofhaltungFaktorProzent(spieler.GetHofhaltungAbweichung()) / 100;
             ergebnis.Gesamtkosten += ergebnis.Hofhaltung;
+
+            // Der Mehr- oder Minderaufwand gegenueber dem standesgemaessen Satz schlaegt sich in
+            // permanentem Ansehen nieder - der Waehrung, in der auch Kirchenaustritt (-100), Kerker und
+            // Pranger rechnen. Gedeckelt, damit Geltung ueber Jahre waechst und nicht in einem Zug.
+            int standesgemaess = SW.Statisch.GetTitelX(spieler.GetTitel()).GetJahresaufwand();
+            int abweichungTaler = ergebnis.Hofhaltung - standesgemaess;
+
+            if (abweichungTaler != 0)
+            {
+                int punkte = abweichungTaler / AnsehenJeTalerHofhaltung;
+
+                if (punkte > AnsehenMaxProJahr)
+                    punkte = AnsehenMaxProJahr;
+                else if (punkte < -AnsehenMaxProJahr)
+                    punkte = -AnsehenMaxProJahr;
+
+                // Sparen kostet auch dann Geltung, wenn der Betrag fuer einen vollen Punkt nicht reicht.
+                if (punkte == 0)
+                    punkte = abweichungTaler > 0 ? 1 : -1;
+
+                spieler.ErhoehePermaAnsehen(punkte);
+            }
+
+            // Gut gefuehrte Werke bringen Geltung. Bewusst mit hoher Schwelle: eine Auszeichnung, kein
+            // Grundzustand. Nur nach oben wirksam, es gibt also nichts auszunutzen.
+            if (bewerteteSlots > 0)
+            {
+                int auslastungProzent = (int)(100 * auslastungSumme / bewerteteSlots);
+
+                if (auslastungProzent >= AuslastungsschwelleProzent)
+                    spieler.ErhoehePermaAnsehen(1);
+            }
 
             #endregion
 
