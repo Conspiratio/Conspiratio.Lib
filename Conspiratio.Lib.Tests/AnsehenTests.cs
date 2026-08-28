@@ -13,6 +13,7 @@ namespace Conspiratio.Lib.Tests
     /// </summary>
     public class AnsehenTests
     {
+        private const int Edelmann = 2;
         private const int Herzog = 9;
 
         [Fact]
@@ -49,7 +50,10 @@ namespace Conspiratio.Lib.Tests
 
         /// <summary>
         /// Der Gewinn ist gedeckelt: Geltung waechst ueber Jahre, nicht in einem Zug. Ohne Deckel liesse
-        /// sich mit einem einzigen aufwendigen Jahr jedes Ansehensniveau kaufen.
+        /// sich mit einem einzigen aufwendigen Jahr jedes Ansehensniveau kaufen. Hofhaltung und
+        /// Auslastung teilen sich dieselbe Obergrenze - deshalb traegt die Zuchtprobe hier zusaetzlich
+        /// einen voll ausgelasteten Betrieb, sonst wuerde die Deckelung der Wechselwirkung beider
+        /// Quellen nie geprueft.
         /// </summary>
         [Fact]
         public void Der_Ansehensgewinn_ist_auf_das_Jahresmaximum_gedeckelt()
@@ -57,15 +61,48 @@ namespace Conspiratio.Lib.Tests
             TestSpielwelt.Starte();
 
             var spieler = SW.Dynamisch.GetAktHum();
+            var slot = spieler.GetProduktionsslot(1, 0);
+            int rohstoffId = SW.Dynamisch.GetStadtwithID(1).GetSingleRohstoff(1);
+            var ware = SW.Dynamisch.GetRohstoffwithID(rohstoffId);
+            int proStaette = ware.GetWerkstaetten() > 0 ? ware.GetArbeiter() / ware.GetWerkstaetten() : 1;
+
             spieler.SetTitel(Herzog);
             spieler.SetTaler(100000000);
             spieler.SetHofhaltungAbweichung(1);
+
+            spieler.GetSpielerHatInStadtXWerkstaettenY(1, 1).SetEnabled(true);
+            slot.SetTaetigkeit((int)EnumProduktionsslotAktionsart.Produzieren);
+            slot.SetProduktionRohstoff(rohstoffId);
+            slot.SetProduktionStaetten(1);
+            slot.SetProduktionArbeiter(proStaette);
 
             int vorher = spieler.GetPermaAnsehen();
             new AbrechnungsManager().ErstelleAbrechnungFuerAktivenSpieler();
 
             Assert.True(spieler.GetPermaAnsehen() - vorher <= AbrechnungsManager.AnsehenMaxProJahr,
                         "Der Jahresgewinn darf das Maximum nicht ueberschreiten.");
+            Assert.Equal(AbrechnungsManager.AnsehenMaxProJahr, spieler.GetPermaAnsehen() - vorher);
+        }
+
+        /// <summary>
+        /// Auch ein Mehraufwand, der fuer keinen vollen Punkt reicht, muss Geltung bringen - sonst waere
+        /// aufwendige Hofhaltung fuer die unteren Raenge wirkungslos. Edelmann: standesgemaess 500,
+        /// aufwendig 1000, Differenz 500 - unter der Schwelle von 2000 Talern je Punkt.
+        /// </summary>
+        [Fact]
+        public void Kleiner_Mehraufwand_bringt_trotzdem_einen_Punkt()
+        {
+            TestSpielwelt.Starte();
+
+            var spieler = SW.Dynamisch.GetAktHum();
+            spieler.SetTitel(Edelmann);
+            spieler.SetTaler(1000000);
+            spieler.SetHofhaltungAbweichung(1);
+
+            int vorher = spieler.GetPermaAnsehen();
+            new AbrechnungsManager().ErstelleAbrechnungFuerAktivenSpieler();
+
+            Assert.Equal(1, spieler.GetPermaAnsehen() - vorher);
         }
 
         /// <summary>

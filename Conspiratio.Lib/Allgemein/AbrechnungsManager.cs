@@ -254,26 +254,22 @@ namespace Conspiratio.Lib.Allgemein
                                   * HofhaltungFaktorProzent(spieler.GetHofhaltungAbweichung()) / 100;
             ergebnis.Gesamtkosten += ergebnis.Hofhaltung;
 
-            // Der Mehr- oder Minderaufwand gegenueber dem standesgemaessen Satz schlaegt sich in
-            // permanentem Ansehen nieder - der Waehrung, in der auch Kirchenaustritt (-100), Kerker und
-            // Pranger rechnen. Gedeckelt, damit Geltung ueber Jahre waechst und nicht in einem Zug.
+            // Der Mehr- oder Minderaufwand gegenueber dem standesgemaessen Satz sowie eine gut
+            // ausgelastete Werkstattflotte schlagen sich in permanentem Ansehen nieder - der Waehrung, in
+            // der auch Kirchenaustritt (-100), Kerker und Pranger rechnen. Beide Anteile teilen sich
+            // dieselbe Jahresobergrenze und werden deshalb erst summiert und dann gemeinsam gedeckelt,
+            // damit Geltung ueber Jahre waechst und nicht in einem Zug.
             int standesgemaess = SW.Statisch.GetTitelX(spieler.GetTitel()).GetJahresaufwand();
             int abweichungTaler = ergebnis.Hofhaltung - standesgemaess;
+            int punkte = 0;
 
             if (abweichungTaler != 0)
             {
-                int punkte = abweichungTaler / AnsehenJeTalerHofhaltung;
-
-                if (punkte > AnsehenMaxProJahr)
-                    punkte = AnsehenMaxProJahr;
-                else if (punkte < -AnsehenMaxProJahr)
-                    punkte = -AnsehenMaxProJahr;
+                punkte = abweichungTaler / AnsehenJeTalerHofhaltung;
 
                 // Sparen kostet auch dann Geltung, wenn der Betrag fuer einen vollen Punkt nicht reicht.
                 if (punkte == 0)
                     punkte = abweichungTaler > 0 ? 1 : -1;
-
-                spieler.ErhoehePermaAnsehen(punkte);
             }
 
             // Gut gefuehrte Werke bringen Geltung. Bewusst mit hoher Schwelle: eine Auszeichnung, kein
@@ -283,8 +279,16 @@ namespace Conspiratio.Lib.Allgemein
                 int auslastungProzent = (int)(100 * auslastungSumme / bewerteteSlots);
 
                 if (auslastungProzent >= AuslastungsschwelleProzent)
-                    spieler.ErhoehePermaAnsehen(1);
+                    punkte++;
             }
+
+            if (punkte > AnsehenMaxProJahr)
+                punkte = AnsehenMaxProJahr;
+            else if (punkte < -AnsehenMaxProJahr)
+                punkte = -AnsehenMaxProJahr;
+
+            if (punkte != 0)
+                spieler.ErhoehePermaAnsehen(punkte);
 
             #endregion
 
