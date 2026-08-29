@@ -411,6 +411,9 @@ namespace Conspiratio.Lib.Gameplay.Justiz
 
             _zeugenBonus = 0;
 
+            // Das Zitat des zuletzt vernommenen Zeugen, damit der naechste nicht woertlich dasselbe sagt.
+            string vorherigesZitat = null;
+
             for (int i = 0; i < _zeugen.Count; i++)
             {
                 var zeuge = SW.Dynamisch.GetKIwithID(_zeugen[i]);
@@ -438,7 +441,8 @@ namespace Conspiratio.Lib.Gameplay.Justiz
                 int staerke = ueberzeugend ? ZeugeUeberzeugend : ZeugeSchwach;
                 _zeugenBonus += fuerAngeklagten ? -staerke : staerke;   // für Angeklagten -> weniger schuldig
 
-                aussagen.Add(new ZeugenAussage(ZeugenText(zeuge.GetKompletterName(), fuerAngeklagten, ueberzeugend, maennlich)));
+                aussagen.Add(new ZeugenAussage(ZeugenText(zeuge.GetKompletterName(), fuerAngeklagten,
+                    ueberzeugend, maennlich, vorherigesZitat, out vorherigesZitat)));
             }
 
             return aussagen;
@@ -475,7 +479,13 @@ namespace Conspiratio.Lib.Gameplay.Justiz
             "Man munkelt so einiges über {ihn}."
         };
 
-        private static string ZeugenText(string name, bool fuerAngeklagten, bool ueberzeugend, bool maennlich)
+        /// <summary>
+        /// Baut die Aussage eines Zeugen. <paramref name="vorherigesZitat"/> ist das Zitat des zuvor
+        /// vernommenen Zeugen (beim ersten null); das gewaehlte Zitat kommt ueber
+        /// <paramref name="zitat"/> zurueck, damit der naechste Zeuge es wiederum meiden kann.
+        /// </summary>
+        private static string ZeugenText(string name, bool fuerAngeklagten, bool ueberzeugend, bool maennlich,
+                                         string vorherigesZitat, out string zitat)
         {
             string aussage;
             string[] zitate;
@@ -500,9 +510,30 @@ namespace Conspiratio.Lib.Gameplay.Justiz
                 zitate = ueberzeugend ? ZitateGegenUeberzeugend : ZitateGegenSchwach;
             }
 
-            string zitat = FuellePronomen(zitate[SW.Statisch.Rnd.Next(zitate.Length)], maennlich);
+            zitat = WaehleZitat(zitate, vorherigesZitat);
 
-            return name + "\n" + aussage + "\n„" + zitat + "“";
+            return name + "\n" + aussage + "\n„" + FuellePronomen(zitat, maennlich) + "“";
+        }
+
+        /// <summary>
+        /// Wuerfelt ein Zitat aus, das nicht dem des vorigen Zeugen entspricht. Beide Zeugen einer
+        /// Verhandlung stehen haeufig auf derselben Seite und in derselben Staerke, greifen also auf
+        /// denselben Topf von drei bis vier Zitaten zu - ohne diese Pruefung sagten sie mit rund einem
+        /// Drittel Wahrscheinlichkeit hintereinander woertlich dasselbe. Da bei gleicher Seite und
+        /// Staerke nur das Zitat variiert, genuegt es dieses zu entprellen: Die Aussage als ganze ist
+        /// damit nie zweimal hintereinander dieselbe.
+        ///
+        /// Bei einer Wiederholung wird ein Feld weitergerueckt statt neu gewuerfelt - das kommt ohne
+        /// Schleife aus, die im Extremfall auf einen anderen Wurf warten muesste.
+        /// </summary>
+        private static string WaehleZitat(string[] zitate, string vorherigesZitat)
+        {
+            int index = SW.Statisch.Rnd.Next(zitate.Length);
+
+            if (zitate.Length > 1 && zitate[index] == vorherigesZitat)
+                index = (index + 1) % zitate.Length;
+
+            return zitate[index];
         }
 
         private static string FuellePronomen(string zitat, bool maennlich)
