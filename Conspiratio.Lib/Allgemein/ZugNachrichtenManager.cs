@@ -17,6 +17,21 @@ namespace Conspiratio.Lib.Allgemein
     {
         private const int AnzahlGeschworene = 11;
 
+        /// <summary>
+        /// Jährlicher Zustandsverlust eines fertigen Wohnsitzes in Prozentpunkten (<see cref="AktualisiereAnwesen"/>),
+        /// unabhängig von Katastrophenschäden (<see cref="KatastrophenManager"/>) und unabhängig davon, ob der
+        /// Wohnsitz überhaupt genutzt wird. Das ist der Moneysink, der einen wohlhabenden Spieler erreicht, der
+        /// nicht mehr expandiert: Bei den aktuellen Kaufpreisen (Kate 1 000 bis Schloss 250 000 Taler) und dem
+        /// Wertverlustfaktor 0,5 des aktuellen Werts (<see cref="Conspiratio.Lib.Gameplay.Wohnsitz.SpHatHaus.GetAktuellerWert"/>)
+        /// macht das für ein Schloss rund 10 000 Taler Renovierungskosten im Jahr
+        /// (<see cref="AnwesenManager.GetRenovierungsPreis"/>, unreduziert durch den Sparplan-Faktor), für eine Kate
+        /// rund 40 Taler. Der Wert ist absichtlich als benannte Konstante ausgelagert, um ihn ohne Codesuche
+        /// nachjustieren zu können. <see cref="Conspiratio.Lib.Gameplay.Wohnsitz.SpHatHaus.ZustandInProzent"/> klemmt
+        /// selbst bei 0 (kein negativer Zustand) – ein völlig vernachlässigtes Anwesen verliert dadurch nicht
+        /// weiter an Wert, Ansehen oder Gesundheit, sondern verharrt bei 0 %, bis es renoviert wird.
+        /// </summary>
+        private const int AnwesenVerfallProzentProJahr = 8;
+
         /// <summary>Anteil des Gesamtvermögens, den das Überschreiten der Vermögensgrenze kostet.</summary>
         private const double StrafanteilVermoegen = 0.15;
 
@@ -157,8 +172,10 @@ namespace Conspiratio.Lib.Allgemein
                 }
                 else if (haus.GetHausID() != 0 && haus.GetStadtID() != 0)  // Ist das Haus vorhanden?
                 {
-                    // Zustand verringern
-                    haus.ZustandInProzent -= 8;  // 8 % Abzug
+                    // Zustand verringern (Reihenfolge bewusst vor der Renovierung: eine in diesem Jahr
+                    // beauftragte Renovierung soll das Jahr bei exakt 100 % beenden, nicht bei 100 % minus
+                    // diesem Jahresverfall)
+                    haus.ZustandInProzent -= AnwesenVerfallProzentProJahr;
 
                     // Renovierung durchführen
                     if (haus.InDiesemJahrRenovieren)
