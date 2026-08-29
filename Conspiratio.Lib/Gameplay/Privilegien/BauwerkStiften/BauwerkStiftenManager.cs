@@ -1,5 +1,6 @@
 ﻿using System;
 
+using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
@@ -59,14 +60,33 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.BauwerkStiften
         /// Führt die Stiftung des Bauwerks am angegebenen Index in der aktuell gewählten Stadt aus:
         /// erhöht das Permaansehen des aktiven Spielers und zieht die Taler ab. Wird erst nach
         /// bestätigter Bezahlbarkeit (PruefeGoldMitMeldung) und Bestätigung aufgerufen.
+        ///
+        /// Das Ansehen ist auf <see cref="AbrechnungsManager.AnsehenMaxProJahr"/> je Spieler und Jahr
+        /// gedeckelt wie die anderen beiden Ansehensquellen (Hofhaltung, Auslastung) - sonst wäre eine
+        /// Stiftung mit 1 000 Talern je Punkt, beliebig oft im selben Zug wiederholbar, die mit Abstand
+        /// billigste Geltung im Spiel. Bezahlt und gestiftet wird trotz Deckel immer voll: Nur das
+        /// zusätzliche Ansehen entfällt, das Bauwerk steht so oder so.
         /// </summary>
         public void FuehreStiftungAus(int index)
         {
             var spieler = SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler());
-            spieler.ErhoehePermaAnsehen(Convert.ToInt16(_preise[index] / 1000));
+
+            int rohertrag = Convert.ToInt16(_preise[index] / 1000);
+            int nochFrei = AbrechnungsManager.AnsehenMaxProJahr - spieler.AnsehenAusStiftungenDiesesJahr;
+            int ertrag = rohertrag;
+
+            if (ertrag > nochFrei)
+                ertrag = nochFrei;
+            if (ertrag < 0)
+                ertrag = 0;
+
+            spieler.ErhoehePermaAnsehen(ertrag);
+            spieler.AnsehenAusStiftungenDiesesJahr += ertrag;
+
             spieler.ErhoeheTaler(-_preise[index]);
 
-            // Gestifteten Gesamtwert mitführen (für den Auftrag „Mäzen").
+            // Gestifteten Gesamtwert mitführen (für den Auftrag „Mäzen") - unabhängig vom Ansehensdeckel,
+            // der volle Betrag ist gezahlt und das Bauwerk steht.
             spieler.GestifteterBauwert += _preise[index];
         }
     }

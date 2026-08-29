@@ -63,6 +63,17 @@ namespace Conspiratio.Lib.Gameplay.Personen
         public bool DuellGefuehrtDiesesJahr { get; set; }
 
         /// <summary>
+        /// Punkte permanenten Ansehens, die dieser Spieler in diesem Jahr bereits aus Bauwerk-Stiftungen
+        /// gewonnen hat (<see cref="Privilegien.BauwerkStiften.BauwerkStiftenManager.FuehreStiftungAus"/>) –
+        /// gedeckelt auf <see cref="Allgemein.AbrechnungsManager.AnsehenMaxProJahr"/> wie die beiden
+        /// anderen Ansehensquellen. Reset zu Zugbeginn, analog zu <see cref="DuellGefuehrtDiesesJahr"/>.
+        /// Feldbasierte Serialisierung: Ein alter Spielstand kennt das Feld nicht und liefert 0 – das ist
+        /// hier genau der richtige Default ("in diesem Jahr noch nichts gestiftet"), eine Lazy-Init wie
+        /// bei <see cref="GetAhnentafelListe"/> ist also nicht nötig.
+        /// </summary>
+        public int AnsehenAusStiftungenDiesesJahr { get; set; }
+
+        /// <summary>
         /// Die Ahnentafel der Dynastie: je Generation das verstorbene Oberhaupt samt Ehepartner und Kindern,
         /// festgehalten beim Erbfall (sonst gingen diese Daten bei der Erbübernahme verloren). Übersteht den
         /// Erbfall, da sie am fortbestehenden Spielerobjekt hängt. Alte Spielstände starten mit null (leer).

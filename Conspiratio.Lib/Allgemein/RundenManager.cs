@@ -28,6 +28,11 @@ namespace Conspiratio.Lib.Allgemein
 
             // Die Duell-Sperre (max. ein Duell pro Zug, Issue #17) gilt nur für das laufende Jahr.
             SW.Dynamisch.GetAktHum().DuellGefuehrtDiesesJahr = false;
+
+            // Der Ansehensdeckel aus Bauwerk-Stiftungen (AbrechnungsManager.AnsehenMaxProJahr) gilt
+            // ebenfalls nur für das laufende Jahr - sonst wäre er nach dem ersten Jahr für immer
+            // ausgeschöpft.
+            SW.Dynamisch.GetAktHum().AnsehenAusStiftungenDiesesJahr = 0;
         }
 
         /// <summary>

@@ -58,20 +58,33 @@ namespace Conspiratio.Lib.Allgemein
         public const int GrundunterhaltProWerkstatt = 100;
 
         /// <summary>
-        /// Taler Mehraufwand je Punkt permanenten Ansehens. Der Kurs staffelt die Geltung nach Rang:
-        /// Ein Herzog gewinnt mit aufwendiger Hofhaltung 5 Punkte im Jahr (50 000 Taler Mehraufwand),
-        /// ein Fuerst 3, ein Graf 2, die Raenge darunter je einen. Ueber zehn Jahre sind das 50 bzw. 20
-        /// Punkte - die Groessenordnung eines KI-Ansehens (Amtsbonus mal 5, also 15 bis 60), erreichbar
-        /// nur ueber Jahre.
+        /// Taler Mehraufwand je Punkt permanenten Ansehens auf der Gewinnseite (aufwendige Hofhaltung).
+        /// Der Kurs staffelt die Geltung nach Rang: Ein Herzog gewinnt mit aufwendiger Hofhaltung
+        /// 5 Punkte im Jahr (50 000 Taler Mehraufwand), ein Fuerst 3, ein Graf 2, die Raenge darunter je
+        /// einen. Ueber zehn Jahre sind das 50 bzw. 20 Punkte - die Groessenordnung eines KI-Ansehens
+        /// (Amtsbonus mal 5, also 15 bis 60), erreichbar nur ueber Jahre.
         ///
-        /// <b>Die Verlustseite ist deutlich flacher, und zwar bauartbedingt:</b> Sparsam <i>halbiert</i>
-        /// den standesgemaessen Aufwand, der Fehlbetrag ist also nie groesser als die Haelfte des
-        /// Jahresaufwands. Fuer den Herzog sind das -25 000 Taler und damit -2 Punkte, fuer den Fuersten
-        /// -17 500 und -1; jeder Rang darunter landet ueber die Mindest-Ein-Punkt-Regel bei genau -1.
-        /// <b>Mehr als -2 im Jahr ist nicht erreichbar</b> - der Clamp bei <c>-AnsehenMaxProJahr</c> ist
-        /// eine Sicherung, keine Grenze, die je greift.
+        /// <b>Die Verlustseite hat einen eigenen, halbierten Kurs</b>
+        /// (<see cref="AnsehenVerlustJeTalerHofhaltung"/>), damit sparsame Hofhaltung wirklich weh tut
+        /// statt nur halb so stark zu wirken wie aufwendige.
         /// </summary>
         public const int AnsehenJeTalerHofhaltung = 10000;
+
+        /// <summary>
+        /// Taler Fehlbetrag je Punkt permanenten Ansehens auf der Verlustseite (sparsame Hofhaltung) -
+        /// die Haelfte von <see cref="AnsehenJeTalerHofhaltung"/>, sonst waere Sparsamkeit nur ein
+        /// Achtungszeichen und keine echte Bremse. Sparsam halbiert den standesgemaessen Aufwand, der
+        /// Fehlbetrag ist also nie groesser als die Haelfte des Jahresaufwands - bei diesem Kurs reicht
+        /// das fuer den Herzog exakt bis an den Deckel:
+        ///
+        /// <list type="bullet">
+        /// <item>Baron: -7 500 Taler => -1 Punkt</item>
+        /// <item>Graf: -12 500 Taler => -2 Punkte</item>
+        /// <item>Fuerst: -17 500 Taler => -3 Punkte</item>
+        /// <item>Herzog: -25 000 Taler => -5 Punkte (<see cref="AnsehenMaxProJahr"/> exakt erreicht)</item>
+        /// </list>
+        /// </summary>
+        public const int AnsehenVerlustJeTalerHofhaltung = 5000;
 
         /// <summary>
         /// Obergrenze des Ansehensgewinns pro Jahr - <b>je Quelle</b>, nicht fuer beide zusammen:
@@ -79,14 +92,17 @@ namespace Conspiratio.Lib.Allgemein
         /// damit hoechstens <c>2 * AnsehenMaxProJahr</c> Punkte zu gewinnen (je der Deckel aus jeder
         /// Quelle).
         ///
-        /// Nach unten ist die Grenze <b>nicht</b> symmetrisch, auch wenn der Clamp das nahelegt:
-        /// Abziehen kann nur die Hofhaltung, und sparsam halbiert den Aufwand hoechstens, weshalb
-        /// tatsaechlich nur -1 oder -2 Punkte im Jahr erreichbar sind (Einzelheiten bei
-        /// <see cref="AnsehenJeTalerHofhaltung"/>). Weil beide Anteile <i>addiert</i> werden, hebt eine
-        /// gut ausgelastete Flotte den Sparmalus vollstaendig auf: Ein Herzog mit fuenf gut gefuehrten
-        /// Produktionsplaetzen gewinnt trotz sparsamer Hofhaltung noch 3 Punkte im Jahr und behaelt
-        /// 25 000 Taler. Sparsam ist damit fuer den, der gut wirtschaftet, kaum eine Entscheidung -
-        /// ob der Malus mit dem Rang skalieren sollte, ist eine offene Balancingfrage.
+        /// Nach unten ist die Grenze <b>nicht</b> symmetrisch, auch wenn der Clamp das nahelegt: Abziehen
+        /// kann nur die Hofhaltung, mit einem eigenen, halbierten Kurs auf der Verlustseite
+        /// (<see cref="AnsehenVerlustJeTalerHofhaltung"/>) - -1 bis -5 Punkte je nach Rang, beim Herzog
+        /// exakt der Deckel. Weil beide Anteile <i>addiert</i> werden, kann eine gut ausgelastete Flotte
+        /// den Sparmalus dennoch abfedern: Ein Herzog mit fuenf gut gefuehrten Produktionsplaetzen
+        /// gleicht seinen eigenen Sparmalus (-5) gerade aus und behaelt 25 000 Taler, gewinnt dabei aber
+        /// selbst keine Geltung mehr hinzu.
+        ///
+        /// Eine dritte Quelle - Bauwerksstiftungen (<c>BauwerkStiftenManager.FuehreStiftungAus</c>) -
+        /// unterliegt demselben Deckel, wird aber ausserhalb dieser Methode verbucht und zaehlt daher
+        /// nicht in die <c>2 * AnsehenMaxProJahr</c> oben ein.
         ///
         /// Ein gemeinsamer Topf haette die beiden Wege gegeneinander ausgespielt, obwohl Geltung sich
         /// erwirtschaften <i>oder</i> erkaufen laesst: Wer schon so viele Werke gut auslastet, wie der
@@ -343,7 +359,10 @@ namespace Conspiratio.Lib.Allgemein
 
             if (abweichungTaler != 0)
             {
-                hofhaltungPunkte = abweichungTaler / AnsehenJeTalerHofhaltung;
+                // Gewinn- und Verlustseite laufen ueber getrennte Kurse (siehe AnsehenVerlustJeTalerHofhaltung):
+                // Sparsam soll wirklich weh tun und nicht nur halb so stark wirken wie aufwendig.
+                int kurs = abweichungTaler > 0 ? AnsehenJeTalerHofhaltung : AnsehenVerlustJeTalerHofhaltung;
+                hofhaltungPunkte = abweichungTaler / kurs;
 
                 // Sparen kostet auch dann Geltung, wenn der Betrag fuer einen vollen Punkt nicht reicht.
                 if (hofhaltungPunkte == 0)

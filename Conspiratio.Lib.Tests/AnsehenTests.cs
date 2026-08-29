@@ -15,6 +15,9 @@ namespace Conspiratio.Lib.Tests
     {
         private const int Buerger = 1;
         private const int Edelmann = 2;
+        private const int Baron = 6;
+        private const int Graf = 7;
+        private const int Fuerst = 8;
         private const int Herzog = 9;
 
         /// <summary>
@@ -171,6 +174,33 @@ namespace Conspiratio.Lib.Tests
             new AbrechnungsManager().ErstelleAbrechnungFuerAktivenSpieler();
 
             Assert.Equal(1, spieler.GetPermaAnsehen() - vorher);
+        }
+
+        /// <summary>
+        /// Die Verlustseite hat einen eigenen, halbierten Kurs (<see
+        /// cref="AbrechnungsManager.AnsehenVerlustJeTalerHofhaltung"/>, 5 000 statt 10 000 Taler je
+        /// Punkt), damit sparsame Hofhaltung wirklich weh tut statt nur halb so stark zu wirken wie
+        /// aufwendige. Mit dem alten, gemeinsamen Kurs kostete Sparsamkeit hoechstens -2 Punkte
+        /// (Herzog); mit dem neuen erreicht der Herzog exakt den Deckel bei -5.
+        /// </summary>
+        [Theory]
+        [InlineData(Baron, -1)]
+        [InlineData(Graf, -2)]
+        [InlineData(Fuerst, -3)]
+        [InlineData(Herzog, -5)]
+        public void Sparsame_Hofhaltung_kostet_mit_dem_Rang_wachsend(int titelId, int erwartetePunkte)
+        {
+            TestSpielwelt.Starte();
+
+            var spieler = SW.Dynamisch.GetAktHum();
+            spieler.SetTitel(titelId);
+            spieler.SetTaler(1000000);
+            spieler.SetHofhaltungAbweichung(-1);
+
+            int vorher = spieler.GetPermaAnsehen();
+            new AbrechnungsManager().ErstelleAbrechnungFuerAktivenSpieler();
+
+            Assert.Equal(erwartetePunkte, spieler.GetPermaAnsehen() - vorher);
         }
 
         /// <summary>
