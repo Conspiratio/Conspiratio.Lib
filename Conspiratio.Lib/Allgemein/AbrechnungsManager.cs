@@ -16,20 +16,44 @@ namespace Conspiratio.Lib.Allgemein
     public class AbrechnungsManager
     {
         /// <summary>
-        /// Unterhalt des ersten Betriebs; der n-te kostet das n-Fache. Zwischen zwei Schranken gemessen:
+        /// Unterhalt der ersten besessenen Werkstatt; die n-te kostet das n-Fache.
         ///
-        /// Nach unten: Zwei Betriebe kosten drei Grundeinheiten, also 300 Taler - Rauschen gemessen am
-        /// Startkapital, und mit Abstand unter den 500 Talern, die der Einsteigertest zulaesst.
+        /// <b>Bemessungsgrundlage ist der Besitz</b>, gezaehlt ueber <c>HumSpieler.ZaehleWerkstaetten</c>
+        /// - nicht die Produktionsplaetze, ueber die weiter oben die Auslastungsbelohnung laeuft. Die
+        /// beiden Groessen werden in dieser Datei bewusst auseinandergehalten: <i>besessene Werkstatt</i>
+        /// meint immer den Unterhalt, <i>Produktionsplatz</i> immer die Belohnung. Sie sind verschieden
+        /// gross - der Besitz reicht bis 84, die Produktionsplaetze bis 28.
+        ///
+        /// Nach unten: Zwei Werkstaetten kosten drei Grundeinheiten, also 300 Taler - Rauschen gemessen
+        /// am Startkapital, und mit Abstand unter den 500 Talern, die der Einsteigertest zulaesst.
         ///
         /// Nach oben: der Deckungsbeitrag einer ausgelasteten Werkstatt. Aus
         /// <see cref="Rohstoffe.Rohstoff.GetWSProdProWS"/> (90 % davon bei richtiger Arbeiterzahl) gegen
         /// <see cref="Rohstoffe.Rohstoff.GetWSEinzelpreis"/> und
-        /// <see cref="Rohstoffe.Rohstoff.GetWSArbeiterpreis"/> traegt die schwaechste Ware in einem bis
-        /// zum Arbeiterdeckel besetzten Produktionsplatz 8 474 Taler im Jahr, die staerkste 20 438. Bei
-        /// 100 Talern Grundunterhalt kostet selbst der 28. Betrieb - so viele Produktionsplaetze, wie
-        /// 14 Staedte mal <c>GetMaxProdSlots</c> ueberhaupt hergeben - 2 800 Taler und damit ein Drittel
-        /// des schwaechsten und ein Siebtel des staerksten Deckungsbeitrags. Expansion bleibt damit
-        /// lohnend, wird aber spuerbar teurer.
+        /// <see cref="Rohstoffe.Rohstoff.GetWSArbeiterpreis"/> traegt die schwaechste Ware <b>mit
+        /// Arbeitergrenze</b> in einem bis zum Arbeiterdeckel besetzten Produktionsplatz 8 474 Taler im
+        /// Jahr, die staerkste 20 438. Die Einschraenkung ist noetig: Wolle, Fell und Rum brauchen
+        /// 1 Arbeiter je 2 Werkstaetten, ganzzahlig also 0, und haben damit ueberhaupt keine
+        /// Arbeitergrenze - sie stehen ausserhalb dieser Spanne.
+        ///
+        /// <b>Der Betriebsbereich reicht weit ueber die kalibrierte Mitte hinaus.</b> Ueber die volle
+        /// Spanne des Besitzes:
+        ///
+        /// <list type="bullet">
+        /// <item>2 Werkstaetten: 300 Taler im Jahr - der Einsteigerfall.</item>
+        /// <item>20 Werkstaetten: 21 000 Taler; die 20. allein 2 000.</item>
+        /// <item>28 Werkstaetten: 40 600 Taler; die 28. allein 2 800 und damit ein Drittel des
+        /// schwaechsten und ein Siebtel des staerksten Deckungsbeitrags.</item>
+        /// <item>84 Werkstaetten - 14 Staedte mal <c>GetMaxWerkstaettenProStadt</c> (6), mit dem
+        /// Anwesengesetz auf seiner Obergrenze (14) legal erreichbar: <b>357 000 Taler</b>; die 84.
+        /// allein 8 400, also so viel, wie die schwaechste Ware mit Arbeitergrenze in einem vollen
+        /// Produktionsplatz ueberhaupt einbringt.</item>
+        /// </list>
+        ///
+        /// Am oberen Ende ist der Unterhalt damit keine Randnotiz mehr, sondern die Bremse selbst: Wer
+        /// alles besitzt, was das Gesetz zulaesst, muss auch alles auslasten. Ob dieser Endausschlag so
+        /// gewollt ist, ist eine Balancingfrage und hier ausdruecklich offen - die Kalibrierung des
+        /// Wertes 100 zielte auf die Mitte der Spanne, nicht auf ihr Ende.
         /// </summary>
         public const int GrundunterhaltProWerkstatt = 100;
 
@@ -39,6 +63,13 @@ namespace Conspiratio.Lib.Allgemein
         /// ein Fuerst 3, ein Graf 2, die Raenge darunter je einen. Ueber zehn Jahre sind das 50 bzw. 20
         /// Punkte - die Groessenordnung eines KI-Ansehens (Amtsbonus mal 5, also 15 bis 60), erreichbar
         /// nur ueber Jahre.
+        ///
+        /// <b>Die Verlustseite ist deutlich flacher, und zwar bauartbedingt:</b> Sparsam <i>halbiert</i>
+        /// den standesgemaessen Aufwand, der Fehlbetrag ist also nie groesser als die Haelfte des
+        /// Jahresaufwands. Fuer den Herzog sind das -25 000 Taler und damit -2 Punkte, fuer den Fuersten
+        /// -17 500 und -1; jeder Rang darunter landet ueber die Mindest-Ein-Punkt-Regel bei genau -1.
+        /// <b>Mehr als -2 im Jahr ist nicht erreichbar</b> - der Clamp bei <c>-AnsehenMaxProJahr</c> ist
+        /// eine Sicherung, keine Grenze, die je greift.
         /// </summary>
         public const int AnsehenJeTalerHofhaltung = 10000;
 
@@ -46,8 +77,16 @@ namespace Conspiratio.Lib.Allgemein
         /// Obergrenze des Ansehensgewinns pro Jahr - <b>je Quelle</b>, nicht fuer beide zusammen:
         /// Hofhaltung und Auslastung werden getrennt gedeckelt und erst danach addiert. Im Jahr sind
         /// damit hoechstens <c>2 * AnsehenMaxProJahr</c> Punkte zu gewinnen (je der Deckel aus jeder
-        /// Quelle) und hoechstens <c>AnsehenMaxProJahr</c> zu verlieren, denn abziehen kann nur die
-        /// Hofhaltung.
+        /// Quelle).
+        ///
+        /// Nach unten ist die Grenze <b>nicht</b> symmetrisch, auch wenn der Clamp das nahelegt:
+        /// Abziehen kann nur die Hofhaltung, und sparsam halbiert den Aufwand hoechstens, weshalb
+        /// tatsaechlich nur -1 oder -2 Punkte im Jahr erreichbar sind (Einzelheiten bei
+        /// <see cref="AnsehenJeTalerHofhaltung"/>). Weil beide Anteile <i>addiert</i> werden, hebt eine
+        /// gut ausgelastete Flotte den Sparmalus vollstaendig auf: Ein Herzog mit fuenf gut gefuehrten
+        /// Produktionsplaetzen gewinnt trotz sparsamer Hofhaltung noch 3 Punkte im Jahr und behaelt
+        /// 25 000 Taler. Sparsam ist damit fuer den, der gut wirtschaftet, kaum eine Entscheidung -
+        /// ob der Malus mit dem Rang skalieren sollte, ist eine offene Balancingfrage.
         ///
         /// Ein gemeinsamer Topf haette die beiden Wege gegeneinander ausgespielt, obwohl Geltung sich
         /// erwirtschaften <i>oder</i> erkaufen laesst: Wer schon so viele Werke gut auslastet, wie der
@@ -108,6 +147,12 @@ namespace Conspiratio.Lib.Allgemein
 
                         // Ganzzahlig statt in Gleitkomma: Der Arbeiterdeckel liegt bei 99, ein Ueberlauf
                         // ist ausgeschlossen, und der Kern der Oekonomie bleibt exakt reproduzierbar.
+                        //
+                        // benoetigt > 0 ist dabei mehr als eine Nullpruefung fuer die Division: Wolle,
+                        // Fell und Rum brauchen 1 Arbeiter je 2 Werkstaetten, ganzzahlig also 0 je
+                        // Staette. Ohne diese Bedingung raeumte jeder Produktionsplatz dieser drei Waren
+                        // die Schwelle ohne einen einzigen Arbeiter - Geltung zum Nulltarif, und zwar
+                        // gerade fuer die Waren, die keine Auslastung kennen.
                         if (benoetigt > 0 &&
                             100 * produktionsslot.GetProduktionArbeiter() / benoetigt >= AuslastungsschwelleProzent)
                             gutAusgelasteteBetriebe++;

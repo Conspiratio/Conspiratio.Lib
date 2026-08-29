@@ -41,6 +41,14 @@ namespace Conspiratio.Lib.Gameplay.Justiz
         // Plädoyers (Issue #18): Das Anklageplädoyer stellt die Beweislast dar (nur Text), das
         // Verteidigungsplädoyer gewichtet das Ansehen des Angeklagten – hohes Ansehen zieht die Richter
         // etwas Richtung Freispruch (_plaedoyerBonus, negativ = weniger schuldig).
+        //
+        // OFFENE BALANCINGFRAGE (bewusst unveraendert gelassen): Diese beiden Schwellen sind absolute
+        // Ansehenswerte und wurden kalibriert, als sich das Ansehen ueberwiegend aus dem Kontostand
+        // speiste (2 500 Taler je Punkt, bei 2,9 Mio. also rund 1 160 Punkte). Seit dem Wegfall des
+        // Geldansehens (HumSpieler.AnsehenAktualisieren) liegt ein KI-Spieler bei 15 bis 60 - 80 ist
+        // damit oberhalb der gesamten KI-Spanne, und PlaedoyerBonusHoch faellt praktisch aus. Ob die
+        // Schwellen auf die neue Skala gezogen werden sollen, ist eine Spielbalance-Entscheidung und
+        // ausdruecklich nicht mit der Umstellung miterledigt worden.
         private const int AnsehenHoch = 80;
         private const int AnsehenMittel = 30;
         private const int PlaedoyerBonusHoch = -6;
