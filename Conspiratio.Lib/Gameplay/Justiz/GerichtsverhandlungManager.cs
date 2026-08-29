@@ -42,13 +42,14 @@ namespace Conspiratio.Lib.Gameplay.Justiz
         // Verteidigungsplädoyer gewichtet das Ansehen des Angeklagten – hohes Ansehen zieht die Richter
         // etwas Richtung Freispruch (_plaedoyerBonus, negativ = weniger schuldig).
         //
-        // OFFENE BALANCINGFRAGE (bewusst unveraendert gelassen): Diese beiden Schwellen sind absolute
-        // Ansehenswerte und wurden kalibriert, als sich das Ansehen ueberwiegend aus dem Kontostand
-        // speiste (2 500 Taler je Punkt, bei 2,9 Mio. also rund 1 160 Punkte). Seit dem Wegfall des
-        // Geldansehens (HumSpieler.AnsehenAktualisieren) liegt ein KI-Spieler bei 15 bis 60 - 80 ist
-        // damit oberhalb der gesamten KI-Spanne, und PlaedoyerBonusHoch faellt praktisch aus. Ob die
-        // Schwellen auf die neue Skala gezogen werden sollen, ist eine Spielbalance-Entscheidung und
-        // ausdruecklich nicht mit der Umstellung miterledigt worden.
+        // Bemessungsgrundlage ist das *Standesansehen* (Spieler.GetStandesAnsehen), also Ansehen plus
+        // Titelbonus. Die beiden Schwellen sind an der Titelleiter kalibriert und nicht, wie hier
+        // frueher behauptet, am Kontostand: 80 liegt genau zwischen Baron (75) und Graf (100), 30
+        // genau zwischen Ritter (20) und Landherr (35). Adelstitel.BonusAnsehen wurde daraufhin
+        // aktiviert - Graf und darueber bekommen den vollen Plaedoyerbonus, Landherr bis Baron den
+        // halben, darunter keinen. Bewusst nur fuer die Beurteilung von Personen (hier und bei den
+        // Geschworenen des Schuldenprozesses), nicht fuer die Wahl: Titel haengen an Talerschwellen,
+        // dort wuerde der Bonus den Weg von Geld zu Einfluss wieder oeffnen.
         private const int AnsehenHoch = 80;
         private const int AnsehenMittel = 30;
         private const int PlaedoyerBonusHoch = -6;
@@ -131,8 +132,8 @@ namespace Conspiratio.Lib.Gameplay.Justiz
             _zeugenBonus = 0;
             WaehleZeugen();
 
-            // Verteidigungsplädoyer: hohes Ansehen des Angeklagten zieht die Richter Richtung Freispruch.
-            int ansehen = angeklagter.GetAnsehen();
+            // Verteidigungsplädoyer: hoher Stand des Angeklagten zieht die Richter Richtung Freispruch.
+            int ansehen = angeklagter.GetStandesAnsehen();
             _plaedoyerBonus = ansehen >= AnsehenHoch ? PlaedoyerBonusHoch : ansehen >= AnsehenMittel ? PlaedoyerBonusMittel : 0;
 
             _delikte = new int[SW.Statisch.GetMaxGesetze()];
@@ -538,15 +539,16 @@ namespace Conspiratio.Lib.Gameplay.Justiz
         }
 
         /// <summary>
-        /// Das Schlussplädoyer der Verteidigung. Der Ton richtet sich nach dem Ansehen des Angeklagten;
-        /// ein hohes Ansehen wurde beim Start der Verhandlung bereits als <c>_plaedoyerBonus</c> zugunsten
-        /// des Angeklagten verbucht (siehe StarteVerhandlung).
+        /// Das Schlussplädoyer der Verteidigung. Der Ton richtet sich nach dem Standesansehen des
+        /// Angeklagten; ein hoher Stand wurde beim Start der Verhandlung bereits als
+        /// <c>_plaedoyerBonus</c> zugunsten des Angeklagten verbucht (siehe StarteVerhandlung). Beide
+        /// Stellen lesen bewusst dieselbe Größe, damit der Text zum tatsächlich gewährten Bonus passt.
         /// </summary>
         public string GetVerteidigungsplaedoyer()
         {
             var angeklagter = SW.Dynamisch.GetSpWithID(_verhandlung.GetAngeklagterID());
             bool maennlich = angeklagter.GetMaennlich();
-            int ansehen = angeklagter.GetAnsehen();
+            int ansehen = angeklagter.GetStandesAnsehen();
 
             string meinMandant = maennlich ? "meines Mandanten" : "meiner Mandantin";
             string derMandant = maennlich ? "Mein Mandant" : "Meine Mandantin";

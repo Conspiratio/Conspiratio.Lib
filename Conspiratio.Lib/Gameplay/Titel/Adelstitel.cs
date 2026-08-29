@@ -25,7 +25,11 @@ namespace Conspiratio.Lib.Gameplay.Titel
         public int AbTaler { get; }
 
         /// <summary>
-        /// Hat aktuell noch keine Auswirkung. Ist wahrscheinlich für einen Ansehensbonus durch den Titel gedacht gewesen.
+        /// Ansehensbonus des Titels: Bürger 5, Edelmann 10, Ritter 20, Landherr 35, Freiherr 55,
+        /// Baron 75, Graf 100, Fürst 125, Herzog 150. Fliesst über
+        /// <see cref="Personen.Spieler.GetStandesAnsehen"/> in die Beurteilung einer Person ein
+        /// (Gericht und Geschworene des Schuldenprozesses) - und ausdrücklich nur dort, nicht in
+        /// die Wahl.
         /// </summary>
         public int BonusAnsehen { get; }
 

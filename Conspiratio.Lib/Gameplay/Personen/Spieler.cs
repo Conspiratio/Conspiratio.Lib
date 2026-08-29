@@ -336,6 +336,33 @@ namespace Conspiratio.Lib.Gameplay.Personen
             return SW.Statisch.GetTitelX(_titel).GetName(Maennlich);
         }
 
+        /// <summary>
+        /// Das Ansehen zuzüglich des Ansehensbonus des geführten Adelstitels
+        /// (<see cref="Titel.Adelstitel.BonusAnsehen"/>): Bürger 5, Edelmann 10, Ritter 20,
+        /// Landherr 35, Freiherr 55, Baron 75, Graf 100, Fürst 125, Herzog 150.
+        ///
+        /// Gilt ausdrücklich nur dort, wo über eine *Person* geurteilt wird: vor Gericht
+        /// (<c>GerichtsverhandlungManager</c>) und vor den Geschworenen des Schuldenprozesses
+        /// (<c>ZugNachrichtenManager.FuehreSchuldenProzessDurch</c>). Die Schwellen des Gerichts
+        /// (80 / 30) liegen genau zwischen den Rängen der Titelleiter – sie sind an ihr
+        /// kalibriert, nicht am Kontostand. Nicht verwendet wird es in der Wahl
+        /// (<c>AemterManager.ErmittleKiStimme</c>), in der Schuldentoleranz und im Militärbonus
+        /// (<c>Stuetzpunkt</c>): Titel hängen an Talerschwellen, ein Titelbonus in der Wahl würde
+        /// den mit dem Wegfall des Geldansehens geschlossenen Weg von Geld zu Einfluss wieder öffnen.
+        /// Der Titel öffnet Türen bei Hofe, er kauft keine Stimmen.
+        ///
+        /// Bewusst hier auf <see cref="Spieler"/> und nicht als Summand in
+        /// <c>HumSpieler.AnsehenAktualisieren</c>: Jene Methode gibt es nur auf <c>HumSpieler</c> und
+        /// sie läuft nur für den aktiven Menschen. Dort eingebaut hätte der Titelbonus nur
+        /// Menschen gestärkt und die KI nie – genau die Asymmetrie, die beim Geldansehen der
+        /// Fehler war. Hier berechnet, gilt er für beide, denn auch KI-Spieler tragen Titel
+        /// (<c>DynamischeSpieldaten</c> macht jede KI mindestens zum Bürger).
+        /// </summary>
+        public int GetStandesAnsehen()
+        {
+            return GetAnsehen() + SW.Statisch.GetTitelX(_titel).BonusAnsehen;
+        }
+
         public void SetReligion(int wert)
         {
             Religion = wert;

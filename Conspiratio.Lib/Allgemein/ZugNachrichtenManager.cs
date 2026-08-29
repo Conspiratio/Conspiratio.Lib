@@ -243,9 +243,12 @@ namespace Conspiratio.Lib.Allgemein
                 geschworene[i] = kandidat;
             }
 
-            // Abstimmung durchführen
+            // Abstimmung durchführen. Die Geschworenen urteilen über eine Person, nicht über ein
+            // Konto - deshalb zählt hier wie vor Gericht das Standesansehen samt Titelbonus. Die
+            // Schuldentoleranz oben (MussSichVorGlaeubigernVerantworten) bleibt bewusst beim blanken
+            // Ansehen: Sie bemisst, wie tief jemand ins Minus darf, und beurteilt niemanden.
             int schulden = spieler.GetTaler();
-            int ansehen = spieler.GetAnsehen();
+            int ansehen = spieler.GetStandesAnsehen();
             int anzahlSchuldsprueche = 0;
 
             for (int i = 0; i < AnzahlGeschworene; i++)
