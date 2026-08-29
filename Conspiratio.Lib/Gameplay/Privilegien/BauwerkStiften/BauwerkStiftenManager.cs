@@ -51,6 +51,20 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.BauwerkStiften
         public string GetNichtGenugGoldMeldung(int index) =>
             "Ihr besitzt die " + _preise[index].ToStringGeld(false) + "\n Taler für dieses\nVorhaben nicht.";
 
+        /// <summary>
+        /// Prüft (ohne Nebenwirkung), ob der aktive Spieler das Bauwerk in der aktuell gewählten Stadt
+        /// bereits gestiftet hat. Jedes der vier Bauwerke ist je Stadt nur einmal zu haben – damit ist
+        /// die Stiftung etwas, das man im ganzen Reich verfolgt (4 mal 14 Städte), statt sie durch
+        /// wiederholtes Klicken in derselben Stadt zu häufen. Wie <see cref="KannBezahlen"/> ist dies
+        /// eine Vorbedingung, die der Aufrufer prüft, bevor er <see cref="FuehreStiftungAus"/> ruft.
+        /// </summary>
+        public bool IstBereitsGestiftet(int index) =>
+            SW.Dynamisch.GetHumWithID(SW.Dynamisch.GetAktiverSpieler()).HatBauwerkGestiftet(AktiveStadtID, index);
+
+        /// <summary>Meldungstext, wenn das Bauwerk in dieser Stadt bereits gestiftet wurde.</summary>
+        public string GetBereitsGestiftetMeldung(int index) =>
+            "In " + GetStadtName() + " habt Ihr\nbereits " + _bauwerke[index] + "\ngestiftet.";
+
         /// <summary>Bestätigungsfrage für die Stiftung des Bauwerks am angegebenen Index.</summary>
         public string GetBestaetigungsfrage(int index) =>
             "Wollt Ihr wirklich für " + _preise[index].ToStringGeld() +
@@ -66,6 +80,9 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.BauwerkStiften
         /// Stiftung mit 1 000 Talern je Punkt, beliebig oft im selben Zug wiederholbar, die mit Abstand
         /// billigste Geltung im Spiel. Bezahlt und gestiftet wird trotz Deckel immer voll: Nur das
         /// zusätzliche Ansehen entfällt, das Bauwerk steht so oder so.
+        ///
+        /// Die Stiftung wird beim Spieler vermerkt (<see cref="IstBereitsGestiftet"/>), denn dasselbe
+        /// Bauwerk lässt sich in derselben Stadt kein zweites Mal stiften.
         /// </summary>
         public void FuehreStiftungAus(int index)
         {
@@ -88,6 +105,9 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.BauwerkStiften
             // Gestifteten Gesamtwert mitführen (für den Auftrag „Mäzen") - unabhängig vom Ansehensdeckel,
             // der volle Betrag ist gezahlt und das Bauwerk steht.
             spieler.GestifteterBauwert += _preise[index];
+
+            // Bauwerk und Stadt vermerken: Dieses Bauwerk ist hier ab jetzt vergeben.
+            spieler.MerkeBauwerkStiftung(AktiveStadtID, index);
         }
     }
 }

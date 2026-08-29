@@ -5,6 +5,7 @@ using System.Linq;
 using Conspiratio.Lib.Gameplay.Ereignisse;
 using Conspiratio.Lib.Gameplay.Hinterzimmer;
 using Conspiratio.Lib.Gameplay.Niederlassung;
+using Conspiratio.Lib.Gameplay.Privilegien.BauwerkStiften;
 using Conspiratio.Lib.Gameplay.Schreibstube;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 using Conspiratio.Lib.Gameplay.Wohnsitz;
@@ -87,6 +88,42 @@ namespace Conspiratio.Lib.Gameplay.Personen
                 Ahnentafel = new List<Dynastiegeneration>();
 
             return Ahnentafel;
+        }
+
+        /// <summary>
+        /// Die Bauwerke, die dieser Spieler bereits gestiftet hat (<c>BauwerkStiftenManager</c>). Jedes
+        /// der vier Bauwerke lässt sich je Stadt nur einmal stiften, die Lebensobergrenze liegt damit
+        /// bei vier Bauwerken mal vierzehn Städten. Alte Spielstände starten mit null (leer) –
+        /// die Serialisierung ist feldbasiert und umgeht Konstruktoren, deshalb wird ausschließlich
+        /// über <see cref="GetGestifteteBauwerke"/> zugegriffen und nie direkt auf das Feld.
+        /// </summary>
+        public List<GestiftetesBauwerk> GestifteteBauwerke { get; set; }
+
+        /// <summary>Liefert die Liste der gestifteten Bauwerke und legt sie bei Bedarf an (kompatibel mit alten Spielständen).</summary>
+        public List<GestiftetesBauwerk> GetGestifteteBauwerke()
+        {
+            if (GestifteteBauwerke == null)
+                GestifteteBauwerke = new List<GestiftetesBauwerk>();
+
+            return GestifteteBauwerke;
+        }
+
+        /// <summary>Hat dieser Spieler das angegebene Bauwerk in der angegebenen Stadt bereits gestiftet?</summary>
+        public bool HatBauwerkGestiftet(int stadtId, int bauwerkIndex)
+        {
+            return GetGestifteteBauwerke().Any(b => b.StadtId == stadtId && b.BauwerkIndex == bauwerkIndex);
+        }
+
+        /// <summary>
+        /// Hält eine ausgeführte Stiftung fest. Ein bereits vermerktes Bauwerk wird nicht doppelt
+        /// eingetragen (wie bei <see cref="ErpressungAnlegen"/>), damit die Liste nicht wachsen kann.
+        /// </summary>
+        public void MerkeBauwerkStiftung(int stadtId, int bauwerkIndex)
+        {
+            if (HatBauwerkGestiftet(stadtId, bauwerkIndex))
+                return;
+
+            GetGestifteteBauwerke().Add(new GestiftetesBauwerk { StadtId = stadtId, BauwerkIndex = bauwerkIndex });
         }
 
         /// <summary>
