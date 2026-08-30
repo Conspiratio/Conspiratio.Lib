@@ -106,8 +106,26 @@ namespace Conspiratio.Lib.Tests
                 foreach (var aussage in manager.ErmittleZeugenAussagen())
                     gesehen.Add(Wortlaut(aussage));
 
-            // Der Topf fuer diese Seite und Staerke haelt drei Zitate; alle drei muessen vorkommen.
-            Assert.Equal(3, gesehen.Count);
+            // Der Topf ZitateFuerSchwach - auf den die Testaufstellung zielt - haelt acht Zitate; alle
+            // muessen vorkommen. Die Zahl ist bewusst exakt: Kommen Zitate hinzu, soll dieser Test
+            // auffallen und mitgezogen werden, statt eine schleichend schrumpfende Auswahl zu decken.
+            Assert.Equal(8, gesehen.Count);
+        }
+
+        /// <summary>
+        /// Kein Zitat darf einen Platzhalter uebrig lassen. Die Zitate werden von Hand gepflegt, ein
+        /// Vertipper wie {sie} statt {er} faellt sonst niemandem auf - er stuende woertlich im Spiel.
+        /// </summary>
+        [Fact]
+        public void Kein_Zitat_laesst_einen_Platzhalter_stehen()
+        {
+            TestSpielwelt.Starte(seed: 4711);
+            var manager = BaueVerhandlung();
+
+            for (int runde = 0; runde < 2000; runde++)
+                foreach (var aussage in manager.ErmittleZeugenAussagen())
+                    Assert.False(aussage.Text.Contains("{") || aussage.Text.Contains("}"),
+                        "Unersetzter Platzhalter in der Aussage: " + aussage.Text);
         }
     }
 }

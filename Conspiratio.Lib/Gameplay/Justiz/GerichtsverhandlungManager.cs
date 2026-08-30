@@ -449,34 +449,64 @@ namespace Conspiratio.Lib.Gameplay.Justiz
         }
 
         // Gesprochene Zeugen-Zitate für etwas Atmosphäre, je nach Richtung und Überzeugungskraft. Platzhalter
-        // {er}/{ihn}/{ihm} werden je nach Geschlecht des Angeklagten ersetzt (siehe FuellePronomen).
+        // {er}/{ihn}/{ihm}/{der_taeter} werden je nach Geschlecht des Angeklagten ersetzt (siehe FuellePronomen).
+        //
+        // Zwei Regeln für neue Zitate: Kein Satz darf mit einem Platzhalter beginnen, weil dieser
+        // kleingeschrieben ersetzt wird. Und ein Possessivpronomen auf den Angeklagten („sein"/„ihr")
+        // gibt es nicht – dafür fehlt ein Platzhalter, solche Wendungen also umschreiben.
+        //
+        // Je größer ein Topf, desto seltener wiederholt sich der Wortlaut: WaehleZitat verhindert nur die
+        // unmittelbare Wiederholung beim nächsten Zeugen, nicht die gefühlte Eintönigkeit über viele
+        // Verhandlungen hinweg.
         private static readonly string[] ZitateFuerUeberzeugend =
         {
             "Ich schwöre, dass {er} nicht {der_taeter} ist!",
             "Zur fraglichen Zeit war {er} nachweislich bei mir.",
             "Einen ehrbareren Menschen gibt es in der ganzen Stadt nicht!",
-            "Diese Anschuldigungen sind frei erfunden, das sage ich Euch!"
+            "Diese Anschuldigungen sind frei erfunden, das sage ich Euch!",
+            "Mein Wort darauf: Den ganzen Tag über war {er} in meiner Werkstatt!",
+            "Wer das behauptet, hat {ihn} nie kennengelernt!",
+            "Bei allen Heiligen, an {ihm} ist kein Falsch!",
+            "Mit meinem guten Namen stehe ich für {ihn} ein!",
+            "Die halbe Gasse kann bezeugen, dass {er} unschuldig ist!",
+            "Man will {ihm} hier etwas anhängen, so viel steht fest!",
+            "Nicht {der_taeter} sitzt hier vor Euch, sondern ein Opfer übler Nachrede!"
         };
 
         private static readonly string[] ZitateFuerSchwach =
         {
             "Ich… ich glaube kaum, dass {er} so etwas täte.",
             "Mir schien {er} stets rechtschaffen, doch wer weiß…",
-            "So recht vorstellen kann ich mir die Tat bei {ihm} nicht."
+            "So recht vorstellen kann ich mir die Tat bei {ihm} nicht.",
+            "Nun ja… gesehen habe ich nichts, das muss ich zugeben.",
+            "Böses habe ich von {ihm} eigentlich nie gehört.",
+            "Man sagt allerlei, doch beweisen kann es wohl keiner.",
+            "Ich möchte {ihm} ja nichts Schlechtes nachsagen…",
+            "Zuzutrauen wäre {ihm} das nicht, meine ich."
         };
 
         private static readonly string[] ZitateGegenUeberzeugend =
         {
             "Ich habe {ihn} genau gesehen!",
             "Mit eigenen Augen sah ich die Tat geschehen!",
-            "Ein reines Gewissen hat {er} gewiss nicht, das sieht man {ihm} an!"
+            "Ein reines Gewissen hat {er} gewiss nicht, das sieht man {ihm} an!",
+            "Ich schwöre es: Niemand anderes als {er} hat es getan!",
+            "Vor meinen Augen ist es geschehen, ich kann es beschwören!",
+            "Die Tat lastet auf {ihm}, daran gibt es nichts zu deuteln!",
+            "Zu oft schon sah ich {ihn} bei krummen Geschäften!",
+            "Ich sage aus, was ich sah – und ich sah {ihn}, mitten in der Tat!"
         };
 
         private static readonly string[] ZitateGegenSchwach =
         {
             "Ja, und mit einer schwarzen Katze habe ich {ihn} auch schon gesehen!",
             "Ganz geheuer war {er} mir noch nie…",
-            "Man munkelt so einiges über {ihn}."
+            "Man munkelt so einiges über {ihn}.",
+            "Ehrlich gesagt war {er} mir immer ein wenig unheimlich.",
+            "Ob {er} es war? Ich will nichts gesagt haben…",
+            "In der Schenke erzählt man sich sonderbare Dinge über {ihn}.",
+            "Die Nachbarn tuscheln, und wo Rauch ist, da ist auch Feuer…",
+            "Gegrüßt hat {er} mich nie – das sagt doch schon einiges."
         };
 
         /// <summary>
