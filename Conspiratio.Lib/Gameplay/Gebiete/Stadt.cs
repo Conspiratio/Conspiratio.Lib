@@ -118,6 +118,20 @@ namespace Conspiratio.Lib.Gameplay.Gebiete
         #region Getter und Setter
 
         /// <summary>
+        /// Der Basispreis der Ware in dieser Stadt, ohne den Mengenabschlag aus
+        /// <see cref="GetRohstoffPreisVonIDX"/>.
+        ///
+        /// Aus dem Marktpreis lässt er sich nicht zurückrechnen: Der Abschlag teilt dort ganzzahlig ab,
+        /// sodass mehrere Basispreise auf denselben Marktpreis führen (Basispreis 10 und 11 ergeben bei
+        /// 10 % Abschlag beide 9). Wer beide Werte nebeneinander anzeigen will – etwa um dem Spieler den
+        /// Abschlag zu erklären – braucht deshalb diesen Zugriff statt einer Umkehrrechnung.
+        /// </summary>
+        public int GetRohstoffBasispreisVonIDX(int X)
+        {
+            return _rohstoffPreis[X];
+        }
+
+        /// <summary>
         /// Der Marktpreis der Ware in dieser Stadt: Basispreis abzüglich eines Mengenabschlags, der sich
         /// danach richtet, wie viele Jahre lokalen Bedarfs bereits als Überhang im Stadtlager liegen.
         ///

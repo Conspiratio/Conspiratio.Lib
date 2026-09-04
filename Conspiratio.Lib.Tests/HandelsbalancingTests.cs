@@ -44,6 +44,44 @@ namespace Conspiratio.Lib.Tests
         }
 
         [Fact]
+        public void Der_Basispreis_bleibt_vom_Mengenabschlag_unberuehrt()
+        {
+            TestSpielwelt.Starte();
+
+            var stadt = BereiteStadtVor(GrosseStadt, 1_000_000);
+
+            Assert.Equal(Basispreis, stadt.GetRohstoffBasispreisVonIDX(Korn));
+            Assert.True(stadt.GetRohstoffPreisVonIDX(Korn) < stadt.GetRohstoffBasispreisVonIDX(Korn));
+        }
+
+        /// <summary>
+        /// Der Grund, aus dem es <c>GetRohstoffBasispreisVonIDX</c> überhaupt gibt: Die Ganzzahldivision
+        /// in <c>GetRohstoffPreisVonIDX</c> bildet mehrere Basispreise auf denselben Marktpreis ab. Eine
+        /// Anzeige, die den Basispreis aus dem Marktpreis zurückrechnet, rät deshalb – und zeigt in der
+        /// Mehrzahl der Fälle eine falsche Zahl.
+        /// </summary>
+        [Fact]
+        public void Der_Marktpreis_laesst_den_Basispreis_nicht_zurueckrechnen()
+        {
+            TestSpielwelt.Starte();
+
+            var stadt = SW.Dynamisch.GetStadtwithID(GrosseStadt);
+            stadt.SetRohstoffVorratWithIDXToY(Korn, 500);   // ein Jahresbedarf => 10 % Abschlag
+
+            stadt.SetRohstoffPreisVonIDXToY(Korn, 10);
+            int preisBei10 = stadt.GetRohstoffPreisVonIDX(Korn);
+
+            stadt.SetRohstoffPreisVonIDXToY(Korn, 11);
+            int preisBei11 = stadt.GetRohstoffPreisVonIDX(Korn);
+
+            // 10 * 90 / 100 = 9 und 11 * 90 / 100 = 9 (abgeschnitten): derselbe Marktpreis.
+            Assert.Equal(preisBei10, preisBei11);
+
+            // Der Getter unterscheidet, was der Marktpreis zusammenwirft.
+            Assert.Equal(11, stadt.GetRohstoffBasispreisVonIDX(Korn));
+        }
+
+        [Fact]
         public void Ein_Jahresbedarf_Vorrat_kostet_genau_einen_Abschlagsschritt()
         {
             TestSpielwelt.Starte();
