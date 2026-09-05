@@ -36,6 +36,9 @@ namespace Conspiratio.Lib.Harness
 
         /// <summary>Mittlerer Marktabschlag der belieferten Staedte in Prozentpunkten.</summary>
         public int Abschlag;
+
+        /// <summary>Erreichter Rang - ohne ihn ist die Hofhaltung nicht zu deuten.</summary>
+        public string Titel;
     }
 
     /// <summary>Wie der Betrieb aufgebaut wird, bevor die Jahre laufen.</summary>
@@ -64,6 +67,23 @@ namespace Conspiratio.Lib.Harness
         /// damit eine Produktionslinie statt zweier.
         /// </summary>
         public bool Export;
+
+        /// <summary>
+        /// Den Adelsweg mitgehen: Wohnsitze kaufen, sobald sie bezahlbar sind. Ohne das steigt der
+        /// Spieler nie im Rang - und die Hofhaltung, eine der Spaetspiel-Geldsenken, bleibt fuer immer
+        /// bei 0. Die Titelleiter haengt naemlich nicht am Vermoegen allein: Landherr verlangt ein
+        /// Landhaus, Baron einen Landsitz, Freiherr eine Villa, Graf und hoeher zusaetzlich
+        /// Stuetzpunkte. Ein reiner Haendler zahlt diese Senke also nie.
+        /// </summary>
+        public bool Adel;
+
+        /// <summary>
+        /// Nur so viel produzieren, wie eine Stadt im Jahr verbraucht, statt so viel wie Arbeiter und
+        /// Lager hergeben. Die naive Strategie schuettet die Zielmaerkte zu und verkauft danach zum
+        /// halben Preis - was gemessen wird, ist dann die Strafe fuer Ueberproduktion und nicht das
+        /// Balancing.
+        /// </summary>
+        public bool Marktklug;
     }
 
     /// <summary>
@@ -234,6 +254,11 @@ namespace Conspiratio.Lib.Harness
                 if (_aufbau.StaettenJeLinie > 0)
                     staetten = Math.Min(staetten, _aufbau.StaettenJeLinie);
 
+                // Marktklug: nicht mehr erzeugen, als eine Stadt im Jahr verbraucht. Alles darueber
+                // bleibt im Zielmarkt liegen und drueckt den Preis, den man selbst erloest.
+                if (_aufbau.Marktklug)
+                    staetten = Math.Max(1, Math.Min(staetten, MittlererJahresbedarf() / mengeProStaette));
+
                 if (ausLager < ausArbeitern)
                     lagerBindet++;
 
@@ -270,7 +295,13 @@ namespace Conspiratio.Lib.Harness
             var spieler = SW.Dynamisch.GetAktHum();
             var zeile = new Jahreszeile { Jahr = SW.Dynamisch.GetAktuellesJahr() };
 
-            // 1. Zugbeginn: Das Buch verbucht Produktion und Exporterloese des Vorjahres.
+            // 0. Zugbeginn im Sinne der Lib: aktualisiert Privilegien und Ansehen und setzt den
+            //    Jahresdeckel fuer Stiftungs-Ansehen zurueck. Der Aufruf fehlte in der ersten Fassung -
+            //    ohne ihn wird das Ansehen nie fortgeschrieben und der Deckel bleibt nach dem ersten
+            //    Jahr fuer immer ausgeschoepft.
+            _runden.BeginneZug();
+
+            // 1. Das Buch verbucht Produktion und Exporterloese des Vorjahres.
             var buch = new BuchManager().ErstelleJahresbuchFuerAktivenSpieler();
 
             for (int rohstoffId = 1; rohstoffId < SW.Statisch.GetMaxRohID(); rohstoffId++)
@@ -328,6 +359,9 @@ namespace Conspiratio.Lib.Harness
             nachrichten.KassiereAmtseinkommen();
             nachrichten.AktualisiereAnwesen();
 
+            if (_aufbau.Adel)
+                BaueWohnsitzAus();
+
             // 5. Wirtschaftliches Rundenende - Reihenfolge bindend, siehe Kontor.FuehreWirtschaftliches-
             //    RundenendeDurch: Das Reichtumswachstum liest die Verkaufsmengen, die RohBedarf danach
             //    verbraucht und nullt.
@@ -345,6 +379,7 @@ namespace Conspiratio.Lib.Harness
             zeile.Taler = spieler.GetTaler();
             zeile.Vermoegen = spieler.GetGesamtVermoegen(SpielerId);
             zeile.Abschlag = MittlererAbschlag();
+            zeile.Titel = SW.Statisch.GetTitelX(spieler.GetTitel()).GetName(spieler.GetMaennlich());
 
             return zeile;
         }
@@ -405,6 +440,88 @@ namespace Conspiratio.Lib.Harness
             }
 
             return beste;
+        }
+
+        /// <summary>
+        /// Die Haeuser, die die Titelleiter verlangt - in der Reihenfolge, in der sie bezahlbar werden.
+        /// Landherr braucht ein Landhaus, Freiherr eine Villa, Baron einen Landsitz, Graf eine Burg,
+        /// Fuerst und Herzog ein Schloss.
+        /// </summary>
+        private static readonly string[] Adelsleiter = { "Landhaus", "Villa", "Landsitz", "Burg", "Schloss" };
+
+        /// <summary>
+        /// Kauft das Haus, das der naechste noch nicht erreichte Rang verlangt - je Rang in einer
+        /// eigenen Stadt.
+        ///
+        /// <b>Der Name zaehlt, nicht der Preis.</b> <c>BesitztSpielerFertigesHaus</c> vergleicht den
+        /// Hausnamen exakt, und ein Spieler kann je Stadt ein Haus besitzen. Wer sich gleich das
+        /// teuerste leistet, erfuellt "Landhaus" damit nicht: Eine erste Fassung kaufte in einer
+        /// einzigen Stadt jeweils das teuerste bezahlbare Haus, gab ueber 40 Jahre rund 925 000 Taler
+        /// aus und blieb Ritter. Fuer Graf und hoeher fehlt ausserdem der Stuetzpunkt, den diese
+        /// Harness nicht kauft - die oberen Raenge bleiben also unerreichbar.
+        ///
+        /// Die Haelfte der Barschaft bleibt als Puffer stehen, und es wird hoechstens ein Bau je Jahr
+        /// begonnen.
+        /// </summary>
+        private void BaueWohnsitzAus()
+        {
+            var spieler = SW.Dynamisch.GetAktHum();
+            var anwesen = new AnwesenManager();
+            int budget = spieler.GetTaler() / 2;
+
+            for (int stufe = 0; stufe < Adelsleiter.Length; stufe++)
+            {
+                string name = Adelsleiter[stufe];
+
+                if (spieler.BesitztSpielerFertigesHaus(name))
+                    continue;
+
+                // Je Rang eine eigene Stadt, ab Stadt 2 - in Stadt 1 steht der Startwohnsitz.
+                int stadtId = stufe + 2;
+
+                if (stadtId >= SW.Statisch.GetMaxStadtID())
+                    return;
+
+                // Dort wird schon gebaut oder steht bereits etwas: abwarten.
+                if (anwesen.HatHaus(stadtId))
+                    return;
+
+                var angebote = anwesen.GetBaubareHaeuser(stadtId, 0);
+
+                if (angebote == null)
+                    return;
+
+                foreach (var angebot in angebote)
+                {
+                    if (angebot.Name == name && angebot.Preis <= budget)
+                    {
+                        anwesen.BaueHaus(stadtId, angebot);
+                        return;
+                    }
+                }
+
+                // Noch nicht bezahlbar - die teureren Stufen erst recht nicht.
+                return;
+            }
+        }
+
+        /// <summary>
+        /// Was eine Stadt im Jahr verbraucht, gemittelt ueber alle Staedte - die Menge, die ein Markt
+        /// aufnimmt, ohne zu saettigen (<c>Stadt.GetRohstoffPreisVonIDX</c> rechnet den Abschlag in
+        /// Jahresbedarfen, und ein Jahresbedarf ist Einwohner/10).
+        /// </summary>
+        private static int MittlererJahresbedarf()
+        {
+            int summe = 0;
+            int anzahl = 0;
+
+            for (int stadtId = 1; stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
+            {
+                summe += Math.Max(1, SW.Dynamisch.GetStadtwithID(stadtId).GetEinwohner() / 10);
+                anzahl++;
+            }
+
+            return anzahl == 0 ? 1 : summe / anzahl;
         }
 
         /// <summary>Verkauft in jeder Stadt den dort gelagerten Bestand der eigenen Ware.</summary>

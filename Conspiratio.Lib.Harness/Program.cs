@@ -61,7 +61,9 @@ namespace Conspiratio.Lib.Harness
                 Lagerausbauten = Zahl(args, "lagerausbauten", 8),
                 StaettenJeLinie = Zahl(args, "staetten", 0),
                 Vollstaendig = Schalter(args, "vollstaendig"),
-                Export = Schalter(args, "export")
+                Export = Schalter(args, "export"),
+                Adel = Schalter(args, "adel"),
+                Marktklug = Schalter(args, "marktklug")
             };
 
             int jahre = Zahl(args, "jahre", 20);
@@ -72,7 +74,9 @@ namespace Conspiratio.Lib.Harness
             Console.WriteLine("Staedte " + aufbau.Staedte + ", Slots je Stadt " + aufbau.SlotsProStadt +
                               ", Jahre " + jahre + ", Seeds " + seeds.Count +
                               (aufbau.Vollstaendig ? ", mit KI-Jahreswechsel" : ", ohne KI-Jahreswechsel") +
-                              (aufbau.Export ? ", Absatz per Export" : ", Absatz vor Ort"));
+                              (aufbau.Export ? ", Absatz per Export" : ", Absatz vor Ort") +
+                              (aufbau.Adel ? ", mit Adelsweg" : "") +
+                              (aufbau.Marktklug ? ", marktklug" : ""));
             Console.WriteLine();
 
             var endstaende = new List<int>();
@@ -118,7 +122,8 @@ namespace Conspiratio.Lib.Harness
                 Console.WriteLine("Seed " + seed.ToString(CultureInfo.InvariantCulture).PadLeft(6) +
                                   ":  Endvermoegen " + G(letzte.Vermoegen).PadLeft(12) +
                                   "   Taler " + G(letzte.Taler).PadLeft(12) +
-                                  "   Abschlag " + (letzte.Abschlag + " %").PadLeft(5));
+                                  "   Abschlag " + (letzte.Abschlag + " %").PadLeft(5) +
+                                  "   " + letzte.Titel);
             }
 
             endstaende.Sort();
