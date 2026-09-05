@@ -39,6 +39,9 @@ namespace Conspiratio.Lib.Harness
 
         /// <summary>Erreichter Rang - ohne ihn ist die Hofhaltung nicht zu deuten.</summary>
         public string Titel;
+
+        /// <summary>Der simulierte Kapazitaetsunterhalt dieses Jahres (siehe Aufbau).</summary>
+        public int Kapazitaet;
     }
 
     /// <summary>Wie der Betrieb aufgebaut wird, bevor die Jahre laufen.</summary>
@@ -84,6 +87,21 @@ namespace Conspiratio.Lib.Harness
         /// Balancing.
         /// </summary>
         public bool Marktklug;
+
+        /// <summary>
+        /// Simuliert einen <b>vorgeschlagenen</b>, noch nicht umgesetzten Kapazitaetsunterhalt: Die
+        /// n-te Produktionsstaette einer Linie kostet das n-Fache dieser Grundeinheit im Jahr, der
+        /// Betrag wird nach der Jahresabrechnung abgezogen. 0 schaltet ihn ab.
+        ///
+        /// <b>Die Lib bleibt dafuer unveraendert.</b> Der heutige Unterhalt ist zwar schon progressiv,
+        /// bemisst sich aber am <i>Besitz an Werkstaetten</i> (<c>ZaehleWerkstaetten</c>), und genau
+        /// daran waechst ein Haendler nicht: Gemessen sind 14 Werkstaetten, aber 646 Produktionsstaetten
+        /// und 1 360 Arbeiter - Unterhalt 10 500 Taler. Erloes und Kosten steigen beide linear mit der
+        /// Menge, die Marge bleibt konstant, und das Vermoegen waechst ewig geradeaus. Dieser Schalter
+        /// misst, wie stark eine Progression auf der <i>Kapazitaet</i> sein muesste, damit die Kurve
+        /// abflacht.
+        /// </summary>
+        public int KapazitaetsunterhaltJeStaette;
     }
 
     /// <summary>
@@ -334,6 +352,8 @@ namespace Conspiratio.Lib.Harness
             zeile.Hofhaltung = abrechnung.Hofhaltung;
             zeile.Gesamtkosten = abrechnung.Gesamtkosten;
 
+            zeile.Kapazitaet = ZieheKapazitaetsunterhaltAb();
+
             _runden.SchliesseZugAb();
 
             // 4. Zugnachrichten, soweit sie auf das Vermoegen wirken.
@@ -443,6 +463,32 @@ namespace Conspiratio.Lib.Harness
             }
 
             return beste;
+        }
+
+        /// <summary>
+        /// Zieht den simulierten Kapazitaetsunterhalt ab: je Linie die Dreieckszahl ihrer Staetten mal
+        /// der Grundeinheit. Zwei Staetten kosten also drei Einheiten, 46 Staetten 1 081 - die
+        /// Progression trifft den Magnaten und laesst den Einsteiger in Ruhe.
+        /// </summary>
+        private int ZieheKapazitaetsunterhaltAb()
+        {
+            if (_aufbau.KapazitaetsunterhaltJeStaette <= 0)
+                return 0;
+
+            // Progression ueber die GESAMTE Kapazitaet, nicht je Linie: Die n-te Staette des Betriebs
+            // kostet das n-Fache eines Tausendstels der Grundeinheit. Je Linie gerechnet war die
+            // Dreieckszahl zu steil - 46 Staetten je Linie zu quadrieren traf haerter als die 14
+            // Werkstaetten, an denen der heutige Unterhalt haengt.
+            long staetten = 0;
+
+            foreach (var (stadtId, slot, _) in _linien)
+                staetten += _handel.GetProduktionsslot(stadtId, slot).GetProduktionStaetten();
+
+            int summe = (int)(staetten * (staetten + 1) / 2 * _aufbau.KapazitaetsunterhaltJeStaette / 1000);
+
+            SW.Dynamisch.GetAktHum().ErhoeheTaler(-summe);
+
+            return summe;
         }
 
         /// <summary>Hoechste Wohnsitzstufe des Spiels (Schloss).</summary>

@@ -63,7 +63,8 @@ namespace Conspiratio.Lib.Harness
                 Vollstaendig = Schalter(args, "vollstaendig"),
                 Export = Schalter(args, "export"),
                 Adel = Schalter(args, "adel"),
-                Marktklug = Schalter(args, "marktklug")
+                Marktklug = Schalter(args, "marktklug"),
+                KapazitaetsunterhaltJeStaette = Zahl(args, "kapazitaet", 0)
             };
 
             int jahre = Zahl(args, "jahre", 20);
@@ -100,7 +101,7 @@ namespace Conspiratio.Lib.Harness
                                       " Arbeiter, bindende Grenze: " + spiel.BindendeGrenze);
                     Console.WriteLine();
                     Console.WriteLine("Jahr    Produziert   Verkauft       Erloes    Unterhalt   Hofhaltung   " +
-                                      "Gesamtkosten       Taler     Vermoegen   Abschlag");
+                                      "Gesamtkosten    Kapazitaet       Taler     Vermoegen   Abschlag");
                     Console.WriteLine(new string('-', 125));
 
                     foreach (var z in zeilen)
@@ -112,6 +113,7 @@ namespace Conspiratio.Lib.Harness
                             G(z.Unterhalt).PadLeft(11) + "  " +
                             G(z.Hofhaltung).PadLeft(11) + "  " +
                             G(z.Gesamtkosten).PadLeft(14) + "  " +
+                            G(z.Kapazitaet).PadLeft(10) + "  " +
                             G(z.Taler).PadLeft(10) + "  " +
                             G(z.Vermoegen).PadLeft(12) + "  " +
                             (z.Abschlag + " %").PadLeft(9));
