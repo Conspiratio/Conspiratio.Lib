@@ -15,7 +15,7 @@ namespace Conspiratio.Lib.Gameplay.Titel
             if (!base.IstSpielerFuerTitelBerechtigt(dynamischeSpieldaten, spielerId))
                 return false;
 
-            if (!dynamischeSpieldaten.GetHumWithID(spielerId).BesitztSpielerFertigesHaus("Burg"))
+            if (!dynamischeSpieldaten.GetHumWithID(spielerId).BesitztSpielerFertigesHausAbStufe(8))
                 return false;
 
             return dynamischeSpieldaten.GetHumWithID(spielerId).GetAnzahlStuetzpunkte(spielerId) >= 1;

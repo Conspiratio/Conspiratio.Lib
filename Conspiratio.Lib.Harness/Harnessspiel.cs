@@ -360,7 +360,10 @@ namespace Conspiratio.Lib.Harness
             nachrichten.AktualisiereAnwesen();
 
             if (_aufbau.Adel)
+            {
                 BaueWohnsitzAus();
+                KaufeStuetzpunkt();
+            }
 
             // 5. Wirtschaftliches Rundenende - Reihenfolge bindend, siehe Kontor.FuehreWirtschaftliches-
             //    RundenendeDurch: Das Reichtumswachstum liest die Verkaufsmengen, die RohBedarf danach
@@ -442,65 +445,115 @@ namespace Conspiratio.Lib.Harness
             return beste;
         }
 
-        /// <summary>
-        /// Die Haeuser, die die Titelleiter verlangt - in der Reihenfolge, in der sie bezahlbar werden.
-        /// Landherr braucht ein Landhaus, Freiherr eine Villa, Baron einen Landsitz, Graf eine Burg,
-        /// Fuerst und Herzog ein Schloss.
-        /// </summary>
-        private static readonly string[] Adelsleiter = { "Landhaus", "Villa", "Landsitz", "Burg", "Schloss" };
+        /// <summary>Hoechste Wohnsitzstufe des Spiels (Schloss).</summary>
+        private const int HoechsteHausstufe = 9;
 
         /// <summary>
-        /// Kauft das Haus, das der naechste noch nicht erreichte Rang verlangt - je Rang in einer
-        /// eigenen Stadt.
+        /// Baut den naechstbesseren Wohnsitz, sobald er bezahlbar ist - der erste Teil des Adelswegs.
         ///
-        /// <b>Der Name zaehlt, nicht der Preis.</b> <c>BesitztSpielerFertigesHaus</c> vergleicht den
-        /// Hausnamen exakt, und ein Spieler kann je Stadt ein Haus besitzen. Wer sich gleich das
-        /// teuerste leistet, erfuellt "Landhaus" damit nicht: Eine erste Fassung kaufte in einer
-        /// einzigen Stadt jeweils das teuerste bezahlbare Haus, gab ueber 40 Jahre rund 925 000 Taler
-        /// aus und blieb Ritter. Fuer Graf und hoeher fehlt ausserdem der Stuetzpunkt, den diese
-        /// Harness nicht kauft - die oberen Raenge bleiben also unerreichbar.
+        /// Seit der Korrektur der Wohnsitzbedingung genuegt ein Haus <b>mindestens</b> der verlangten
+        /// Stufe, es reicht also, immer das beste bezahlbare zu bauen (Landherr braucht Stufe 5, der
+        /// Herzog 9). Vorher verglich die Lib den Hausnamen exakt: Da musste je Rang genau das
+        /// passende Haus stehen, und eine erste Fassung dieser Harness gab ueber 40 Jahre rund
+        /// 925 000 Taler aus und blieb trotzdem Ritter.
         ///
-        /// Die Haelfte der Barschaft bleibt als Puffer stehen, und es wird hoechstens ein Bau je Jahr
-        /// begonnen.
+        /// Je Stadt kann ein Haus stehen, gebaut wird deshalb ab Stadt 2 in der ersten freien - in
+        /// Stadt 1 steht der Startwohnsitz. Die Haelfte der Barschaft bleibt als Puffer, und es laeuft
+        /// hoechstens ein Bau zur Zeit.
         /// </summary>
         private void BaueWohnsitzAus()
         {
             var spieler = SW.Dynamisch.GetAktHum();
             var anwesen = new AnwesenManager();
+
+            int beste = 0;
+
+            for (int stufe = HoechsteHausstufe; stufe >= 1; stufe--)
+            {
+                if (spieler.BesitztSpielerFertigesHausAbStufe(stufe))
+                {
+                    beste = stufe;
+                    break;
+                }
+            }
+
+            if (beste >= HoechsteHausstufe)
+                return;
+
             int budget = spieler.GetTaler() / 2;
 
-            for (int stufe = 0; stufe < Adelsleiter.Length; stufe++)
+            for (int stadtId = 2; stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
             {
-                string name = Adelsleiter[stufe];
-
-                if (spieler.BesitztSpielerFertigesHaus(name))
-                    continue;
-
-                // Je Rang eine eigene Stadt, ab Stadt 2 - in Stadt 1 steht der Startwohnsitz.
-                int stadtId = stufe + 2;
-
-                if (stadtId >= SW.Statisch.GetMaxStadtID())
+                // Es wird schon irgendwo gebaut: abwarten, statt daneben einen zweiten Bau zu beginnen.
+                if (anwesen.HatHaus(stadtId) && !anwesen.IstFertig(stadtId))
                     return;
 
-                // Dort wird schon gebaut oder steht bereits etwas: abwarten.
                 if (anwesen.HatHaus(stadtId))
-                    return;
+                    continue;
 
                 var angebote = anwesen.GetBaubareHaeuser(stadtId, 0);
 
                 if (angebote == null)
-                    return;
+                    continue;
+
+                HausAngebot bestes = null;
 
                 foreach (var angebot in angebote)
                 {
-                    if (angebot.Name == name && angebot.Preis <= budget)
+                    if (angebot.HausId > beste && angebot.Preis <= budget &&
+                        (bestes == null || angebot.HausId > bestes.HausId))
                     {
-                        anwesen.BaueHaus(stadtId, angebot);
-                        return;
+                        bestes = angebot;
                     }
                 }
 
-                // Noch nicht bezahlbar - die teureren Stufen erst recht nicht.
+                if (bestes != null)
+                    anwesen.BaueHaus(stadtId, bestes);
+
+                return;
+            }
+        }
+
+        /// <summary>
+        /// Bietet einmal im Jahr auf einen Stützpunkt einer KI - der zweite Teil des Adelswegs.
+        ///
+        /// Graf und Fürst verlangen einen, der Herzog zwei; ohne Stützpunkte endet die Leiter beim
+        /// Baron, und damit auch die Hofhaltung als Geldsenke.
+        ///
+        /// <c>KaufangebotAbgeben</c> haengt nicht nur am Geld: Angenommen wird nach Beziehung,
+        /// Ansehen/10 und Religionssympathie, und nur der Betrag <b>ueber</b> dem geschätzten Wert
+        /// zaehlt zusaetzlich (je angefangene 1 000 Taler ein Punkt). Deshalb wird das Doppelte des
+        /// Werts geboten. Pro Jahr ist genau ein Angebot erlaubt; das Flag setzt
+        /// <c>RundenManager.SchliesseZugAb</c> zurueck, den diese Harness ohnehin aufruft.
+        ///
+        /// Geboten wird nur auf Stützpunkte von KI-Spielern - fuer menschliche Besitzer nimmt
+        /// <c>KaufangebotAbgeben</c> einen anderen Weg, den es in einer Einspieler-Messung nicht gibt.
+        /// </summary>
+        private void KaufeStuetzpunkt()
+        {
+            var spieler = SW.Dynamisch.GetAktHum();
+
+            if (spieler.GetAnzahlStuetzpunkte(SpielerId) >= 2)
+                return;
+
+            var soeldner = new Gameplay.Kampf.SoeldnerRaeuberManager();
+
+            for (int id = 1; id <= soeldner.Anzahl; id++)
+            {
+                int besitzer = soeldner.GetBesitzer(id);
+
+                if (besitzer == SpielerId || besitzer < SW.Statisch.GetMinKIID())
+                    continue;
+
+                int gebot = SW.Dynamisch.GetStuetzpunkte()[id - 1].BerechneWert() * 2;
+
+                if (gebot <= 0 || gebot > spieler.GetTaler() / 2)
+                    continue;
+
+                // Der Ja/Nein-Stub antwortet ohne Warten, der Aufruf laeuft also synchron durch.
+                soeldner.KaufangebotAbgeben(id, gebot).GetAwaiter().GetResult();
+
+                // Ob angenommen oder nicht: mehr als ein Angebot je Jahr geht nicht.
                 return;
             }
         }

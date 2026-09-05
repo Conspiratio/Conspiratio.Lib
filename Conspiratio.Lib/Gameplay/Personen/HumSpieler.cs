@@ -993,21 +993,29 @@ namespace Conspiratio.Lib.Gameplay.Personen
         }
         #endregion
 
-        #region BesitztSpielerFertigesHaus
+        #region BesitztSpielerFertigesHausAbStufe
         /// <summary>
-        /// Gibt zurück, ob der aktuelle Spieler ein bestimmtes, fertiges Haus besitzt.
+        /// Gibt zurück, ob der Spieler irgendwo ein fertiges Haus <b>mindestens</b> dieser Stufe besitzt.
+        ///
+        /// Die <c>HausID</c> ist die Stufe: Kate 1, Hütte 2, Haus 3, Bürgerhaus 4, Landhaus 5, Villa 6,
+        /// Landsitz 7, Burg 8, Schloss 9 – mit durchweg steigendem Kaufpreis und Ansehensbonus.
+        ///
+        /// <b>Vorher wurde der Hausname exakt verglichen</b>, und das war ein Fehler: Die Titelleiter
+        /// verlangt aufsteigende Stufen (Landherr 5, Freiherr 6, Baron 7, Graf 8, Fürst und Herzog 9)
+        /// bei ebenso steigenden Talerschwellen, ist also eine Leiter und keine Sammlung. Mit dem
+        /// Namensvergleich machte der teurere Kauf den Spieler schlechter: Wer statt eines Landhauses
+        /// (10 000) ein Schloss (250 000) baute, verlor den Landherrn-Titel, den er sonst bekommen
+        /// hätte – ohne dass irgendetwas darauf hinwies.
         /// </summary>
-        /// <param name="hausname">Bezeichnung des gesuchten Hauses, z.B. Villa</param>
-        /// <returns>Besitzt der Spieler das fertige Haus (true) oder nicht (false)</returns>
-        public bool BesitztSpielerFertigesHaus(string hausname)
+        /// <param name="mindestHausId">Stufe des verlangten Hauses, z.B. 6 für die Villa.</param>
+        public bool BesitztSpielerFertigesHausAbStufe(int mindestHausId)
         {
             for (int i = 1; i < SW.Statisch.GetMaxStadtID(); i++)
             {
                 var hausInStadt = _spielerHatHausVonStadtAnArraystelle[i];
 
-                if (hausInStadt.GetHausID() > 0 &&  // Existiert ein Haus?
-                    hausInStadt.GetRestlicheBauzeit() == 0 &&  // Ist es fertig gebaut?
-                    SW.Statisch.GetHaus(hausInStadt.GetHausID()).Name == hausname)  // Entspricht es dem gesuchten Haus?
+                if (hausInStadt.GetHausID() >= mindestHausId &&  // Mindestens die verlangte Stufe?
+                    hausInStadt.GetRestlicheBauzeit() == 0)      // Und fertig gebaut?
                 {
                     return true;
                 }

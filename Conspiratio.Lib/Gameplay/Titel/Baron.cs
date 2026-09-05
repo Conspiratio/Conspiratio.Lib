@@ -15,7 +15,7 @@ namespace Conspiratio.Lib.Gameplay.Titel
             if (!base.IstSpielerFuerTitelBerechtigt(dynamischeSpieldaten, spielerId))
                 return false;
 
-            return dynamischeSpieldaten.GetHumWithID(spielerId).BesitztSpielerFertigesHaus("Landsitz");
+            return dynamischeSpieldaten.GetHumWithID(spielerId).BesitztSpielerFertigesHausAbStufe(7);
         }
     }
 }
