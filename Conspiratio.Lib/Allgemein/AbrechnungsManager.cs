@@ -86,6 +86,36 @@ namespace Conspiratio.Lib.Allgemein
         public const int KapazitaetsunterhaltProMille = 140;
 
         /// <summary>
+        /// Anteil des Ansehens, der jährlich verfällt, in Prozent. Ruhm verblaßt: Wer nichts nachlegt,
+        /// sinkt zurück.
+        ///
+        /// <b>Warum es das braucht.</b> <c>PermaAnsehen</c> war ein reines Konto - die
+        /// Auslastungsbelohnung zahlte Jahr für Jahr bis zu <see cref="AnsehenMaxProJahr"/> Punkte
+        /// dafür, dass die Werke ordentlich besetzt sind. Gemessen mit der Balancing-Harness stieg das
+        /// Standesansehen eines schlichten Ritters ohne Amt dadurch linear um 5 Punkte im Jahr: 30 nach
+        /// fünf Jahren, 80 nach fünfzehn, 205 nach vierzig, ohne Ende. Die Gerichtsschwellen
+        /// (<c>GerichtsverhandlungManager</c>: 80 und 30) waren danach bedeutungslos.
+        ///
+        /// <b>Die Schwellen anzuheben wäre der falsche Griff gewesen.</b> Das Standesansehen der
+        /// 390 KI-Spieler hat über 40 gemessene Jahre einen unveränderten Median von 29 - die Schwellen
+        /// sind also auf das Feld geeicht und sitzen richtig. Nur der Mensch inflationierte, denn
+        /// <c>PermaAnsehen</c> gibt es allein auf <c>HumSpieler</c>. Das ist dieselbe Asymmetrie, die
+        /// beim Geldansehen beseitigt wurde (siehe <c>HumSpieler.AnsehenAktualisieren</c>), durch eine
+        /// andere Tür.
+        ///
+        /// Der Verfall macht aus dem Konto einen Zustand mit Gleichgewicht: Bei einem Zufluss von
+        /// <c>z</c> Punkten im Jahr pendelt sich das Ansehen bei rund <c>100 * z / Prozent</c> ein.
+        /// Ganzzahlig gerechnet, also unterhalb von <c>100 / Prozent</c> ohne Wirkung - kleine Namen
+        /// verblassen nicht. Er wirkt in beide Richtungen: Auch Schande verblaßt.
+        ///
+        /// Mit 10 % gemessen, jeweils im eingependelten Zustand: Ein Händler ohne Amt kommt auf ein
+        /// Standesansehen von 60, ein Herzog mit Amt auf gut 300, der Median der KI liegt bei 29.
+        /// Beide Gerichtsschwellen unterscheiden damit wieder - die 30 trennt den Betrieb vom Feld,
+        /// die 80 den Adel vom Kaufmann.
+        /// </summary>
+        public const int AnsehensverfallProzent = 10;
+
+        /// <summary>
         /// Taler Mehraufwand je Punkt permanenten Ansehens auf der Gewinnseite (aufwendige Hofhaltung).
         /// Der Kurs staffelt die Geltung nach Rang: Ein Herzog gewinnt mit aufwendiger Hofhaltung
         /// 5 Punkte im Jahr (50 000 Taler Mehraufwand), ein Fuerst 3, ein Graf 2, die Raenge darunter je
@@ -428,6 +458,16 @@ namespace Conspiratio.Lib.Allgemein
             // gegenseitig, und die Hofhaltung waere fuer genau den Spieler wertlos geworden, auf den sie
             // zielt: den reichen, der seine Werke ohnehin gut fuehrt.
             int punkte = hofhaltungPunkte + auslastungPunkte;
+
+            // Erst verblasst der alte Ruhm, dann zaehlen die Taten des Jahres. Diese Reihenfolge
+            // haelt den Zufluss unangetastet - wer die vollen Punkte aus Hofhaltung und Auslastung
+            // erwirbt, bekommt sie auch gutgeschrieben, und der Verfall trifft nur, was schon da
+            // war. Wirkt in beide Richtungen: Bei negativem Ansehen bewegt der Abzug den Wert zur
+            // Null hin, Schande verblasst also ebenfalls.
+            int verfall = spieler.GetPermaAnsehen() * AnsehensverfallProzent / 100;
+
+            if (verfall != 0)
+                spieler.ErhoehePermaAnsehen(-verfall);
 
             if (punkte != 0)
                 spieler.ErhoehePermaAnsehen(punkte);
