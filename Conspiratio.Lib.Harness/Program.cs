@@ -65,7 +65,8 @@ namespace Conspiratio.Lib.Harness
                 Adel = Schalter(args, "adel"),
                 Marktklug = Schalter(args, "marktklug"),
                 KapazitaetsunterhaltJeStaette = Zahl(args, "kapazitaet", 0),
-                Aemter = Schalter(args, "aemter")
+                Aemter = Schalter(args, "aemter"),
+                Wahlen = Schalter(args, "wahlen")
             };
 
             int jahre = Zahl(args, "jahre", 20);
@@ -79,7 +80,8 @@ namespace Conspiratio.Lib.Harness
                               (aufbau.Export ? ", Absatz per Export" : ", Absatz vor Ort") +
                               (aufbau.Adel ? ", mit Adelsweg" : "") +
                               (aufbau.Marktklug ? ", marktklug" : "") +
-                              (aufbau.Aemter ? ", mit Aemtern" : ""));
+                              (aufbau.Aemter ? ", mit Aemtern" : "") +
+                              (aufbau.Wahlen ? ", mit Wahlen" : ""));
             Console.WriteLine();
 
             var endstaende = new List<int>();

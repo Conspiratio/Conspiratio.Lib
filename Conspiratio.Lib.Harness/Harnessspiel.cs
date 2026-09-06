@@ -132,6 +132,17 @@ namespace Conspiratio.Lib.Harness
         /// <i>Groesse</i> des Amtsertrags, nicht die Wahrscheinlichkeit, eines zu halten.
         /// </summary>
         public bool Aemter;
+
+        /// <summary>
+        /// Der echte politische Weg zum Amt statt der Abkuerzung: Der Spieler bewirbt sich auf freie
+        /// Aemter, die Wahlen werden ausgezaehlt, Amtsenthebungen laufen, und KI-Spieler sterben und
+        /// machen dabei Stellen frei. Das beantwortet die Frage, die <see cref="Aemter"/> offen laesst -
+        /// nicht wie viel ein Amt traegt, sondern wie lange man eines haelt.
+        ///
+        /// Zieht den KI-Jahreswechsel zwingend mit sich: Ohne ihn altert keine KI, es stirbt keine, und
+        /// kein Amt wird je frei.
+        /// </summary>
+        public bool Wahlen;
     }
 
     /// <summary>
@@ -416,6 +427,9 @@ namespace Conspiratio.Lib.Harness
             if (_aufbau.Aemter)
                 UebernimmAmt();
 
+            if (_aufbau.Wahlen)
+                BewirbDichUmAemter();
+
             zeile.Amtseinkommen = nachrichten.KassiereAmtseinkommen();
             nachrichten.AktualisiereAnwesen();
 
@@ -434,8 +448,18 @@ namespace Conspiratio.Lib.Harness
             SW.Dynamisch.EinwohnerWachstumAktRundenEnde();
             SW.Dynamisch.RundenBestechungenAbwickeln();
 
-            if (_aufbau.Vollstaendig)
+            if (_aufbau.Vollstaendig || _aufbau.Wahlen)
                 SW.Dynamisch.KIAktionenDurchfuehren();
+
+            // Der politische Block des Rundenendes, in der Reihenfolge von Kontor.ZeigeZugnachrichten:
+            // erst die Amtsenthebungen, dann die Wahlen (solange die Kandidaten noch gemeldet sind),
+            // zuletzt die Todesfaelle, die die Aemter des naechsten Jahres frei machen.
+            if (_aufbau.Wahlen)
+            {
+                FuehreAmtsenthebungenDurch();
+                HalteWahlenAb();
+                new RundenEndeManager().FuehreKiTodesfaelleDurch();
+            }
 
             _runden.SchalteZumNaechstenSpieler();
 
@@ -574,6 +598,126 @@ namespace Conspiratio.Lib.Harness
             // Gebiet 1 der Stufe; der Cheat erwartet den Gebietsindex 0-basiert und den Amtsindex
             // relativ zur Stufe.
             new CheatManager().UebernehmeAmt(stufe, 0, AmtsIndexInStufe(stufe, bestes));
+        }
+
+        /// <summary>
+        /// Meldet den Spieler fuer jede Wahl an, die ihm offensteht. Welche das sind, entscheidet die
+        /// Lib ueber <c>GetBewerbungsangebote</c> - dort steckt auch die Rangschranke. Gewinnt er ein
+        /// hoeheres Amt, zieht ihn <c>FuelleRestlicheAemter</c> aus den niedrigeren Wahlen zurueck.
+        /// </summary>
+        private static void BewirbDichUmAemter()
+        {
+            var aemter = new AemterManager();
+
+            foreach (var angebot in aemter.GetBewerbungsangebote())
+            {
+                if (!angebot.IstAngemeldet)
+                    aemter.WahlAnmeldungUmschalten(angebot.WahlId);
+            }
+        }
+
+        /// <summary>
+        /// Wickelt die Amtsenthebungsverfahren ab. Ist der Spieler beteiligt, enthaelt er sich - der
+        /// Client liesse ihn hier abstimmen oder sich verteidigen; eine Messung soll das Ergebnis nicht
+        /// in die eine oder andere Richtung schieben.
+        /// </summary>
+        private static void FuehreAmtsenthebungenDurch()
+        {
+            var manager = new AmtsenthebungsManager();
+
+            foreach (var verfahren in manager.ErmittleVerfahren())
+            {
+                if (verfahren.MenschlichBeteiligt)
+                    manager.ErgaenzeKiStimmen(verfahren);
+
+                manager.WerteAus(verfahren);
+            }
+        }
+
+        /// <summary>
+        /// Haelt die Wahlen ab - dieselbe Mechanik wie <c>WahlDialog.RunWahl</c>, nur ohne Anzeige:
+        /// KI-Waehler stimmen ueber <c>ErmittleKiStimme</c>, menschliche Waehler stimmen fuer sich
+        /// selbst, sofern sie kandidieren, sonst fuer den ersten Bewerber. <c>FuelleRestlicheAemter</c>
+        /// zaehlt danach alles aus, was offen blieb.
+        /// </summary>
+        private static void HalteWahlenAb()
+        {
+            var aemter = new AemterManager();
+
+            foreach (int wahlId in aemter.GetWahlenMitMenschlicherBeteiligung())
+            {
+                if (!aemter.HatMenschlicheBeteiligung(wahlId))
+                    continue;
+
+                var ansicht = aemter.ErstelleWahlAnsicht(wahlId);
+
+                // Eine Wahl ohne Bewerber laesst sich nicht auszaehlen: WerteWahlAus zaehlt die
+                // Stimmen direkt in das Kandidaten-Slotarray, jeder Index zeigt dann auf einen
+                // leeren Platz, und GetSpWithID(0) ist null. Solche Wahlen entstehen, wenn der
+                // Spieler nur Waehler ist und sich niemand beworben hat; FuelleRestlicheAemter
+                // raeumt sie danach ab.
+                if (ansicht.Kandidaten.Count == 0)
+                    continue;
+
+                if (ansicht.IstLoswahl)
+                {
+                    aemter.WerteWahlAus(wahlId, new List<int>());
+                    continue;
+                }
+
+                var kandidatenIds = new List<int>();
+
+                foreach (var kandidat in ansicht.Kandidaten)
+                    kandidatenIds.Add(kandidat.SpielerId);
+
+                // Die Ansicht verdichtet die Kandidaten (ErstelleWahlAnsicht ueberspringt leere
+                // Plaetze), WerteWahlAus zaehlt die Stimmen aber in das ROHE Slotarray. Beide Indizes
+                // stimmen nur ueberein, solange die Plaetze luecklos von vorn belegt sind. Deshalb wird
+                // hier ueber die Spieler-ID zurueckgerechnet, statt den Ansichtsindex weiterzureichen.
+                int[] slots = SW.Dynamisch.GetWahlX(wahlId).GetKandidaten();
+
+                var stimmen = new List<int>();
+
+                foreach (var waehler in ansicht.Waehler)
+                {
+                    int gewaehlteId;
+
+                    if (waehler.IstMensch)
+                    {
+                        // Fuer sich selbst, wenn man antritt - sonst fuer den ersten Bewerber.
+                        gewaehlteId = kandidatenIds.Contains(SpielerId) ? SpielerId : kandidatenIds[0];
+                    }
+                    else
+                    {
+                        int index = aemter.ErmittleKiStimme(waehler.SpielerId, kandidatenIds);
+                        gewaehlteId = index >= 0 && index < kandidatenIds.Count ? kandidatenIds[index] : kandidatenIds[0];
+                    }
+
+                    stimmen.Add(SlotVonKandidat(slots, gewaehlteId));
+                }
+
+                aemter.WerteWahlAus(wahlId, stimmen);
+            }
+
+            aemter.FuelleRestlicheAemter();
+        }
+
+        /// <summary>Der Platz, auf dem dieser Kandidat in der Wahl steht - oder der erste belegte.</summary>
+        private static int SlotVonKandidat(int[] slots, int spielerId)
+        {
+            for (int i = 0; i < slots.Length; i++)
+            {
+                if (slots[i] == spielerId)
+                    return i;
+            }
+
+            for (int i = 0; i < slots.Length; i++)
+            {
+                if (slots[i] != 0)
+                    return i;
+            }
+
+            return 0;
         }
 
         /// <summary>Ob der Rang fuer diese Amtsebene ausreicht.</summary>
