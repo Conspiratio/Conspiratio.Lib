@@ -64,7 +64,8 @@ namespace Conspiratio.Lib.Harness
                 Export = Schalter(args, "export"),
                 Adel = Schalter(args, "adel"),
                 Marktklug = Schalter(args, "marktklug"),
-                KapazitaetsunterhaltJeStaette = Zahl(args, "kapazitaet", 0)
+                KapazitaetsunterhaltJeStaette = Zahl(args, "kapazitaet", 0),
+                Aemter = Schalter(args, "aemter")
             };
 
             int jahre = Zahl(args, "jahre", 20);
@@ -77,7 +78,8 @@ namespace Conspiratio.Lib.Harness
                               (aufbau.Vollstaendig ? ", mit KI-Jahreswechsel" : ", ohne KI-Jahreswechsel") +
                               (aufbau.Export ? ", Absatz per Export" : ", Absatz vor Ort") +
                               (aufbau.Adel ? ", mit Adelsweg" : "") +
-                              (aufbau.Marktklug ? ", marktklug" : ""));
+                              (aufbau.Marktklug ? ", marktklug" : "") +
+                              (aufbau.Aemter ? ", mit Aemtern" : ""));
             Console.WriteLine();
 
             var endstaende = new List<int>();
@@ -125,7 +127,11 @@ namespace Conspiratio.Lib.Harness
                                   ":  Endvermoegen " + G(letzte.Vermoegen).PadLeft(12) +
                                   "   Taler " + G(letzte.Taler).PadLeft(12) +
                                   "   Abschlag " + (letzte.Abschlag + " %").PadLeft(5) +
-                                  "   " + letzte.Titel);
+                                  "   " + letzte.Titel +
+                                  "   Amt: " + letzte.Amt +
+                                  "   Amtseinkommen " + G(letzte.Amtseinkommen) +
+                                  "   Ansehen " + letzte.Ansehen +
+                                  " (Standes " + letzte.StandesAnsehen + ")");
             }
 
             endstaende.Sort();

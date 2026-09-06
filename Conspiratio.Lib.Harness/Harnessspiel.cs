@@ -42,6 +42,22 @@ namespace Conspiratio.Lib.Harness
 
         /// <summary>Der simulierte Kapazitaetsunterhalt dieses Jahres (siehe Aufbau).</summary>
         public int Kapazitaet;
+
+        /// <summary>Amtseinkommen dieses Jahres.</summary>
+        public int Amtseinkommen;
+
+        /// <summary>Name des gefuehrten Amtes.</summary>
+        public string Amt;
+
+        /// <summary>Das rohe Ansehen - hier steckt der Ansehensbonus des Amtes bereits drin.</summary>
+        public int Ansehen;
+
+        /// <summary>
+        /// Ansehen zuzueglich des Titelbonus (<c>Spieler.GetStandesAnsehen</c>). Gilt ausdruecklich nur
+        /// dort, wo ueber eine Person geurteilt wird: vor Gericht und im Schuldenprozess. In Wahlen
+        /// zaehlt er bewusst nicht.
+        /// </summary>
+        public int StandesAnsehen;
     }
 
     /// <summary>Wie der Betrieb aufgebaut wird, bevor die Jahre laufen.</summary>
@@ -102,6 +118,20 @@ namespace Conspiratio.Lib.Harness
         /// abflacht.
         /// </summary>
         public int KapazitaetsunterhaltJeStaette;
+
+        /// <summary>
+        /// Aemter uebernehmen, soweit der Rang sie erlaubt. Das ist die Ertragsseite des Adelswegs, die
+        /// bis jetzt fehlte: Titel sind Zugangsvoraussetzung fuer Aemter
+        /// (<c>GetMinTitelStadtEbene</c> 1, <c>GetMinTitelLandEbene</c> 3,
+        /// <c>GetMinTitelReichsEbene</c> 5), und Aemter zahlen ein Jahreseinkommen und geben Ansehen.
+        ///
+        /// Uebernommen wird ueber <c>CheatManager.UebernehmeAmt</c> - denselben Weg, den der E2E-Treiber
+        /// fuer <c>--zustaende</c> nutzt, weil er Amt und Gebiet zusammen setzt und der verdraengten KI
+        /// ihr altes Amt zurueckgibt. <b>Das ist eine Abkuerzung:</b> Im Spiel wird ein Amt in einer Wahl
+        /// gewonnen und kann durch Amtsenthebung wieder verloren gehen. Gemessen wird hier also die
+        /// <i>Groesse</i> des Amtsertrags, nicht die Wahrscheinlichkeit, eines zu halten.
+        /// </summary>
+        public bool Aemter;
     }
 
     /// <summary>
@@ -150,6 +180,13 @@ namespace Conspiratio.Lib.Harness
         {
             SW.Statisch.Initialisieren();
 
+            // Der Seed wird ZWEIMAL gesetzt, wie im E2E-Treiber: einmal vor dem Aufbau, damit die
+            // Welt selbst reproduzierbar entsteht, und einmal, wenn das Spiel steht. Ohne den ersten
+            // Aufruf zogen CreateNewGame und die Spielererstellung aus einem ungeseedeten Strom -
+            // der Haendlerweg war davon unbeeindruckt, der Adelsweg nicht: Dieselbe Kommandozeile
+            // lieferte ueber mehrere Aufrufe 266 441, 367 734 und 187 274 Taler Median.
+            SW.Statisch.SetRnd(seed);
+
             string pfad = Path.Combine(Path.GetTempPath(), "conspiratio-harness");
             Directory.CreateDirectory(pfad);
 
@@ -163,8 +200,8 @@ namespace Conspiratio.Lib.Harness
             setup.Beende();
             SW.Dynamisch.SetAktiverSpieler(SpielerId);
 
-            // Erst nach dem Aufbau setzen: Die Spielerstellung zieht selbst Zufallszahlen, und ein Seed
-            // davor wuerde vom Setup verbraucht statt von den gemessenen Jahren.
+            // Zum zweiten Mal, damit die gemessenen Jahre an derselben Stelle des Stroms beginnen,
+            // egal wie viel der Aufbau verbraucht hat.
             SW.Statisch.SetRnd(seed);
 
             BaueBetrieb();
@@ -376,7 +413,10 @@ namespace Conspiratio.Lib.Harness
             nachrichten.PruefeVerbrechen();
             zeile.Strafen = vorStrafe - spieler.GetTaler();
 
-            nachrichten.KassiereAmtseinkommen();
+            if (_aufbau.Aemter)
+                UebernimmAmt();
+
+            zeile.Amtseinkommen = nachrichten.KassiereAmtseinkommen();
             nachrichten.AktualisiereAnwesen();
 
             if (_aufbau.Adel)
@@ -403,6 +443,9 @@ namespace Conspiratio.Lib.Harness
             zeile.Vermoegen = spieler.GetGesamtVermoegen(SpielerId);
             zeile.Abschlag = MittlererAbschlag();
             zeile.Titel = SW.Statisch.GetTitelX(spieler.GetTitel()).GetName(spieler.GetMaennlich());
+            zeile.Amt = SW.Statisch.GetAmtwithID(spieler.GetAmtID()).GetAmtsname(spieler.GetMaennlich());
+            zeile.Ansehen = spieler.GetAnsehen();
+            zeile.StandesAnsehen = spieler.GetStandesAnsehen();
 
             return zeile;
         }
@@ -489,6 +532,75 @@ namespace Conspiratio.Lib.Harness
             SW.Dynamisch.GetAktHum().ErhoeheTaler(-summe);
 
             return summe;
+        }
+
+        /// <summary>
+        /// Uebernimmt das eintraeglichste Amt, das der Rang erlaubt - und nur, wenn gerade keines
+        /// gefuehrt wird. Ein Amt geht durch Amtsenthebung verloren; dann wird im naechsten Jahr das
+        /// naechste genommen.
+        /// </summary>
+        private void UebernimmAmt()
+        {
+            var spieler = SW.Dynamisch.GetAktHum();
+
+            // Auch mit Amt weitersuchen: Der Rang steigt im Lauf des Spiels, und mit ihm die
+            // erlaubte Amtsebene. Wer beim ersten Stadtamt bleibt, verdient bis zum Ende 1 500
+            // Taler im Jahr, obwohl ihm als Graf laengst Reichsaemter offenstuenden.
+            int jetzigerErtrag = SW.Statisch.GetAmtwithID(spieler.GetAmtID()).GetEinkommen();
+
+            int titel = spieler.GetTitel();
+            int bestes = 0;
+            int besterErtrag = 0;
+
+            for (int amtId = 1; amtId < SW.Statisch.GetMaxAmtID(); amtId++)
+            {
+                if (!RangErlaubtAmt(titel, amtId))
+                    continue;
+
+                int ertrag = SW.Statisch.GetAmtwithID(amtId).GetEinkommen();
+
+                if (ertrag > besterErtrag && ertrag > jetzigerErtrag)
+                {
+                    besterErtrag = ertrag;
+                    bestes = amtId;
+                }
+            }
+
+            if (bestes == 0)
+                return;
+
+            int stufe = SW.Dynamisch.GetStufeVonAmtmitIDx(bestes);
+
+            // Gebiet 1 der Stufe; der Cheat erwartet den Gebietsindex 0-basiert und den Amtsindex
+            // relativ zur Stufe.
+            new CheatManager().UebernehmeAmt(stufe, 0, AmtsIndexInStufe(stufe, bestes));
+        }
+
+        /// <summary>Ob der Rang fuer diese Amtsebene ausreicht.</summary>
+        private static bool RangErlaubtAmt(int titel, int amtId)
+        {
+            if (amtId < SW.Statisch.GetMaxAmtStadtID())
+                return titel >= SW.Statisch.GetMinTitelStadtEbene();
+
+            if (amtId < SW.Statisch.GetMaxAmtLandID())
+                return titel >= SW.Statisch.GetMinTitelLandEbene();
+
+            return titel >= SW.Statisch.GetMinTitelReichsEbene();
+        }
+
+        /// <summary>
+        /// Rechnet eine Amts-ID in den stufenrelativen Index um, den <c>CheatManager.UebernehmeAmt</c>
+        /// erwartet - wie im E2E-Treiber.
+        /// </summary>
+        private static int AmtsIndexInStufe(int stufe, int amtId)
+        {
+            if (stufe == 1)
+                return amtId - SW.Statisch.GetMaxAmtStadtID();
+
+            if (stufe == 2)
+                return amtId - SW.Statisch.GetMaxAmtLandID();
+
+            return amtId;
         }
 
         /// <summary>Hoechste Wohnsitzstufe des Spiels (Schloss).</summary>
