@@ -670,54 +670,32 @@ namespace Conspiratio.Lib.Harness
                 foreach (var kandidat in ansicht.Kandidaten)
                     kandidatenIds.Add(kandidat.SpielerId);
 
-                // Die Ansicht verdichtet die Kandidaten (ErstelleWahlAnsicht ueberspringt leere
-                // Plaetze), WerteWahlAus zaehlt die Stimmen aber in das ROHE Slotarray. Beide Indizes
-                // stimmen nur ueberein, solange die Plaetze luecklos von vorn belegt sind. Deshalb wird
-                // hier ueber die Spieler-ID zurueckgerechnet, statt den Ansichtsindex weiterzureichen.
-                int[] slots = SW.Dynamisch.GetWahlX(wahlId).GetKandidaten();
-
+                // Gezaehlt wird in die verdichtete Kandidatenliste - dieselbe Reihenfolge, die
+                // ErstelleWahlAnsicht liefert und auf die ErmittleKiStimme zeigt.
                 var stimmen = new List<int>();
 
                 foreach (var waehler in ansicht.Waehler)
                 {
-                    int gewaehlteId;
+                    int stimme;
 
                     if (waehler.IstMensch)
                     {
                         // Fuer sich selbst, wenn man antritt - sonst fuer den ersten Bewerber.
-                        gewaehlteId = kandidatenIds.Contains(SpielerId) ? SpielerId : kandidatenIds[0];
+                        int eigener = kandidatenIds.IndexOf(SpielerId);
+                        stimme = eigener >= 0 ? eigener : 0;
                     }
                     else
                     {
-                        int index = aemter.ErmittleKiStimme(waehler.SpielerId, kandidatenIds);
-                        gewaehlteId = index >= 0 && index < kandidatenIds.Count ? kandidatenIds[index] : kandidatenIds[0];
+                        stimme = aemter.ErmittleKiStimme(waehler.SpielerId, kandidatenIds);
                     }
 
-                    stimmen.Add(SlotVonKandidat(slots, gewaehlteId));
+                    stimmen.Add(stimme);
                 }
 
                 aemter.WerteWahlAus(wahlId, stimmen);
             }
 
             aemter.FuelleRestlicheAemter();
-        }
-
-        /// <summary>Der Platz, auf dem dieser Kandidat in der Wahl steht - oder der erste belegte.</summary>
-        private static int SlotVonKandidat(int[] slots, int spielerId)
-        {
-            for (int i = 0; i < slots.Length; i++)
-            {
-                if (slots[i] == spielerId)
-                    return i;
-            }
-
-            for (int i = 0; i < slots.Length; i++)
-            {
-                if (slots[i] != 0)
-                    return i;
-            }
-
-            return 0;
         }
 
         /// <summary>Ob der Rang fuer diese Amtsebene ausreicht.</summary>

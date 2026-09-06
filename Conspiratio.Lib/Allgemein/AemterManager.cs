@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 using Conspiratio.Lib.Gameplay.Schreibstube;
@@ -290,18 +290,44 @@ namespace Conspiratio.Lib.Allgemein
         /// </summary>
         /// <param name="wahlId">Die auszuwertende Wahl</param>
         /// <param name="stimmenIndizes">Je Wähler der Index des gewählten Kandidaten; leer bei einer Loswahl</param>
+        /// <summary>
+        /// Zählt die Stimmen aus und vergibt das Amt.
+        ///
+        /// <paramref name="stimmenIndizes"/> zählt je Stimme in die <b>verdichtete</b> Kandidatenliste,
+        /// also in dieselbe Reihenfolge, die <see cref="ErstelleWahlAnsicht"/> liefert und auf die auch
+        /// <see cref="ErmittleKiStimme"/> zeigt - leere Plätze im Slotarray sind darin übersprungen.
+        ///
+        /// <b>Früher wurde direkt in das rohe Slotarray gezählt</b>, und das war ein Fehler: Beide
+        /// Zählweisen stimmen nur überein, solange die Plätze lückenlos von vorn belegt sind. Sind sie es
+        /// nicht, landete eine Stimme beim falschen Bewerber - oder auf einem leeren Platz, und dann
+        /// scheiterte <c>GetSpWithID(0)</c> mit einer NullReferenceException. Der Godot-Wahldialog baut
+        /// seine Indizes aus der verdichteten Ansicht und war damit unmittelbar betroffen.
+        /// </summary>
         [PublicAPI]
         public WahlErgebnis WerteWahlAus(int wahlId, IReadOnlyList<int> stimmenIndizes)
         {
             var wahl = SW.Dynamisch.GetWahlX(wahlId);
             int[] kandidaten = wahl.GetKandidaten();
 
-            int kandAnzahl = 0;
+            // Die belegten Plätze in der Reihenfolge, in der auch <see cref="ErstelleWahlAnsicht"/> sie
+            // auflistet. <paramref name="stimmenIndizes"/> zählt in <b>diese</b> Liste, nicht in das rohe
+            // Slotarray - genau wie der Rückgabewert von <see cref="ErmittleKiStimme"/>, der auf die
+            // ebenfalls verdichtete Kandidaten-ID-Liste zeigt.
+            var belegtePlaetze = new List<int>();
+
             for (int i = 0; i < SW.Statisch.GetMaxWahlKandidaten(); i++)
             {
                 if (kandidaten[i] != 0)
-                    kandAnzahl++;
+                    belegtePlaetze.Add(i);
             }
+
+            int kandAnzahl = belegtePlaetze.Count;
+
+            // Ohne Bewerber gibt es nichts zu vergeben. FuelleRestlicheAemter räumt die Wahl danach ab.
+            if (kandAnzahl == 0)
+                return new WahlErgebnis(0, "", SW.Statisch.GetAmtwithID(wahl.AmtID).GetAmtsname(true),
+                                        SW.Dynamisch.GetGebietwithID(wahl.GebietID, wahl.Stufe).GetGebietsName(),
+                                        false);
 
             bool warLoswahl = false;
             int gewinnerIndex;
@@ -314,7 +340,7 @@ namespace Conspiratio.Lib.Allgemein
             }
             else
             {
-                int[] hatStimmen = new int[SW.Statisch.GetMaxWahlKandidaten()];
+                int[] hatStimmen = new int[kandAnzahl];
 
                 foreach (int index in stimmenIndizes)
                     hatStimmen[index]++;
@@ -322,7 +348,7 @@ namespace Conspiratio.Lib.Allgemein
                 int max = 0;
                 gewinnerIndex = 0;
 
-                for (int i = 0; i < SW.Statisch.GetMaxWahlKandidaten(); i++)
+                for (int i = 0; i < kandAnzahl; i++)
                 {
                     if (hatStimmen[i] > max)
                     {
@@ -333,7 +359,7 @@ namespace Conspiratio.Lib.Allgemein
 
                 // Haben mehrere die Höchstzahl an Stimmen, entscheidet das Los unter ihnen
                 int maxCounter = 0;
-                for (int i = 0; i < SW.Statisch.GetMaxWahlKandidaten(); i++)
+                for (int i = 0; i < kandAnzahl; i++)
                 {
                     if (hatStimmen[i] == max)
                         maxCounter++;
@@ -345,7 +371,7 @@ namespace Conspiratio.Lib.Allgemein
                     int losIndex = SW.Statisch.Rnd.Next(0, maxCounter);
                     int zaehler = 0;
 
-                    for (int i = 0; i < SW.Statisch.GetMaxWahlKandidaten(); i++)
+                    for (int i = 0; i < kandAnzahl; i++)
                     {
                         if (hatStimmen[i] == max)
                         {
@@ -358,7 +384,7 @@ namespace Conspiratio.Lib.Allgemein
                 }
             }
 
-            int gewinnerId = kandidaten[gewinnerIndex];
+            int gewinnerId = kandidaten[belegtePlaetze[gewinnerIndex]];
             string amtName = SW.Statisch.GetAmtwithID(wahl.AmtID).GetAmtsname(true);
             string gebietName = SW.Dynamisch.GetGebietwithID(wahl.GebietID, wahl.Stufe).GetGebietsName();
             string gewinnerName = SW.Dynamisch.GetSpWithID(gewinnerId).GetKompletterName();
