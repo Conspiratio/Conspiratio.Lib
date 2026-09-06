@@ -64,7 +64,6 @@ namespace Conspiratio.Lib.Harness
                 Export = Schalter(args, "export"),
                 Adel = Schalter(args, "adel"),
                 Marktklug = Schalter(args, "marktklug"),
-                KapazitaetsunterhaltJeStaette = Zahl(args, "kapazitaet", 0),
                 Aemter = Schalter(args, "aemter"),
                 Wahlen = Schalter(args, "wahlen")
             };

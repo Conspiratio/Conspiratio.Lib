@@ -58,6 +58,34 @@ namespace Conspiratio.Lib.Allgemein
         public const int GrundunterhaltProWerkstatt = 100;
 
         /// <summary>
+        /// Der Kapazitätsunterhalt in <b>Promille</b> je Produktionsstätte: Die n-te Stätte des Betriebs
+        /// kostet das n-Fache eines Tausendstels dieses Werts im Jahr. Bei 646 Stätten und 140 sind das
+        /// 29 257 Taler.
+        ///
+        /// <b>Warum es ihn braucht.</b> <see cref="GrundunterhaltProWerkstatt"/> ist zwar progressiv,
+        /// bemisst sich aber am <i>Besitz an Werkstätten</i> - und daran wächst ein Händler nicht.
+        /// Gemessen mit der Balancing-Harness: 14 Werkstätten, aber 646 Produktionsstätten und
+        /// 1 360 Arbeiter, Unterhalt 10 500 Taler. Gewachsen wird <i>innerhalb</i> der Werkstatt, und
+        /// Stätten wie Arbeiter kosten linear. Erlös linear, Kosten linear, Marge konstant: Das Vermögen
+        /// stieg 40 Jahre lang geradeaus um rund 50 000 im Jahr, ohne je abzuflachen.
+        ///
+        /// <b>Die Spannung zum Kommentar an <see cref="AbrechnungsErgebnis.Unterhalt"/> ist gewollt und
+        /// aufgelöst.</b> Dort steht, der Unterhalt hänge bewusst nicht an der Produktion, sonst wäre
+        /// Horten gratis und Wirtschaften teuer. Das gilt weiter - der Werkstattunterhalt bleibt
+        /// unverändert am Besitz. Wer zwanzig Werkstätten hält und in keiner produziert, zahlt sie
+        /// voll. Der Kapazitätsunterhalt tritt daneben und trifft nur, was tatsächlich betrieben wird.
+        ///
+        /// Quadratisch über den <b>ganzen Betrieb</b> gerechnet, nicht je Linie: Je Linie war die
+        /// Dreieckszahl viel zu steil (46 Stätten je Linie zu quadrieren trifft härter als 14
+        /// Werkstätten) - schon 2 Taler Grundeinheit drückten das gemessene Endvermögen von 1,96
+        /// Millionen auf 56 000.
+        ///
+        /// Der Einsteiger merkt nichts: Zwei Stätten kosten 3 × 140 / 1000 = 0 Taler.
+        /// Siehe docs/haendlerbremse-konzept.md im Godot-Repo für die Kalibrierung.
+        /// </summary>
+        public const int KapazitaetsunterhaltProMille = 140;
+
+        /// <summary>
         /// Taler Mehraufwand je Punkt permanenten Ansehens auf der Gewinnseite (aufwendige Hofhaltung).
         /// Der Kurs staffelt die Geltung nach Rang: Ein Herzog gewinnt mit aufwendiger Hofhaltung
         /// 5 Punkte im Jahr (50 000 Taler Mehraufwand), ein Fuerst 3, ein Graf 2, die Raenge darunter je
@@ -135,6 +163,8 @@ namespace Conspiratio.Lib.Allgemein
 
             int gutAusgelasteteBetriebe = 0;
 
+            long staettenGesamt = 0;
+
             for (int stadtId = 1; stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
             {
                 for (int slot = 0; slot < SW.Statisch.GetMaxProdSlots(); slot++)
@@ -147,6 +177,10 @@ namespace Conspiratio.Lib.Allgemein
 
                         ergebnis.Arbeiterkosten += produktionsslot.GetProduktionArbeiter() * SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetWSArbeiterpreis();
                         ergebnis.Betriebskosten += produktionsslot.GetProduktionStaetten() * SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetWSEinzelpreis();
+
+                        // Fuer den Kapazitaetsunterhalt weiter unten - hier mitgezaehlt, statt in einer
+                        // zweiten Schleife ueber dieselben Slots.
+                        staettenGesamt += produktionsslot.GetProduktionStaetten();
 
                         // Auslastung = gesetzte zu benoetigten Arbeitern, dasselbe Verhaeltnis, mit dem
                         // Produktionsslot.GetProduktion den Ertrag anteilig senkt. Jeder Betrieb wird
@@ -335,6 +369,13 @@ namespace Conspiratio.Lib.Allgemein
 
             ergebnis.Unterhalt = GrundunterhaltProWerkstatt * werkstaetten * (werkstaetten + 1) / 2;
             ergebnis.Gesamtkosten += ergebnis.Unterhalt;
+
+            // Der Kapazitaetsunterhalt: dieselbe Dreieckszahl, aber ueber die betriebenen Staetten und
+            // in Promille. long, weil das Produkt bei 84 Werkstaetten mal 99 Arbeitern die int-Grenze
+            // sonst streifen koennte, bevor durch 1000 geteilt wird.
+            ergebnis.Kapazitaetsunterhalt =
+                (int)(staettenGesamt * (staettenGesamt + 1) / 2 * KapazitaetsunterhaltProMille / 1000);
+            ergebnis.Gesamtkosten += ergebnis.Kapazitaetsunterhalt;
 
             #endregion
 

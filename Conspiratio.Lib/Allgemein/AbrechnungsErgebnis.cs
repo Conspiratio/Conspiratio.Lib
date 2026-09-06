@@ -37,6 +37,14 @@
         /// </summary>
         public int Unterhalt { get; internal set; }
 
+        /// <summary>
+        /// Jährlicher Unterhalt der betriebenen Produktionsstätten, progressiv in ihrer Zahl - die
+        /// Bremse für den reinen Händler. Tritt neben <see cref="Unterhalt"/>, der am Besitz hängt:
+        /// Wer Werkstätten hält und nicht produziert, zahlt nur jenen, wer groß produziert auch diesen.
+        /// Siehe <c>AbrechnungsManager.KapazitaetsunterhaltProMille</c>.
+        /// </summary>
+        public int Kapazitaetsunterhalt { get; internal set; }
+
         public int Gesamtkosten { get; internal set; }
     }
 }
