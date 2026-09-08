@@ -82,6 +82,79 @@ namespace Conspiratio.Lib.Gameplay.Personen
         public List<Dynastiegeneration> Ahnentafel { get; set; }
 
         /// <summary>Liefert die Ahnentafel-Liste und legt sie bei Bedarf an (kompatibel mit alten Spielständen).</summary>
+        /// <summary>Obergrenze der Produktionsfertigkeit. 0 ist der Anfang, 100 die Vollendung.</summary>
+        public const int MaxProduktionsfertigkeit = 100;
+
+        /// <summary>
+        /// Die Produktionsfertigkeit je Ware, indiziert mit der Rohstoff-ID.
+        ///
+        /// Sie hebt in <c>Produktionsslot.GetProduktion</c> den <b>unteren</b> Rand der
+        /// Jahresschwankung: Der Meister hat weniger Fehlchargen, nicht bessere Glücksjahre. Weil die
+        /// Qualitätsangabe des Jahresbuchs aus derselben Schwankung abgeleitet wird, wandert sie
+        /// automatisch mit - jene Zahl zeigte bis dahin reinen Zufall an, ohne Ursache und ohne Wirkung.
+        ///
+        /// Alte Spielstände bringen <c>null</c> mit; der Zugriff läuft deshalb ausschließlich über
+        /// <see cref="GetProduktionsfertigkeitenSicher"/> und nie direkt auf das Feld. <b>Fertigkeit 0
+        /// ist exakt das bisherige Verhalten</b>, ein geladener Spielstand rechnet also unverändert
+        /// weiter.
+        ///
+        /// Siehe docs/produktionsfertigkeit-konzept.md im Godot-Repo.
+        /// </summary>
+        private int[] Produktionsfertigkeiten;
+
+        /// <summary>
+        /// Das Fertigkeitenfeld, bei Bedarf angelegt. Fängt auch ein zu kurzes Feld ab: Die Zahl der
+        /// Waren könnte in einer späteren Fassung wachsen, und ein Spielstand von heute brächte dann
+        /// ein Feld der alten Länge mit.
+        /// </summary>
+        public int[] GetProduktionsfertigkeitenSicher()
+        {
+            int laenge = SW.Statisch.GetMaxRohID();
+
+            if (Produktionsfertigkeiten == null)
+            {
+                Produktionsfertigkeiten = new int[laenge];
+            }
+            else if (Produktionsfertigkeiten.Length < laenge)
+            {
+                var gewachsen = new int[laenge];
+                Produktionsfertigkeiten.CopyTo(gewachsen, 0);
+                Produktionsfertigkeiten = gewachsen;
+            }
+
+            return Produktionsfertigkeiten;
+        }
+
+        /// <summary>Die Fertigkeit für diese Ware, 0 bis <see cref="MaxProduktionsfertigkeit"/>.</summary>
+        public int GetProduktionsfertigkeit(int rohstoffId)
+        {
+            var fertigkeiten = GetProduktionsfertigkeitenSicher();
+
+            return rohstoffId >= 0 && rohstoffId < fertigkeiten.Length ? fertigkeiten[rohstoffId] : 0;
+        }
+
+        /// <summary>Setzt die Fertigkeit und klemmt sie auf 0 bis <see cref="MaxProduktionsfertigkeit"/>.</summary>
+        public void SetProduktionsfertigkeit(int rohstoffId, int wert)
+        {
+            var fertigkeiten = GetProduktionsfertigkeitenSicher();
+
+            if (rohstoffId < 0 || rohstoffId >= fertigkeiten.Length)
+                return;
+
+            if (wert < 0)
+                wert = 0;
+            else if (wert > MaxProduktionsfertigkeit)
+                wert = MaxProduktionsfertigkeit;
+
+            fertigkeiten[rohstoffId] = wert;
+        }
+
+        /// <summary>Ändert die Fertigkeit um einen Betrag; die Klemmung besorgt der Setter.</summary>
+        public void ErhoeheProduktionsfertigkeit(int rohstoffId, int wert)
+        {
+            SetProduktionsfertigkeit(rohstoffId, GetProduktionsfertigkeit(rohstoffId) + wert);
+        }
+
         public List<Dynastiegeneration> GetAhnentafelListe()
         {
             if (Ahnentafel == null)

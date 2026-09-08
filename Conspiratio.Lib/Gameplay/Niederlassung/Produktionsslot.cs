@@ -111,7 +111,7 @@ namespace Conspiratio.Lib.Gameplay.Niederlassung
             _gestohlenAnzahl = i;
         }
 
-        public int GetProduktion(int stadtID, int rohstoffID, ref int qualitaetProzent)
+        public int GetProduktion(int stadtID, int rohstoffID, int fertigkeit, ref int qualitaetProzent)
         {
             if (_produktionStaetten == 0)
                 return 0;
@@ -140,6 +140,13 @@ namespace Conspiratio.Lib.Gameplay.Niederlassung
             // Plus Minus eine Random Zahl (Schwankung)
             int PlusMinus = Convert.ToInt32(vorlaeufigeProduktion * 0.1);
             int Schwankung = SW.Statisch.Rnd.Next(-PlusMinus, PlusMinus);
+
+            // Die Produktionsfertigkeit hebt den unteren Rand der Schwankung, nicht den oberen: Der
+            // Meister hat weniger Fehlchargen, keine besseren Gluecksjahre. Bei voller Fertigkeit liegt
+            // die Schwankung damit in [0, PlusMinus] - ein schlechtes Jahr gibt es nicht mehr, ein
+            // ueberdurchschnittliches wird aber auch nicht besser. Fertigkeit 0 laesst alles wie bisher.
+            int bonus = PlusMinus * fertigkeit / Personen.HumSpieler.MaxProduktionsfertigkeit;
+            Schwankung = Math.Min(PlusMinus, Schwankung + bonus);
             int Produktion = Convert.ToInt32(vorlaeufigeProduktion) + Schwankung;
 
             /* 

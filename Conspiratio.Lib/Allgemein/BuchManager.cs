@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 using Conspiratio.Lib.Gameplay.Niederlassung;
 using Conspiratio.Lib.Gameplay.Spielwelt;
@@ -97,7 +97,9 @@ namespace Conspiratio.Lib.Allgemein
                     int rohstoffId = produktionsslot.GetProduktionRohstoff();
 
                     int qualitaetProzent = ergebnis.ProduktionsQualitaetProzent[rohstoffId];
-                    int produziert = produktionsslot.GetProduktion(stadtId, rohstoffId, ref qualitaetProzent);
+                    int produziert = produktionsslot.GetProduktion(stadtId, rohstoffId,
+                                                                  spieler.GetProduktionsfertigkeit(rohstoffId),
+                                                                  ref qualitaetProzent);
                     ergebnis.ProduktionsQualitaetProzent[rohstoffId] = qualitaetProzent;
 
                     if (spieler.CheckPrivilegX(32))
