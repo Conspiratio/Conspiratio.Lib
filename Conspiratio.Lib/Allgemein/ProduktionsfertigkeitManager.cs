@@ -244,7 +244,7 @@ namespace Conspiratio.Lib.Allgemein
         public async Task<List<string>> FuehreJahresereignisseDurch()
         {
             var meldungen = new List<string>();
-            var produziert = ProduzierteWaren();
+            var produziert = GetBetriebeneWaren();
 
             VermerkeProduktion(produziert);
             Verlerne(meldungen);
@@ -426,8 +426,13 @@ namespace Conspiratio.Lib.Allgemein
 
         #region Hilfsfunktionen
 
-        /// <summary>Die Waren, die der Spieler gerade herstellt – je Ware nur einmal.</summary>
-        private static List<int> ProduzierteWaren()
+        /// <summary>
+        /// Die Waren, die der Spieler gerade herstellt – je Ware nur einmal, in der Reihenfolge der
+        /// Städte. Das ist zugleich die Auswahl, die der Client für die Lehrstunden anbietet: Wer eine
+        /// Ware gar nicht betreibt, hat von ihr auch nichts.
+        /// </summary>
+        [PublicAPI]
+        public static List<int> GetBetriebeneWaren()
         {
             var spieler = SW.Dynamisch.GetAktHum();
             var waren = new List<int>();

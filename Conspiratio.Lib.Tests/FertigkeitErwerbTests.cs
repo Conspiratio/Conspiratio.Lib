@@ -341,6 +341,74 @@ namespace Conspiratio.Lib.Tests
 
         #endregion
 
+        #region Zufallswege
+
+        /// <summary>
+        /// Vortrag und Schriftfund sind die beiden Wege, die von selbst kommen. Einzelne Jahre sagen
+        /// darüber nichts – geprüft wird deshalb die Rate über viele Jahre, wie bei jeder anderen
+        /// Wahrscheinlichkeit im Spiel auch. Ein 30-Jahre-Durchlauf des E2E-Treibers ließ sich dazu
+        /// nicht auswerten: Seine Meldungen laufen alle durch denselben Nachrichtendialog.
+        ///
+        /// Je Jahr wird der Zustand zurückgesetzt (Fertigkeit, gelesene Schriften, Taler), denn beide
+        /// Wege enden sonst nach kurzer Zeit von selbst: Die Meisterschrift gibt es je Ware nur
+        /// einmal, und der Vortrag verlangt Eintritt.
+        /// </summary>
+        [Fact]
+        public async Task Vortrag_und_Schriftfund_treffen_ihre_Haeufigkeit()
+        {
+            const int Jahre = 3000;
+
+            TestSpielwelt.Starte(seed: 20260908);
+
+            int ware = WareAusHauptproduktion();
+            ProduziereWare(ware);
+
+            int vortraege = 0;
+            int funde = 0;
+
+            for (int jahr = 0; jahr < Jahre; jahr++)
+            {
+                Spieler.SetProduktionsfertigkeit(ware, 0);
+                Spieler.GetFertigkeitsschriftenSicher()[ware] = 0;
+                SetzeTaler(100000);
+
+                foreach (string meldung in await Manager.FuehreJahresereignisseDurch())
+                {
+                    if (meldung.Contains("Vortrag") || meldung.Contains("Schwätzer"))
+                        vortraege++;
+                    else if (meldung.Contains("Meisterschrift"))
+                        funde++;
+                }
+            }
+
+            // Grosszuegige Bänder um die erwarteten 12 % bzw. 4 %: Geprüft wird, dass beide Wege
+            // überhaupt und in der richtigen Größenordnung feuern, nicht der genaue Wurf.
+            double vortragsRate = 100.0 * vortraege / Jahre;
+            double fundRate = 100.0 * funde / Jahre;
+
+            Assert.InRange(vortragsRate, ProduktionsfertigkeitManager.VortragChanceProzent - 3,
+                           ProduktionsfertigkeitManager.VortragChanceProzent + 3);
+            Assert.InRange(fundRate, ProduktionsfertigkeitManager.MeisterschriftFundChanceProzent - 2,
+                           ProduktionsfertigkeitManager.MeisterschriftFundChanceProzent + 2);
+        }
+
+        /// <summary>
+        /// Ohne eigene Produktion gibt es weder Einladung noch Fund: Beide Wege hängen an Waren, die
+        /// der Spieler tatsächlich betreibt. Das ist zugleich die Zusicherung, dass ein Spieler ohne
+        /// Werkstätte zu Zugbeginn nicht mit Meldungen behelligt wird.
+        /// </summary>
+        [Fact]
+        public async Task Ohne_Produktion_kommt_weder_Einladung_noch_Fund()
+        {
+            TestSpielwelt.Starte(seed: 20260908);
+            SetzeTaler(100000);
+
+            for (int jahr = 0; jahr < 500; jahr++)
+                Assert.Empty(await Manager.FuehreJahresereignisseDurch());
+        }
+
+        #endregion
+
         #region Anzeige
 
         /// <summary>

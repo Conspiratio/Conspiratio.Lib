@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
@@ -40,6 +40,14 @@ namespace Conspiratio.Lib.Allgemein
         /// Spieler in diesem Jahr noch kein Duell geführt hat.
         /// </summary>
         public const int DuellPrivilegId = 10003;
+
+        /// <summary>
+        /// Kennung des Eintrags „Handwerkslehre nehmen“. Synthetischer Listeneintrag – der Client
+        /// fängt die ID ab und wickelt die Lehrstunden über den
+        /// <see cref="ProduktionsfertigkeitManager"/> ab. Nur sichtbar, solange der Spieler überhaupt
+        /// etwas herstellt: Unterrichtet wird in einer Ware, nicht im Handwerk an sich.
+        /// </summary>
+        public const int HandwerkslehrePrivilegId = 10004;
 
         /// <summary>
         /// Basis-Kennung der Einträge „[Amt] [Name] Privilegien" (Issue #13): je laufender Erpressung ein
@@ -89,6 +97,11 @@ namespace Conspiratio.Lib.Allgemein
             privilegien.Add(new PrivilegInfo(FechtunterrichtPrivilegId, "Fechtunterricht nehmen"));
             if (!spieler.DuellGefuehrtDiesesJahr)
                 privilegien.Add(new PrivilegInfo(DuellPrivilegId, "Amtsträger beleidigen"));
+
+            // Handwerkslehre: Unterricht in einer Ware, die der Spieler auch betreibt – wer nichts
+            // herstellt, dem könnte ein Meister nichts zeigen, das er anwenden könnte.
+            if (ProduktionsfertigkeitManager.GetBetriebeneWaren().Count > 0)
+                privilegien.Add(new PrivilegInfo(HandwerkslehrePrivilegId, "Handwerkslehre nehmen"));
 
             // Erpressungen (Issue #13): je Opfer ein Eintrag, der auf dessen Amtsprivilegien umschaltet.
             foreach (var erpressung in spieler.GetErpressungen())
