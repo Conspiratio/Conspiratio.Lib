@@ -155,6 +155,54 @@ namespace Conspiratio.Lib.Gameplay.Personen
             SetProduktionsfertigkeit(rohstoffId, GetProduktionsfertigkeit(rohstoffId) + wert);
         }
 
+        /// <summary>
+        /// Wie viele Lehrstunden fuer diese Ware schon genommen wurden. Traegt die Preisstaffel des
+        /// Unterrichts - dasselbe Muster wie <see cref="FechtstundenGenommen"/>. Alte Spielstaende
+        /// bringen <c>null</c> mit, deshalb nur ueber den Accessor.
+        /// </summary>
+        private int[] Lehrstunden;
+
+        /// <summary>
+        /// Welche Schriften zu einer Ware schon gelesen wurden, als Bitmaske: 1 = Grundlagenbuch,
+        /// 2 = Meisterschrift. Beide gibt es je Ware nur einmal - ein zweites Exemplar lehrt nichts.
+        /// </summary>
+        private int[] Fertigkeitsschriften;
+
+        /// <summary>
+        /// Das Jahr, in dem diese Ware zuletzt produziert wurde. Grundlage des Verlernens: Wer eine
+        /// Ware jahrelang nicht mehr anfasst, kommt aus der Uebung. 0 heisst "noch nie produziert" und
+        /// laesst die Fertigkeit unangetastet - sonst verloere ein frisch erworbenes Buchwissen sofort
+        /// wieder an Wert.
+        /// </summary>
+        private int[] LetzteProduktion;
+
+        private int[] FeldSicher(ref int[] feld)
+        {
+            int laenge = SW.Statisch.GetMaxRohID();
+
+            if (feld == null)
+            {
+                feld = new int[laenge];
+            }
+            else if (feld.Length < laenge)
+            {
+                var gewachsen = new int[laenge];
+                feld.CopyTo(gewachsen, 0);
+                feld = gewachsen;
+            }
+
+            return feld;
+        }
+
+        /// <summary>Genommene Lehrstunden je Ware, bei Bedarf angelegt.</summary>
+        public int[] GetLehrstundenSicher() => FeldSicher(ref Lehrstunden);
+
+        /// <summary>Gelesene Schriften je Ware als Bitmaske, bei Bedarf angelegt.</summary>
+        public int[] GetFertigkeitsschriftenSicher() => FeldSicher(ref Fertigkeitsschriften);
+
+        /// <summary>Jahr der letzten Produktion je Ware, bei Bedarf angelegt.</summary>
+        public int[] GetLetzteProduktionSicher() => FeldSicher(ref LetzteProduktion);
+
         public List<Dynastiegeneration> GetAhnentafelListe()
         {
             if (Ahnentafel == null)
