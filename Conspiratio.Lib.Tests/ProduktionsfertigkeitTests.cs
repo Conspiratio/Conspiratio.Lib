@@ -1,4 +1,5 @@
-﻿using Conspiratio.Lib.Gameplay.Niederlassung;
+﻿using Conspiratio.Lib.Allgemein;
+using Conspiratio.Lib.Gameplay.Niederlassung;
 using Conspiratio.Lib.Gameplay.Personen;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
@@ -118,6 +119,51 @@ namespace Conspiratio.Lib.Tests
 
             Assert.True(halb > ohne && halb < voll,
                         "Halbe Fertigkeit muss zwischen 0 und voll liegen: " + ohne + " / " + halb + " / " + voll);
+        }
+
+        /// <summary>
+        /// Ein Produktionsplatz, der auf „Produzieren“ steht, aber keine Arbeiter hat, liefert nichts –
+        /// und darf daran nicht scheitern. Die Qualitätsrechnung teilte durch die Schwankungsbreite,
+        /// die bei einer Menge von 0 selbst 0 ist: 0/0 ergibt NaN, und <c>Convert.ToInt32</c> quittiert
+        /// das mit einer OverflowException.
+        ///
+        /// Der Zustand ist im Client mit zwei Klicks hergestellt, denn Arbeiter und Stätten sind zwei
+        /// getrennte Zahlenknöpfe – wer die Stätten zuerst setzt und den Zug beendet, hatte den
+        /// Absturz. Gefunden hat ihn ein Test zur Anzeige, nicht das Spiel.
+        /// </summary>
+        [Fact]
+        public void Ein_Platz_ohne_Arbeiter_liefert_nichts_statt_abzustuerzen()
+        {
+            TestSpielwelt.Starte();
+
+            var slot = SW.Dynamisch.GetAktHum().GetProduktionsslot(Stadt, Slot);
+            slot.SetTaetigkeit((int)EnumProduktionsslotAktionsart.Produzieren);
+            slot.SetProduktionRohstoff(Korn);
+            slot.SetProduktionStaetten(Staetten);
+            slot.SetProduktionArbeiter(0);
+
+            int qualitaet = -1;
+
+            Assert.Equal(0, slot.GetProduktion(Stadt, Korn, 0, ref qualitaet));
+            Assert.Equal(QualitaetOhneAusschlag, qualitaet);
+        }
+
+        /// <summary>Derselbe Fall auf dem Weg, auf dem er den Spieler traf: dem Jahresbuch.</summary>
+        [Fact]
+        public void Das_Jahresbuch_uebersteht_einen_Platz_ohne_Arbeiter()
+        {
+            TestSpielwelt.Starte();
+
+            var slot = SW.Dynamisch.GetAktHum().GetProduktionsslot(Stadt, Slot);
+            slot.SetTaetigkeit((int)EnumProduktionsslotAktionsart.Produzieren);
+            slot.SetProduktionRohstoff(Korn);
+            slot.SetProduktionStaetten(Staetten);
+            slot.SetProduktionArbeiter(0);
+
+            var buch = new BuchManager().ErstelleJahresbuchFuerAktivenSpieler();
+
+            Assert.False(buch.EtwasProduziert);
+            Assert.Equal(0, buch.ProduzierteWaren[Korn]);
         }
 
         [Fact]

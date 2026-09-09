@@ -412,6 +412,31 @@ namespace Conspiratio.Lib.Tests
         #region Anzeige
 
         /// <summary>
+        /// Das Jahresbuch nennt die Fertigkeit, mit der tatsächlich produziert wurde – und hält sie
+        /// fest, statt sie bei der Anzeige neu zu lesen. Das ist kein Selbstzweck: Im selben Zugbeginn
+        /// laufen nach dem Buch die Jahresereignisse, die die Fertigkeit heben oder senken. Ein später
+        /// gelesener Wert stünde also neben einer Qualitätsangabe, die er nicht verursacht hat.
+        /// </summary>
+        [Fact]
+        public void Das_Jahresbuch_haelt_die_wirksame_Fertigkeit_fest()
+        {
+            TestSpielwelt.Starte();
+
+            int ware = WareAusHauptproduktion();
+            ProduziereWare(ware);
+            Spieler.SetProduktionsfertigkeit(ware, 48);
+
+            var buch = new BuchManager().ErstelleJahresbuchFuerAktivenSpieler();
+
+            Assert.Equal(48, buch.ProduktionsfertigkeitProzent[ware]);
+
+            // Was danach am Können geschieht, aendert das gebuchte Jahr nicht mehr.
+            Spieler.SetProduktionsfertigkeit(ware, 90);
+
+            Assert.Equal(48, buch.ProduktionsfertigkeitProzent[ware]);
+        }
+
+        /// <summary>
         /// Die Wortleiter deckt die ganze Skala ab und ist monoton: Kein höherer Wert darf ein
         /// schlechteres Wort ergeben, und die Enden müssen erreichbar sein.
         /// </summary>

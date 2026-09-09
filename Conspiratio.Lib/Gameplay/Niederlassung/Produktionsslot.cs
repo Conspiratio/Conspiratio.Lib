@@ -158,7 +158,16 @@ namespace Conspiratio.Lib.Gameplay.Niederlassung
             Bei Schwankung: -4 
              -4 / 2 = -2   + 5 = 3   = 30 Qualität in Prozent
             */
-            qualitaetProzent = Convert.ToInt32((Convert.ToDouble(Schwankung) / (Convert.ToDouble(PlusMinus) / 5d) + 5) * 10);
+            // Ohne Menge gibt es keine Schwankung - und ohne Schwankung keine Qualitätsaussage: Die
+            // Rechnung unten teilte durch PlusMinus und ergab 0/0 = NaN, was Convert.ToInt32 mit einer
+            // OverflowException quittierte. Betroffen war jeder Produktionsplatz, der auf
+            // „Produzieren“ steht, aber (noch) keine Arbeiter hat - im Client mit zwei Klicks
+            // hergestellt, denn Arbeiter und Stätten sind zwei getrennte Zahlenknöpfe. Der Zug endete
+            // dann im Jahresbuch mit einem Absturz. 50 ist der Wert ohne Ausschlag, also genau das,
+            // was eine ausgebliebene Schwankung bedeutet.
+            qualitaetProzent = PlusMinus == 0
+                ? 50
+                : Convert.ToInt32((Convert.ToDouble(Schwankung) / (Convert.ToDouble(PlusMinus) / 5d) + 5) * 10);
 
             return Produktion;
         }

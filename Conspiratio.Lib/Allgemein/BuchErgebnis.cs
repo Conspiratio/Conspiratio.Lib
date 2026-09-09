@@ -15,6 +15,7 @@ namespace Conspiratio.Lib.Allgemein
             ProduzierteWaren = new int[maxRohstoffId];
             VerloreneWaren = new int[maxRohstoffId];
             ProduktionsQualitaetProzent = new int[maxRohstoffId];
+            ProduktionsfertigkeitProzent = new int[maxRohstoffId];
         }
 
         public int[] ExportierteWaren { get; }
@@ -28,6 +29,14 @@ namespace Conspiratio.Lib.Allgemein
         public int[] VerloreneWaren { get; }
 
         public int[] ProduktionsQualitaetProzent { get; }
+
+        /// <summary>
+        /// Die Produktionsfertigkeit, mit der die Ware tatsächlich hergestellt wurde. Sie steht hier
+        /// und nicht erst in der Anzeige, damit die Ursache neben ihrer Wirkung liegt: Die Fertigkeit
+        /// kann sich im selben Zugbeginn noch ändern (Hausgelehrter, Vortrag, Verlernen); ein erst
+        /// bei der Anzeige gelesener Wert wäre dann ein anderer als der, der gewirkt hat.
+        /// </summary>
+        public int[] ProduktionsfertigkeitProzent { get; }
 
         public bool EtwasExportiert { get; internal set; }
 

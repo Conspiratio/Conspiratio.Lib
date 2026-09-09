@@ -96,11 +96,17 @@ namespace Conspiratio.Lib.Allgemein
 
                     int rohstoffId = produktionsslot.GetProduktionRohstoff();
 
+                    int fertigkeit = spieler.GetProduktionsfertigkeit(rohstoffId);
+
                     int qualitaetProzent = ergebnis.ProduktionsQualitaetProzent[rohstoffId];
-                    int produziert = produktionsslot.GetProduktion(stadtId, rohstoffId,
-                                                                  spieler.GetProduktionsfertigkeit(rohstoffId),
+                    int produziert = produktionsslot.GetProduktion(stadtId, rohstoffId, fertigkeit,
                                                                   ref qualitaetProzent);
                     ergebnis.ProduktionsQualitaetProzent[rohstoffId] = qualitaetProzent;
+
+                    // Die Fertigkeit mitschreiben, damit das Buch die Ursache neben der Wirkung nennen
+                    // kann. Sie ist je Ware gleich, auch wenn dieselbe Ware in mehreren Städten
+                    // hergestellt wird - anders als die Menge, die sich aufsummiert.
+                    ergebnis.ProduktionsfertigkeitProzent[rohstoffId] = fertigkeit;
 
                     if (spieler.CheckPrivilegX(32))
                         produziert = Convert.ToInt32(produziert * 1.02);
