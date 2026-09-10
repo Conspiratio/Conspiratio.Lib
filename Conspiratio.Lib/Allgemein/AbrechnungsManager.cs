@@ -407,6 +407,17 @@ namespace Conspiratio.Lib.Allgemein
                 (int)(staettenGesamt * (staettenGesamt + 1) / 2 * KapazitaetsunterhaltProMille / 1000);
             ergebnis.Gesamtkosten += ergebnis.Kapazitaetsunterhalt;
 
+            // Der Faktor, sofern einer im Dienst steht. Er ist die einzige laufende Ausgabe, die der
+            // Spieler mit einem Satz wieder los ist - und deshalb ein eigener Posten und kein
+            // Unterhalt.
+            var faktor = new FaktorManager();
+
+            if (faktor.IstAngestellt())
+            {
+                ergebnis.Faktorlohn = faktor.GetJahreslohn();
+                ergebnis.Gesamtkosten += ergebnis.Faktorlohn;
+            }
+
             #endregion
 
             #region Hofhaltung

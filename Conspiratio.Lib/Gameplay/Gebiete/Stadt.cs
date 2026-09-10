@@ -144,12 +144,46 @@ namespace Conspiratio.Lib.Gameplay.Gebiete
         /// </summary>
         public int GetRohstoffPreisVonIDX(int X)
         {
-            int jahresbedarf = Math.Max(1, _einwohner / 10);
+            return (_rohstoffPreis[X] * (100 - GetAbschlagProzentVonIDX(X))) / 100;
+        }
 
-            int abschlagProzent = Math.Min(MaxAbschlagProzent,
-                                           (_rohstoffVorrat[X] * AbschlagJeBedarfsjahrProzent) / jahresbedarf);
+        /// <summary>
+        /// Was die Stadt in einem Jahr von einer Ware verbraucht: ein Zehntel ihrer Einwohner,
+        /// mindestens 1. Dieselbe Menge zieht <c>DynamischeSpieldaten.RohBedarfAktRundenEnde</c>
+        /// jährlich vom Vorrat ab, und an ihr bemisst sich der Mengenabschlag – ein großer Markt
+        /// verkraftet mehr Absatz als ein kleiner. Die 1 ist der Divisionsschutz.
+        /// </summary>
+        public int GetJahresbedarf()
+        {
+            return Math.Max(1, _einwohner / 10);
+        }
 
-            return (_rohstoffPreis[X] * (100 - abschlagProzent)) / 100;
+        /// <summary>
+        /// Der Mengenabschlag in Prozentpunkten, <b>ungekappt</b>. Er verrät damit zugleich, wie
+        /// viele Jahresbedarfe im Stadtlager liegen (einer je
+        /// <see cref="AbschlagJeBedarfsjahrProzent"/>) – am Deckel ginge diese Angabe verloren, und
+        /// genau sie ist der erklärende Teil: Ob dort fünf oder zwölf Jahresbedarfe liegen, macht
+        /// für den Preis keinen Unterschied mehr, für die Entscheidung des Spielers aber sehr wohl.
+        /// </summary>
+        public int GetRohAbschlagProzentVonIDX(int X)
+        {
+            return (_rohstoffVorrat[X] * AbschlagJeBedarfsjahrProzent) / GetJahresbedarf();
+        }
+
+        /// <summary>Der wirksame Abschlag: derselbe Wert, auf <see cref="MaxAbschlagProzent"/> gekappt.</summary>
+        public int GetAbschlagProzentVonIDX(int X)
+        {
+            return Math.Min(MaxAbschlagProzent, GetRohAbschlagProzentVonIDX(X));
+        }
+
+        /// <summary>
+        /// Der Vorrat, ab dem der Abschlag seinen Deckel erreicht – fünf Jahresbedarfe bei den
+        /// derzeitigen Konstanten. Jenseits davon drückt weitere Ware den Preis nicht mehr; das ist
+        /// die Schwelle, auf die der Faktor seine Prognose rechnet.
+        /// </summary>
+        public int GetVorratAmHoechstabschlag()
+        {
+            return GetJahresbedarf() * MaxAbschlagProzent / AbschlagJeBedarfsjahrProzent;
         }
 
         public void SetRohstoffPreisVonIDXToY(int X, int Y)

@@ -60,6 +60,13 @@ namespace Conspiratio.Lib.Gameplay.Personen
         /// <summary>Anzahl der bisher genommenen Fechtstunden – bestimmt den (steigenden) Preis der nächsten Stunde.</summary>
         public int FechtstundenGenommen { get; set; }
 
+        /// <summary>
+        /// Ob ein Faktor in Diensten steht (siehe <c>FaktorManager</c>). Ein fehlendes Feld kommt aus
+        /// einem alten Spielstand als <c>false</c> – also als „kein Faktor“, und das ist genau der
+        /// bisherige Zustand; ein Lazy-Init-Accessor wäre hier ohne Nutzen.
+        /// </summary>
+        public bool FaktorAngestellt { get; set; }
+
         /// <summary>Ob der Spieler in diesem Jahr bereits ein Duell geführt hat (max. eines pro Zug). Reset zu Zugbeginn.</summary>
         public bool DuellGefuehrtDiesesJahr { get; set; }
 

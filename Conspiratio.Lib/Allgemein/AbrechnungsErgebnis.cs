@@ -45,6 +45,13 @@
         /// </summary>
         public int Kapazitaetsunterhalt { get; internal set; }
 
+        /// <summary>
+        /// Der Jahreslohn des Faktors, 0 ohne einen solchen. Er steht als eigener Posten da und
+        /// nicht im Unterhalt, weil er eine Entscheidung ist und keine Folge des Besitzes: Man kann
+        /// ihn jederzeit entlassen, eine Werkstätte dagegen nicht abschalten.
+        /// </summary>
+        public int Faktorlohn { get; internal set; }
+
         public int Gesamtkosten { get; internal set; }
     }
 }
