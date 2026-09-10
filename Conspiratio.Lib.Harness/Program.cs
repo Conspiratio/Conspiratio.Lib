@@ -14,7 +14,9 @@ namespace Conspiratio.Lib.Harness
     ///
     /// Schalter: <c>--staedte</c>, <c>--slots</c> (1-2), <c>--jahre</c>, <c>--seeds</c> (Anzahl oder
     /// Liste wie <c>--seeds=1234,5678</c>), <c>--start-taler</c>, <c>--vollstaendig</c> (KI-Jahreswechsel
-    /// mitlaufen lassen), <c>--tabelle</c> (Jahrestabelle des ersten Seeds).
+    /// mitlaufen lassen), <c>--tabelle</c> (Jahrestabelle des ersten Seeds), <c>--ware=N</c> (alle Linien
+    /// auf diese Ware statt auf die Hauptproduktion der Stadt) und <c>--arbeiter=voll|exakt|null</c>
+    /// (wie die Linien besetzt werden).
     /// </summary>
     internal static class Program
     {
@@ -27,6 +29,13 @@ namespace Conspiratio.Lib.Harness
 
         private static bool Schalter(string[] args, string name)
             => args.Any(a => a == "--" + name);
+
+        private static string Text(string[] args, string name, string standard)
+        {
+            string treffer = args.FirstOrDefault(a => a.StartsWith("--" + name + "=", StringComparison.Ordinal));
+
+            return treffer?.Substring(name.Length + 3) ?? standard;
+        }
 
         private static List<int> Seeds(string[] args)
         {
@@ -65,7 +74,9 @@ namespace Conspiratio.Lib.Harness
                 Adel = Schalter(args, "adel"),
                 Marktklug = Schalter(args, "marktklug"),
                 Aemter = Schalter(args, "aemter"),
-                Wahlen = Schalter(args, "wahlen")
+                Wahlen = Schalter(args, "wahlen"),
+                Ware = Zahl(args, "ware", 0),
+                Besetzung = Text(args, "arbeiter", "voll")
             };
 
             int jahre = Zahl(args, "jahre", 20);

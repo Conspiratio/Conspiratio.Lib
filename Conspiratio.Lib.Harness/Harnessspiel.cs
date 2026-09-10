@@ -30,6 +30,9 @@ namespace Conspiratio.Lib.Harness
         public int Verkauft;
         public int Erloes;
         public int Unterhalt;
+
+        /// <summary>Die Loehne dieses Jahres - die Groesse, an der das Arbeiterverhaeltnis haengt.</summary>
+        public int Arbeiterkosten;
         public int Hofhaltung;
         public int Gesamtkosten;
         public int Strafen;
@@ -74,6 +77,24 @@ namespace Conspiratio.Lib.Harness
         /// messbar: Wo liegt der Betriebspunkt, an dem der Markt die Menge noch aufnimmt?
         /// </summary>
         public int StaettenJeLinie;
+
+        /// <summary>
+        /// Alle Linien auf diese Ware setzen statt auf die Hauptproduktion der jeweiligen Stadt.
+        /// 0 heisst: wie bisher die Stadtware. Noetig, um eine bestimmte Ware zu messen - Wolle,
+        /// Fell und Rum sind die einzigen drei mit einem Arbeiterverhaeltnis unter eins, und ob
+        /// eine davon vorkommt, entscheidet sonst die Stadtliste.
+        /// </summary>
+        public int Ware;
+
+        /// <summary>
+        /// Wie die Linien besetzt werden: "voll" (Staetten mal max(1, Verhaeltnis) - die bisherige
+        /// und weiterhin voreingestellte Rechnung), "exakt" (Staetten mal Arbeiter durch
+        /// Werkstaetten, also genau was die Ware verlangt) oder "null" (gar keine Arbeiter).
+        ///
+        /// "null" ist kein Unsinn, sondern der Messfall: Vor der Behebung des Arbeiterbedarfs
+        /// lieferten Wolle, Fell und Rum damit die volle Menge zum Nulltarif.
+        /// </summary>
+        public string Besetzung = "voll";
         public bool Vollstaendig;
 
         /// <summary>
@@ -222,7 +243,9 @@ namespace Conspiratio.Lib.Harness
                 for (int slot = 0; slot < slots; slot++)
                 {
                     int platz = slot + 1;   // Werkstattplaetze zaehlen 1-basiert
-                    int rohstoffId = SW.Dynamisch.GetStadtwithID(stadtId).GetSingleRohstoff(platz);
+                    int rohstoffId = _aufbau.Ware > 0
+                        ? _aufbau.Ware
+                        : SW.Dynamisch.GetStadtwithID(stadtId).GetSingleRohstoff(platz);
 
                     // Der Werkstattkauf wird vollstaendig gespiegelt, nicht nur freigeschaltet:
                     // HandelsManager.KaufeWerkstatt setzt neben Enabled auch die Rohstoff-ID und vor
@@ -278,6 +301,24 @@ namespace Conspiratio.Lib.Harness
         }
 
         /// <summary>
+        /// Wie viele Arbeiter eine Linie bekommt - siehe <see cref="Aufbau.Besetzung"/>.
+        ///
+        /// "exakt" rechnet wie die Lib seit der Behebung: erst nehmen, dann teilen. Ein
+        /// Zwischenwert "Arbeiter je Staette" waere bei Wolle, Fell und Rum null und wuerde die
+        /// Frage, um die es hier geht, gerade wegrunden.
+        /// </summary>
+        private int ErmittleArbeiter(Gameplay.Rohstoffe.Rohstoff ware, int staetten)
+        {
+            if (_aufbau.Besetzung == "null")
+                return 0;
+
+            if (_aufbau.Besetzung == "exakt")
+                return staetten * ware.GetArbeiter() / ware.GetWerkstaetten();
+
+            return staetten * Math.Max(1, ware.GetArbeiter() / ware.GetWerkstaetten());
+        }
+
+        /// <summary>
         /// Staettenzahl und Arbeiter je Linie - nach derselben Regel wie der E2E-Treiber: Es bindet,
         /// was zuerst greift, der Arbeiterdeckel oder der Lagerplatz. Arbeiter werden immer exakt im
         /// Verhaeltnis der Ware gesetzt; zu wenige senken den Ertrag anteilig, zu viele kosten nur Lohn.
@@ -314,7 +355,7 @@ namespace Conspiratio.Lib.Harness
                     lagerBindet++;
 
                 _handel.SetzeProduktionsStaetten(stadtId, slot, staetten);
-                _handel.SetzeProduktionsArbeiter(stadtId, slot, staetten * arbeiterProStaette);
+                _handel.SetzeProduktionsArbeiter(stadtId, slot, ErmittleArbeiter(ware, staetten));
 
                 var eingestellt = _handel.GetProduktionsslot(stadtId, slot);
                 staettenGesamt += eingestellt.GetProduktionStaetten();
@@ -382,6 +423,7 @@ namespace Conspiratio.Lib.Harness
 
             var abrechnung = new AbrechnungsManager().ErstelleAbrechnungFuerAktivenSpieler();
             zeile.Unterhalt = abrechnung.Unterhalt;
+            zeile.Arbeiterkosten = abrechnung.Arbeiterkosten;
             zeile.Hofhaltung = abrechnung.Hofhaltung;
             zeile.Gesamtkosten = abrechnung.Gesamtkosten;
             zeile.Kapazitaet = abrechnung.Kapazitaetsunterhalt;
