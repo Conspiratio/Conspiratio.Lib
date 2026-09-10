@@ -50,6 +50,14 @@ namespace Conspiratio.Lib.Allgemein
         public const int HandwerkslehrePrivilegId = 10004;
 
         /// <summary>
+        /// Kennung des Eintrags „Faktor anstellen“ bzw. „Faktor befragen“. Ein Eintrag für
+        /// beides: Wer keinen hat, stellt einen an; wer einen hat, lässt sich berichten und kann ihn
+        /// dort auch wieder entlassen. Zwei Einträge nebeneinander wären einer zu viel, denn nur
+        /// einer von beiden wäre je anklickbar.
+        /// </summary>
+        public const int FaktorPrivilegId = 10005;
+
+        /// <summary>
         /// Basis-Kennung der Einträge „[Amt] [Name] Privilegien" (Issue #13): je laufender Erpressung ein
         /// synthetischer Eintrag, dessen ID sich aus dieser Basis plus der Opfer-ID ergibt. Ein Klick
         /// schaltet die Liste auf die Amtsprivilegien des Erpressten um.
@@ -102,6 +110,10 @@ namespace Conspiratio.Lib.Allgemein
             // herstellt, dem könnte ein Meister nichts zeigen, das er anwenden könnte.
             if (ProduktionsfertigkeitManager.GetBetriebeneWaren().Count > 0)
                 privilegien.Add(new PrivilegInfo(HandwerkslehrePrivilegId, "Handwerkslehre nehmen"));
+
+            // Der Faktor: anstellen oder befragen, je nachdem, ob schon einer im Dienst steht.
+            privilegien.Add(new PrivilegInfo(FaktorPrivilegId,
+                new FaktorManager().IstAngestellt() ? "Faktor befragen" : "Faktor anstellen"));
 
             // Erpressungen (Issue #13): je Opfer ein Eintrag, der auf dessen Amtsprivilegien umschaltet.
             foreach (var erpressung in spieler.GetErpressungen())
