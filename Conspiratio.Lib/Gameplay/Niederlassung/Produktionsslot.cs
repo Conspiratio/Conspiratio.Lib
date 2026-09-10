@@ -121,7 +121,12 @@ namespace Conspiratio.Lib.Gameplay.Niederlassung
             int ProdmaxmitWS = _produktionStaetten * SW.Dynamisch.GetRohstoffwithID(rohstoffID).GetWSProdProWS();
             int Prodmitrichtigerarbeiteranzahl = (ProdmaxmitWS * 9) / 10;
             int vorlaeufigeProduktion = 0;
-            int benArbeiter = Convert.ToInt32(_produktionStaetten * (verharbeiter / verhwerkstaetten));
+            // Erst mal nehmen, dann teilen. Die Klammer stand frueher um die Division, und weil sie
+            // ganzzahlig ist, ergab sie bei Wolle, Fell und Rum (ein Arbeiter je zwei Werkstaetten)
+            // null - der Bedarf dieser drei Waren war damit null, die Bedingung darunter immer
+            // erfuellt und die volle Produktion ohne einen einzigen Arbeiter zu haben. Die uebrigen
+            // achtzehn Waren haben Werkstaetten = 1, wo die Klammer nicht auffiel.
+            int benArbeiter = _produktionStaetten * verharbeiter / verhwerkstaetten;
 
             if (_produktionArbeiter >= benArbeiter)
             {

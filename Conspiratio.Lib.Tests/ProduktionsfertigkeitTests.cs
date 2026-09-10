@@ -148,6 +148,46 @@ namespace Conspiratio.Lib.Tests
             Assert.Equal(QualitaetOhneAusschlag, qualitaet);
         }
 
+        /// <summary>
+        /// Wolle, Fell und Rum sind mit <b>einem Arbeiter je zwei Werkstätten</b> angelegt – als einzige
+        /// drei Waren des Spiels mit einem Verhältnis unter eins. Die ganzzahlige Division stand
+        /// früher in der Klammer (<c>Staetten * (Arbeiter / Werkstaetten)</c>) und ergab dort null:
+        /// Der Bedarf dieser drei Waren war damit null, die Prüfung <c>_produktionArbeiter >=
+        /// benArbeiter</c> immer erfüllt und die volle Produktion ohne einen einzigen Arbeiter zu
+        /// haben – also ohne Lohnkosten. Für wen das auffiel, waren es die einzig sinnvollen Waren.
+        /// </summary>
+        [Fact]
+        public void Waren_mit_halbem_Arbeiterbedarf_brauchen_trotzdem_Arbeiter()
+        {
+            const int Wolle = 2;
+
+            TestSpielwelt.Starte();
+
+            var ware = SW.Dynamisch.GetRohstoffwithID(Wolle);
+
+            // Die Datenlage, auf der dieser Test beruht - sonst pruefte er ab einer Datenaenderung
+            // stillschweigend etwas anderes.
+            Assert.True(ware.GetArbeiter() < ware.GetWerkstaetten(),
+                        "Wolle sollte weniger Arbeiter als Werkstaetten verlangen.");
+
+            var slot = SW.Dynamisch.GetAktHum().GetProduktionsslot(Stadt, Slot);
+            slot.SetTaetigkeit((int)EnumProduktionsslotAktionsart.Produzieren);
+            slot.SetProduktionRohstoff(Wolle);
+            slot.SetProduktionStaetten(Staetten);
+
+            int qualitaet = 0;
+
+            slot.SetProduktionArbeiter(0);
+            int ohneArbeiter = slot.GetProduktion(Stadt, Wolle, 0, ref qualitaet);
+
+            slot.SetProduktionArbeiter(Staetten * ware.GetArbeiter() / ware.GetWerkstaetten());
+            int mitArbeitern = slot.GetProduktion(Stadt, Wolle, 0, ref qualitaet);
+
+            Assert.Equal(0, ohneArbeiter);
+            Assert.True(mitArbeitern > 0,
+                        "Mit dem verlangten Personal muss Wolle etwas einbringen.");
+        }
+
         /// <summary>Derselbe Fall auf dem Weg, auf dem er den Spieler traf: dem Jahresbuch.</summary>
         [Fact]
         public void Das_Jahresbuch_uebersteht_einen_Platz_ohne_Arbeiter()
