@@ -16,7 +16,9 @@ namespace Conspiratio.Lib.Harness
     /// Liste wie <c>--seeds=1234,5678</c>), <c>--start-taler</c>, <c>--vollstaendig</c> (KI-Jahreswechsel
     /// mitlaufen lassen), <c>--tabelle</c> (Jahrestabelle des ersten Seeds), <c>--ware=N</c> (alle Linien
     /// auf diese Ware statt auf die Hauptproduktion der Stadt) und <c>--arbeiter=voll|exakt|null</c>
-    /// (wie die Linien besetzt werden).
+    /// (wie die Linien besetzt werden), <c>--fertigkeit=N</c> (Produktionsfertigkeit jeder
+    /// betriebenen Ware) und <c>--lehrgeld</c> (den Weg dorthin mit Lehrstunden bezahlen statt
+    /// geschenkt zu bekommen).
     /// </summary>
     internal static class Program
     {
@@ -76,7 +78,9 @@ namespace Conspiratio.Lib.Harness
                 Aemter = Schalter(args, "aemter"),
                 Wahlen = Schalter(args, "wahlen"),
                 Ware = Zahl(args, "ware", 0),
-                Besetzung = Text(args, "arbeiter", "voll")
+                Besetzung = Text(args, "arbeiter", "voll"),
+                Fertigkeit = Zahl(args, "fertigkeit", 0),
+                Lehrgeld = Schalter(args, "lehrgeld")
             };
 
             int jahre = Zahl(args, "jahre", 20);
@@ -91,7 +95,9 @@ namespace Conspiratio.Lib.Harness
                               (aufbau.Adel ? ", mit Adelsweg" : "") +
                               (aufbau.Marktklug ? ", marktklug" : "") +
                               (aufbau.Aemter ? ", mit Aemtern" : "") +
-                              (aufbau.Wahlen ? ", mit Wahlen" : ""));
+                              (aufbau.Wahlen ? ", mit Wahlen" : "") +
+                              (aufbau.Fertigkeit > 0 ? ", Fertigkeit " + aufbau.Fertigkeit : "") +
+                              (aufbau.Lehrgeld ? " (bezahlt)" : ""));
             Console.WriteLine();
 
             var endstaende = new List<int>();
@@ -100,6 +106,9 @@ namespace Conspiratio.Lib.Harness
             {
                 var spiel = new Harnessspiel(aufbau);
                 spiel.Starte(seed);
+
+                if (spiel.LehrgeldGezahlt > 0)
+                    Console.WriteLine("Seed " + seed + ": Lehrgeld " + G(spiel.LehrgeldGezahlt) + " Taler");
 
                 var zeilen = new List<Jahreszeile>();
 

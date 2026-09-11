@@ -95,6 +95,22 @@ namespace Conspiratio.Lib.Harness
         /// lieferten Wolle, Fell und Rum damit die volle Menge zum Nulltarif.
         /// </summary>
         public string Besetzung = "voll";
+
+        /// <summary>
+        /// Produktionsfertigkeit, auf die jede betriebene Ware gesetzt wird (0 bis 100). Sie hebt in
+        /// <c>Produktionsslot.GetProduktion</c> den unteren Rand der Jahresschwankung, im Mittel also
+        /// den Ertrag um bis zu rund 5 %. Ob das ueber eine Partie etwas ausmacht, war die Frage,
+        /// derentwegen es diesen Schalter gibt - das Konzept verlangt sie ausdruecklich, und der
+        /// Harness kannte die Groesse bis dahin gar nicht.
+        /// </summary>
+        public int Fertigkeit;
+
+        /// <summary>
+        /// Den Weg zur Fertigkeit bezahlen, statt sie zu schenken: je Ware so viele Lehrstunden, wie
+        /// noetig sind, ueber <c>ProduktionsfertigkeitManager.NimmLehrstunde</c> und damit mit der
+        /// echten Preisstaffel. Erst damit laesst sich sagen, ob sich das Training rechnet.
+        /// </summary>
+        public bool Lehrgeld;
         public bool Vollstaendig;
 
         /// <summary>
@@ -178,6 +194,9 @@ namespace Conspiratio.Lib.Harness
 
         /// <summary>Je Stadt die Ware des jeweiligen Slots - einmal beim Aufbau bestimmt.</summary>
         private readonly List<(int StadtId, int Slot, int RohstoffId)> _linien = new List<(int, int, int)>();
+
+        /// <summary>Was der Aufbau an Lehrstunden gekostet hat - 0 ohne <c>--lehrgeld</c>.</summary>
+        public int LehrgeldGezahlt { get; private set; }
 
         public Harnessspiel(Aufbau aufbau)
         {
@@ -269,6 +288,47 @@ namespace Conspiratio.Lib.Harness
             }
 
             SetzeProduktionsauftraege();
+            SetzeFertigkeit();
+        }
+
+        /// <summary>
+        /// Bringt jede betriebene Ware auf <see cref="Aufbau.Fertigkeit"/> - geschenkt oder mit
+        /// Lehrgeld bezahlt. Je Ware nur einmal, auch wenn mehrere Staedte sie herstellen: Das
+        /// Koennen haengt am Spieler, nicht am Standort.
+        /// </summary>
+        private void SetzeFertigkeit()
+        {
+            if (_aufbau.Fertigkeit <= 0)
+                return;
+
+            var spieler = SW.Dynamisch.GetAktHum();
+            var fertigkeit = new ProduktionsfertigkeitManager();
+            var erledigt = new List<int>();
+            int talerVorher = spieler.GetTaler();
+
+            foreach (var (_, _, rohstoffId) in _linien)
+            {
+                if (erledigt.Contains(rohstoffId))
+                    continue;
+
+                erledigt.Add(rohstoffId);
+
+                if (!_aufbau.Lehrgeld)
+                {
+                    spieler.SetProduktionsfertigkeit(rohstoffId, _aufbau.Fertigkeit);
+                    continue;
+                }
+
+                // Stunde um Stunde, damit die Preisstaffel wirklich greift - 1 000 plus 500 je
+                // bereits genommener Stunde derselben Ware. Reicht das Geld nicht, endet der
+                // Unterricht hier; das ist die ehrliche Antwort und keine Ausnahme.
+                while (spieler.GetProduktionsfertigkeit(rohstoffId) < _aufbau.Fertigkeit &&
+                       fertigkeit.NimmLehrstunde(rohstoffId, out _))
+                {
+                }
+            }
+
+            LehrgeldGezahlt = talerVorher - spieler.GetTaler();
         }
 
         /// <summary>
