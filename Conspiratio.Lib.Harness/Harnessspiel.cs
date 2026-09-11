@@ -98,6 +98,14 @@ namespace Conspiratio.Lib.Harness
         public int Startplatz;
 
         /// <summary>
+        /// Je Stadt den Werkstattplatz mit dem hoechsten Deckungsbeitrag waehlen, statt einen festen.
+        /// Das ist die Wahl, die ein aufmerksamer Spieler beim Aufbau trifft - und die realistische
+        /// Obergrenze, an der sich eine Bremse messen lassen muss. Ein fester Platz trifft sie nur
+        /// zufaellig, denn die Staedte unterscheiden sich in ihrer Warenzuordnung.
+        /// </summary>
+        public bool BesterPlatz;
+
+        /// <summary>
         /// Wie die Linien besetzt werden: "voll" (Staetten mal max(1, Verhaeltnis) - die bisherige
         /// und weiterhin voreingestellte Rechnung), "exakt" (Staetten mal Arbeiter durch
         /// Werkstaetten, also genau was die Ware verlangt) oder "null" (gar keine Arbeiter).
@@ -316,7 +324,9 @@ namespace Conspiratio.Lib.Harness
                 for (int slot = 0; slot < slots; slot++)
                 {
                     // Werkstattplaetze zaehlen 1-basiert.
-                    int platz = _aufbau.Startplatz > 0 ? _aufbau.Startplatz + slot : slot + 1;
+                    int platz = _aufbau.BesterPlatz
+                        ? ErmittleBestenPlatz(stadtId, slot)
+                        : _aufbau.Startplatz > 0 ? _aufbau.Startplatz + slot : slot + 1;
                     int rohstoffId = _aufbau.Ware > 0
                         ? _aufbau.Ware
                         : SW.Dynamisch.GetStadtwithID(stadtId).GetSingleRohstoff(platz);
@@ -384,6 +394,41 @@ namespace Conspiratio.Lib.Harness
             }
 
             LehrgeldGezahlt = talerVorher - spieler.GetTaler();
+        }
+
+        /// <summary>
+        /// Der Werkstattplatz mit dem höchsten Deckungsbeitrag, gerechnet auf den Startlagerraum –
+        /// beim Aufbau steht ja noch kein Lager, und mit derselben Annahme für alle Kandidaten ist
+        /// der Vergleich fair. Bereits vergebene Plätze bleiben außen vor, damit zwei Slots
+        /// derselben Stadt nicht auf derselben Ware landen.
+        /// </summary>
+        private int ErmittleBestenPlatz(int stadtId, int slot)
+        {
+            int bester = 1;
+            int hoechster = int.MinValue;
+
+            for (int platz = 1; platz <= SW.Statisch.GetMaxWerkstaettenProStadt(); platz++)
+            {
+                if (_linien.Exists(l => l.StadtId == stadtId && l.Platz == platz))
+                    continue;
+
+                int rohstoffId = SW.Dynamisch.GetStadtwithID(stadtId).GetSingleRohstoff(platz);
+
+                if (rohstoffId <= 0)
+                    continue;
+
+                int lagerplatz = SW.Statisch.GetStartLagerraum() *
+                                 SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetLagermengeProQMeter();
+                int deckung = DeckungsbeitragDerLinie(stadtId, rohstoffId, lagerplatz);
+
+                if (deckung > hoechster)
+                {
+                    hoechster = deckung;
+                    bester = platz;
+                }
+            }
+
+            return bester;
         }
 
         /// <summary>

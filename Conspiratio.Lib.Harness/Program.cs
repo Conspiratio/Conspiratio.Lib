@@ -79,6 +79,7 @@ namespace Conspiratio.Lib.Harness
                 Wahlen = Schalter(args, "wahlen"),
                 Ware = Zahl(args, "ware", 0),
                 Startplatz = Zahl(args, "startplatz", 0),
+                BesterPlatz = Schalter(args, "bester-platz"),
                 Besetzung = Text(args, "arbeiter", "voll"),
                 Fertigkeit = Zahl(args, "fertigkeit", 0),
                 Lehrgeld = Schalter(args, "lehrgeld"),
