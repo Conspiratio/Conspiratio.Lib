@@ -406,6 +406,24 @@ namespace Conspiratio.Lib.Harness
         /// was zuerst greift, der Arbeiterdeckel oder der Lagerplatz. Arbeiter werden immer exakt im
         /// Verhaeltnis der Ware gesetzt; zu wenige senken den Ertrag anteilig, zu viele kosten nur Lohn.
         /// </summary>
+        /// <summary>
+        /// Die beiden harten Grenzen einer Linie: wie viele Stätten der Arbeiterdeckel bedienen kann
+        /// und wie viele das Lager fasst. Welche zuerst greift, entscheidet über die Betriebsgröße –
+        /// und darüber, ob ein Lagerausbau überhaupt etwas bringt.
+        /// </summary>
+        private static void ErmittleGrenzen(int stadtId, int rohstoffId, out int ausArbeitern, out int ausLager)
+        {
+            var spieler = SW.Dynamisch.GetAktHum();
+            var ware = SW.Dynamisch.GetRohstoffwithID(rohstoffId);
+
+            int arbeiterProStaette = Math.Max(1, ware.GetArbeiter() / ware.GetWerkstaetten());
+            int mengeProStaette = Math.Max(1, ware.GetWSProdProWS() * 9 / 10);
+            int lagerplatz = spieler.ErmittleLagerplatzInStadt(stadtId, rohstoffId) * ware.GetLagermengeProQMeter();
+
+            ausArbeitern = SW.Statisch.GetMaxArbeiterAnzahl() / arbeiterProStaette;
+            ausLager = Math.Max(1, lagerplatz / mengeProStaette);
+        }
+
         private void SetzeProduktionsauftraege()
         {
             var spieler = SW.Dynamisch.GetAktHum();
@@ -416,13 +434,9 @@ namespace Conspiratio.Lib.Harness
             foreach (var (stadtId, slot, rohstoffId) in _linien)
             {
                 var ware = SW.Dynamisch.GetRohstoffwithID(rohstoffId);
-
-                int arbeiterProStaette = Math.Max(1, ware.GetArbeiter() / ware.GetWerkstaetten());
                 int mengeProStaette = Math.Max(1, ware.GetWSProdProWS() * 9 / 10);
 
-                int ausArbeitern = SW.Statisch.GetMaxArbeiterAnzahl() / arbeiterProStaette;
-                int lagerplatz = spieler.ErmittleLagerplatzInStadt(stadtId, rohstoffId) * ware.GetLagermengeProQMeter();
-                int ausLager = Math.Max(1, lagerplatz / mengeProStaette);
+                ErmittleGrenzen(stadtId, rohstoffId, out int ausArbeitern, out int ausLager);
 
                 int staetten = Math.Max(1, Math.Min(ausArbeitern, ausLager));
 
@@ -470,6 +484,69 @@ namespace Conspiratio.Lib.Harness
         /// Das erste Jahr bleibt aussen vor: Da ist das Buch noch leer, der Erloes also 0, und der
         /// Haendler wuerde drosseln, bevor er ueberhaupt etwas verkauft hat.
         /// </summary>
+        /// <summary>
+        /// Baut das Lager aus, wo es sich lohnt. Drei Bedingungen, alle nötig:
+        ///
+        /// <list type="bullet">
+        /// <item><b>Volle Auslastung.</b> Wer drosselt, braucht kein größeres Lager.</item>
+        /// <item><b>Ein Gewinnjahr.</b> Ausgebaut wird aus Ertrag, nicht auf Hoffnung.</item>
+        /// <item><b>Das Lager bindet diese Linie.</b> Bindet stattdessen der Arbeiterdeckel, ist
+        /// zusätzliches Lager totes Kapital – dieselbe Regel, die der E2E-Treiber kennt, und dort
+        /// hatte ihr Fehlen einen positiven 15-Jahre-Lauf ins Minus gedreht.</item>
+        /// </list>
+        ///
+        /// Ein Ausbau je Linie und Jahr, und eine Rücklage in Höhe der Jahreskosten bleibt stehen:
+        /// Man gibt nicht aus, was man nächstes Jahr braucht. Der Aufbau zu Spielbeginn kauft
+        /// dagegen ohne Rücksicht (<c>KaufeLagerraum</c>) – das ist der gesetzte Ausgangszustand
+        /// und keine Entscheidung des Händlers.
+        /// </summary>
+        private void BaueLagerAus(Jahreszeile zeile)
+        {
+            if (!_aufbau.Adaptiv || Auslastung < 100 || zeile.Jahr <= SW.Statisch.StartJahr)
+                return;
+
+            if (zeile.Erloes <= zeile.Gesamtkosten)
+                return;
+
+            foreach (var (stadtId, slot, rohstoffId) in _linien)
+            {
+                ErmittleGrenzen(stadtId, rohstoffId, out int ausArbeitern, out int ausLager);
+
+                if (ausLager >= ausArbeitern)
+                    continue;
+
+                KaufeEinenLagerausbau(stadtId, slot + 1, zeile.Gesamtkosten);
+            }
+        }
+
+        /// <summary>Kauft das größte Angebot, das die Rücklage stehen lässt - oder gar keines.</summary>
+        private static void KaufeEinenLagerausbau(int stadtId, int platz, int ruecklage)
+        {
+            int verfuegbar = SW.Dynamisch.GetAktHum().GetTaler() - ruecklage;
+
+            if (verfuegbar <= 0)
+                return;
+
+            var lager = new LagerraumManager(stadtId, platz);
+            int bestes = -1;
+
+            for (int angebot = 0; angebot < 3; angebot++)
+            {
+                try
+                {
+                    if (lager.GetPreis(angebot) <= verfuegbar)
+                        bestes = angebot;
+                }
+                catch (IndexOutOfRangeException)
+                {
+                    break;
+                }
+            }
+
+            if (bestes >= 0)
+                lager.Kaufe(bestes);
+        }
+
         private void PasseAuslastungAn(Jahreszeile zeile)
         {
             if (!_aufbau.Adaptiv || zeile.Jahr <= SW.Statisch.StartJahr)
@@ -610,6 +687,7 @@ namespace Conspiratio.Lib.Harness
             zeile.StandesAnsehen = spieler.GetStandesAnsehen();
 
             PasseAuslastungAn(zeile);
+            BaueLagerAus(zeile);
             zeile.Auslastung = Auslastung;
 
             return zeile;
