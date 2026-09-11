@@ -216,7 +216,6 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         private IPrivileg[] Privilegien;
 
         private double KupplerProzente;
-        private int AnsehenProTaler;
         #endregion
 
         #region Ereignisse
@@ -675,8 +674,6 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             VergifteterWeinChance = 5;
 
             maxAnzahlSkills = 11;
-
-            AnsehenProTaler = 2500;
 
             Kirchenzehnt = 0.1;
             Konvertierkosten = 2000;
@@ -1495,7 +1492,6 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
         public double GetKirchenzehnt() { return Kirchenzehnt; }
         public int GetKonvertierkosten() { return Konvertierkosten; }
         public int GetAustrittskosten() { return Austrittskosten; }
-        public int GetAnsehenProTaler() { return AnsehenProTaler; }
         public int GetMaxAnzahlSkills() { return maxAnzahlSkills; }
         public int GetKartenSpielenMinTaler() { return KartenSpielenMinTaler; }
         public double GetKartenSpielenProzentsatz() { return kartenSpielenProzentsatz; }

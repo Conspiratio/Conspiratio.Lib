@@ -132,21 +132,6 @@ namespace Conspiratio.Lib.Allgemein
             return Array.IndexOf(SW.Dynamisch.GetStadtwithID(stadtId).GetHauptproduktion(), rohstoffId) >= 0;
         }
 
-        /// <summary>Die Waren, zu denen es in dieser Stadt gerade ein Buch gibt.</summary>
-        [PublicAPI]
-        public List<int> GetBuchangebote(int stadtId)
-        {
-            var angebote = new List<int>();
-
-            foreach (int rohstoffId in SW.Dynamisch.GetStadtwithID(stadtId).GetHauptproduktion())
-            {
-                if (rohstoffId > 0 && !HatSchrift(rohstoffId, SchriftBuch))
-                    angebote.Add(rohstoffId);
-            }
-
-            return angebote;
-        }
-
         /// <summary>Der Preis richtet sich nach der Warenstufe: einfache Waren lehren sich billiger.</summary>
         [PublicAPI]
         public int GetBuchpreis(int rohstoffId)
