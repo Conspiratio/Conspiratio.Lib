@@ -128,7 +128,7 @@ namespace Conspiratio.Lib.Harness
                                       " Arbeiter, bindende Grenze: " + spiel.BindendeGrenze);
                     Console.WriteLine();
                     Console.WriteLine("Jahr    Produziert   Verkauft       Erloes    Unterhalt   Hofhaltung   " +
-                                      "Gesamtkosten    Kapazitaet       Taler     Vermoegen   Abschlag   Auslast.");
+                                      "Gesamtkosten    Kapazitaet     Strafen       Taler     Vermoegen   Abschlag   Auslast.");
                     Console.WriteLine(new string('-', 136));
 
                     foreach (var z in zeilen)
@@ -141,6 +141,7 @@ namespace Conspiratio.Lib.Harness
                             G(z.Hofhaltung).PadLeft(11) + "  " +
                             G(z.Gesamtkosten).PadLeft(14) + "  " +
                             G(z.Kapazitaet).PadLeft(10) + "  " +
+                            G(z.Strafen).PadLeft(10) + "  " +
                             G(z.Taler).PadLeft(10) + "  " +
                             G(z.Vermoegen).PadLeft(12) + "  " +
                             (z.Abschlag + " %").PadLeft(9) + "  " +
