@@ -78,6 +78,7 @@ namespace Conspiratio.Lib.Harness
                 Aemter = Schalter(args, "aemter"),
                 Wahlen = Schalter(args, "wahlen"),
                 Ware = Zahl(args, "ware", 0),
+                Startplatz = Zahl(args, "startplatz", 0),
                 Besetzung = Text(args, "arbeiter", "voll"),
                 Fertigkeit = Zahl(args, "fertigkeit", 0),
                 Lehrgeld = Schalter(args, "lehrgeld"),
@@ -155,7 +156,8 @@ namespace Conspiratio.Lib.Harness
                                   "   Amt: " + letzte.Amt +
                                   "   Amtseinkommen " + G(letzte.Amtseinkommen) +
                                   "   Ansehen " + letzte.Ansehen +
-                                  " (Standes " + letzte.StandesAnsehen + ")");
+                                  " (Standes " + letzte.StandesAnsehen + ")" +
+                                  (spiel.Warenwechsel > 0 ? "   Warenwechsel " + spiel.Warenwechsel : ""));
             }
 
             endstaende.Sort();

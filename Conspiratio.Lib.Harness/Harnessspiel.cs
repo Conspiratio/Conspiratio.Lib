@@ -90,6 +90,14 @@ namespace Conspiratio.Lib.Harness
         public int Ware;
 
         /// <summary>
+        /// Auf welchem Werkstattplatz die Linien beginnen (0 = wie bisher Platz 1, 2, ...). Platz 1
+        /// traegt in der Regel die Hauptproduktion der Stadt, also die hoechste Effizienz - wer dort
+        /// anfaengt, hat nichts zu wechseln. Ein schlechter Startplatz macht die Wechselregel
+        /// pruefbar: Arbeitet sich der Haendler auf den guten Platz hoch?
+        /// </summary>
+        public int Startplatz;
+
+        /// <summary>
         /// Wie die Linien besetzt werden: "voll" (Staetten mal max(1, Verhaeltnis) - die bisherige
         /// und weiterhin voreingestellte Rechnung), "exakt" (Staetten mal Arbeiter durch
         /// Werkstaetten, also genau was die Ware verlangt) oder "null" (gar keine Arbeiter).
@@ -204,7 +212,13 @@ namespace Conspiratio.Lib.Harness
         private readonly RundenManager _runden = new RundenManager();
 
         /// <summary>Je Stadt die Ware des jeweiligen Slots - einmal beim Aufbau bestimmt.</summary>
-        private readonly List<(int StadtId, int Slot, int RohstoffId)> _linien = new List<(int, int, int)>();
+        /// <summary>
+        /// Die Produktionslinien. Der <b>Platz</b> steht eigens dabei und wird nicht mehr aus dem
+        /// Slot abgeleitet: Nach einem Warenwechsel sitzt die Linie auf einem anderen Werkstattplatz
+        /// als dem, mit dem sie angefangen hat.
+        /// </summary>
+        private readonly List<(int StadtId, int Slot, int Platz, int RohstoffId)> _linien =
+            new List<(int, int, int, int)>();
 
         /// <summary>Was der Aufbau an Lehrstunden gekostet hat - 0 ohne <c>--lehrgeld</c>.</summary>
         public int LehrgeldGezahlt { get; private set; }
@@ -220,6 +234,23 @@ namespace Conspiratio.Lib.Harness
 
         /// <summary>... ein Gewinnjahr gibt so viele zurueck. Asymmetrisch, damit es sich einpendelt.</summary>
         private const int SchrittHoch = 5;
+
+        /// <summary>
+        /// Um so viel muss eine andere Ware besser tragen, bevor gewechselt wird. Ohne diese
+        /// Hysterese springt der Haendler hin und her, sobald zwei Waren gleichauf liegen - und
+        /// zahlt jedes Mal die Differenz aus Kauf- und Verkaufspreis der Werkstatt.
+        /// </summary>
+        private const int WechselSchwelleProzent = 125;
+
+        /// <summary>
+        /// Auf so viele Jahre legt der Haendler die Umbaukosten um. Kuerzer waere zu vorsichtig -
+        /// bei vierzig Jahren Spielzeit rechnet sich ein guter Wechsel lange -, laenger zu
+        /// leichtfertig.
+        /// </summary>
+        private const int AmortisationJahre = 5;
+
+        /// <summary>Wie oft die Ware gewechselt wurde - zur Ausgabe, damit die Regel nachpruefbar ist.</summary>
+        public int Warenwechsel { get; private set; }
 
         public Harnessspiel(Aufbau aufbau)
         {
@@ -284,7 +315,8 @@ namespace Conspiratio.Lib.Harness
             {
                 for (int slot = 0; slot < slots; slot++)
                 {
-                    int platz = slot + 1;   // Werkstattplaetze zaehlen 1-basiert
+                    // Werkstattplaetze zaehlen 1-basiert.
+                    int platz = _aufbau.Startplatz > 0 ? _aufbau.Startplatz + slot : slot + 1;
                     int rohstoffId = _aufbau.Ware > 0
                         ? _aufbau.Ware
                         : SW.Dynamisch.GetStadtwithID(stadtId).GetSingleRohstoff(platz);
@@ -306,7 +338,7 @@ namespace Conspiratio.Lib.Harness
                     _handel.SetzeTaetigkeit(stadtId, slot, EnumProduktionsslotAktionsart.Produzieren);
                     _handel.SetzeProduktionsRohstoff(stadtId, slot, rohstoffId);
 
-                    _linien.Add((stadtId, slot, rohstoffId));
+                    _linien.Add((stadtId, slot, platz, rohstoffId));
                 }
             }
 
@@ -329,7 +361,7 @@ namespace Conspiratio.Lib.Harness
             var erledigt = new List<int>();
             int talerVorher = spieler.GetTaler();
 
-            foreach (var (_, _, rohstoffId) in _linien)
+            foreach (var (_, _, _, rohstoffId) in _linien)
             {
                 if (erledigt.Contains(rohstoffId))
                     continue;
@@ -431,7 +463,7 @@ namespace Conspiratio.Lib.Harness
             int arbeiterGesamt = 0;
             int lagerBindet = 0;
 
-            foreach (var (stadtId, slot, rohstoffId) in _linien)
+            foreach (var (stadtId, slot, _, rohstoffId) in _linien)
             {
                 var ware = SW.Dynamisch.GetRohstoffwithID(rohstoffId);
                 int mengeProStaette = Math.Max(1, ware.GetWSProdProWS() * 9 / 10);
@@ -485,6 +517,140 @@ namespace Conspiratio.Lib.Harness
         /// Haendler wuerde drosseln, bevor er ueberhaupt etwas verkauft hat.
         /// </summary>
         /// <summary>
+        /// Was eine ganze Linie dieser Ware in dieser Stadt im Jahr trägt: Deckungsbeitrag je Stätte
+        /// mal so viele Stätten, wie der übergebene Lagerplatz und der Arbeiterdeckel zulassen.
+        ///
+        /// Die Stättenzahl gehört zwingend hinein. Die erste Fassung verglich nur je Stätte und riet
+        /// deshalb zu Wechseln, die den gesamten Lagerausbau wegwarfen – ein einziger solcher
+        /// Wechsel drückte das Endvermögen von 1 144 547 auf 308 535.
+        ///
+        /// Die <b>Effizienz der Stadt</b> steht bewusst darin – sie ist der halbe Unterschied
+        /// zwischen einer Hauptproduktion und einer beliebigen anderen Ware (0,5 gegen bis zu 1,4).
+        /// Und der Preis ist der der <b>besten Absatzstadt</b>, nicht der örtliche: Verkauft wird
+        /// ohnehin dort, wo es am meisten gibt, und eine Stadt zahlt für ihre eigene
+        /// Hauptproduktion am wenigsten.
+        /// </summary>
+        private static int DeckungsbeitragDerLinie(int stadtId, int rohstoffId, int lagerplatzStueck)
+        {
+            var ware = SW.Dynamisch.GetRohstoffwithID(rohstoffId);
+            double effizienz = SW.Dynamisch.GetStadtwithID(stadtId).GetEffizienzVonRohstoffMitIDX(rohstoffId);
+
+            int menge = Math.Max(1, (int)(ware.GetWSProdProWS() * 0.9 * effizienz));
+            int ziel = BesteAbsatzstadt(stadtId, rohstoffId);
+
+            if (ziel == 0)
+                return 0;
+
+            int erloes = menge * SW.Dynamisch.GetStadtwithID(ziel).GetRohstoffPreisVonIDX(rohstoffId);
+
+            int arbeiterProStaette = Math.Max(1, ware.GetArbeiter() / ware.GetWerkstaetten());
+            int kosten = arbeiterProStaette * ware.GetWSArbeiterpreis() + ware.GetWSEinzelpreis();
+
+            // Mal so viele Stätten, wie Lager und Arbeiterdeckel zulassen. Genau das unterschied die
+            // erste Fassung nicht - und sie riet deshalb zu Wechseln, die den ganzen Lagerausbau
+            // wegwarfen.
+            int ausLager = Math.Max(1, lagerplatzStueck / menge);
+            int ausArbeitern = SW.Statisch.GetMaxArbeiterAnzahl() / arbeiterProStaette;
+
+            return Math.Min(ausLager, ausArbeitern) * (erloes - kosten);
+        }
+
+        /// <summary>Der Lagerplatz einer Linie in Stück - was dort tatsächlich hineinpasst.</summary>
+        private static int LagerplatzInStueck(int stadtId, int rohstoffId)
+        {
+            return SW.Dynamisch.GetAktHum().ErmittleLagerplatzInStadt(stadtId, rohstoffId) *
+                   SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetLagermengeProQMeter();
+        }
+
+        /// <summary>
+        /// Wechselt die Ware, wo eine andere deutlich mehr trägt. Im Spiel heißt das: eine
+        /// Werkstätte auf einem anderen Platz derselben Stadt kaufen und die alte verkaufen – die
+        /// Ware hängt am Platz und lässt sich nicht für sich umstellen.
+        ///
+        /// Gewechselt wird erst ab <see cref="WechselSchwelleProzent"/>, und nur wenn der Wechsel
+        /// bezahlbar ist, ohne die Rücklage anzugreifen. Das neue Lager fängt beim Startlagerraum
+        /// an; den Rest besorgt der Lagerausbau in den Folgejahren.
+        ///
+        /// <b>Was die Regel nicht sieht:</b> dass ein Wechsel den alten Markt entlastet und den
+        /// neuen füllt. Sie vergleicht die Preise von heute und rechnet nicht voraus.
+        /// </summary>
+        private void WechsleWare(Jahreszeile zeile)
+        {
+            if (!_aufbau.Adaptiv || _aufbau.Ware > 0 || zeile.Jahr <= SW.Statisch.StartJahr)
+                return;
+
+            var spieler = SW.Dynamisch.GetAktHum();
+
+            for (int i = 0; i < _linien.Count; i++)
+            {
+                var (stadtId, slot, platz, rohstoffId) = _linien[i];
+
+                int jetzt = DeckungsbeitragDerLinie(stadtId, rohstoffId,
+                                                    LagerplatzInStueck(stadtId, rohstoffId));
+                int besterPlatz = 0;
+                int bester = jetzt * WechselSchwelleProzent / 100;
+
+                for (int kandidat = 1; kandidat <= SW.Statisch.GetMaxWerkstaettenProStadt(); kandidat++)
+                {
+                    if (kandidat == platz)
+                        continue;
+
+                    int andereWare = SW.Dynamisch.GetStadtwithID(stadtId).GetSingleRohstoff(kandidat);
+
+                    if (andereWare <= 0)
+                        continue;
+
+                    // Die neue Werkstätte fängt beim Startlagerraum an, aber der Ausbau holt das in
+                    // wenigen Jahren zurück. Gerechnet wird deshalb mit dem halben heutigen
+                    // Lagerplatz - grob der Mittelwert über die Aufbaujahre. Mit dem Startlagerraum
+                    // allein käme kein Wechsel je durch die Schwelle, auch keiner zu einer Ware, die
+                    // das Dreifache trägt.
+                    int neuerLagerplatz = Math.Max(
+                        SW.Statisch.GetStartLagerraum() * SW.Dynamisch.GetRohstoffwithID(andereWare).GetLagermengeProQMeter(),
+                        LagerplatzInStueck(stadtId, rohstoffId) / 2);
+
+                    int deckung = DeckungsbeitragDerLinie(stadtId, andereWare, neuerLagerplatz);
+
+                    // Der Umbau kostet einmalig; umgelegt auf einige Jahre ist das der jaehrliche
+                    // Preis des Wechsels.
+                    int umbau = _handel.GetWerkstattKaufpreis(stadtId, kandidat) -
+                                _handel.GetWerkstattVerkaufspreis(stadtId, platz);
+
+                    deckung -= Math.Max(0, umbau) / AmortisationJahre;
+
+                    if (deckung > bester)
+                    {
+                        bester = deckung;
+                        besterPlatz = kandidat;
+                    }
+                }
+
+                if (besterPlatz == 0)
+                    continue;
+
+                int kaufpreis = _handel.GetWerkstattKaufpreis(stadtId, besterPlatz);
+                int erloes = _handel.GetWerkstattVerkaufspreis(stadtId, platz);
+
+                if (spieler.GetTaler() - kaufpreis + erloes < zeile.Gesamtkosten)
+                    continue;
+
+                int neueWare = SW.Dynamisch.GetStadtwithID(stadtId).GetSingleRohstoff(besterPlatz);
+                spieler.SetRohstoffrechteXZuY(neueWare, true);
+
+                if (!_handel.KaufeWerkstatt(stadtId, besterPlatz, out _))
+                    continue;
+
+                _handel.VerkaufeWerkstatt(stadtId, platz);
+
+                _handel.SetzeTaetigkeit(stadtId, slot, EnumProduktionsslotAktionsart.Produzieren);
+                _handel.SetzeProduktionsRohstoff(stadtId, slot, neueWare);
+
+                _linien[i] = (stadtId, slot, besterPlatz, neueWare);
+                Warenwechsel++;
+            }
+        }
+
+        /// <summary>
         /// Baut das Lager aus, wo es sich lohnt. Drei Bedingungen, alle nötig:
         ///
         /// <list type="bullet">
@@ -508,14 +674,14 @@ namespace Conspiratio.Lib.Harness
             if (zeile.Erloes <= zeile.Gesamtkosten)
                 return;
 
-            foreach (var (stadtId, slot, rohstoffId) in _linien)
+            foreach (var (stadtId, _, platz, rohstoffId) in _linien)
             {
                 ErmittleGrenzen(stadtId, rohstoffId, out int ausArbeitern, out int ausLager);
 
                 if (ausLager >= ausArbeitern)
                     continue;
 
-                KaufeEinenLagerausbau(stadtId, slot + 1, zeile.Gesamtkosten);
+                KaufeEinenLagerausbau(stadtId, platz, zeile.Gesamtkosten);
             }
         }
 
@@ -687,6 +853,7 @@ namespace Conspiratio.Lib.Harness
             zeile.StandesAnsehen = spieler.GetStandesAnsehen();
 
             PasseAuslastungAn(zeile);
+            WechsleWare(zeile);
             BaueLagerAus(zeile);
             zeile.Auslastung = Auslastung;
 
@@ -705,7 +872,7 @@ namespace Conspiratio.Lib.Harness
         {
             const int Verkaufsslot = 1;
 
-            foreach (var (stadtId, _, rohstoffId) in _linien)
+            foreach (var (stadtId, _, _, rohstoffId) in _linien)
             {
                 int bestand = SW.Dynamisch.GetAktHum().GetStadtRohstoffAnzahl(stadtId, rohstoffId);
 
@@ -1053,7 +1220,7 @@ namespace Conspiratio.Lib.Harness
         /// <summary>Verkauft in jeder Stadt den dort gelagerten Bestand der eigenen Ware.</summary>
         private void VerkaufeBestaende(Jahreszeile zeile)
         {
-            foreach (var (stadtId, _, rohstoffId) in _linien)
+            foreach (var (stadtId, _, _, rohstoffId) in _linien)
             {
                 int bestand = SW.Dynamisch.GetAktHum().GetStadtRohstoffAnzahl(stadtId, rohstoffId);
 
@@ -1076,7 +1243,7 @@ namespace Conspiratio.Lib.Harness
 
             int summe = 0;
 
-            foreach (var (stadtId, _, rohstoffId) in _linien)
+            foreach (var (stadtId, _, _, rohstoffId) in _linien)
             {
                 var stadt = SW.Dynamisch.GetStadtwithID(stadtId);
                 int jahresbedarf = Math.Max(1, stadt.GetEinwohner() / 10);
