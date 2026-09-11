@@ -33,6 +33,9 @@ namespace Conspiratio.Lib.Harness
 
         /// <summary>Die Loehne dieses Jahres - die Groesse, an der das Arbeiterverhaeltnis haengt.</summary>
         public int Arbeiterkosten;
+
+        /// <summary>Die gefahrene Auslastung in Prozent - ohne <c>--adaptiv</c> immer 100.</summary>
+        public int Auslastung = 100;
         public int Hofhaltung;
         public int Gesamtkosten;
         public int Strafen;
@@ -111,6 +114,14 @@ namespace Conspiratio.Lib.Harness
         /// echten Preisstaffel. Erst damit laesst sich sagen, ob sich das Training rechnet.
         /// </summary>
         public bool Lehrgeld;
+
+        /// <summary>
+        /// Die Kapazitaet nach dem Jahresergebnis nachfuehren, statt immer auf Anschlag zu
+        /// produzieren. Ohne das haelt der Haendler die volle Menge auch dann, wenn eine Abgabe
+        /// ihn ruiniert - und jede Bremsmessung ueberschaetzt den Schaden, weil ein Mensch
+        /// laengst gedrosselt haette.
+        /// </summary>
+        public bool Adaptiv;
         public bool Vollstaendig;
 
         /// <summary>
@@ -197,6 +208,18 @@ namespace Conspiratio.Lib.Harness
 
         /// <summary>Was der Aufbau an Lehrstunden gekostet hat - 0 ohne <c>--lehrgeld</c>.</summary>
         public int LehrgeldGezahlt { get; private set; }
+
+        /// <summary>Wie weit der Betrieb gefahren wird, in Prozent der moeglichen Kapazitaet.</summary>
+        public int Auslastung { get; private set; } = 100;
+
+        /// <summary>Unter diese Auslastung geht der Haendler nicht - darunter lohnt kein Betrieb.</summary>
+        private const int MindestAuslastung = 10;
+
+        /// <summary>Ein Verlustjahr nimmt so viele Punkte Auslastung weg ...</summary>
+        private const int SchrittRunter = 15;
+
+        /// <summary>... ein Gewinnjahr gibt so viele zurueck. Asymmetrisch, damit es sich einpendelt.</summary>
+        private const int SchrittHoch = 5;
 
         public Harnessspiel(Aufbau aufbau)
         {
@@ -411,6 +434,11 @@ namespace Conspiratio.Lib.Harness
                 if (_aufbau.Marktklug)
                     staetten = Math.Max(1, Math.Min(staetten, MittlererJahresbedarf() / mengeProStaette));
 
+                // Die nachgefuehrte Auslastung sitzt zuletzt: Sie drosselt, was die Grenzen oben
+                // erlauben, und nicht umgekehrt.
+                if (_aufbau.Adaptiv)
+                    staetten = Math.Max(1, staetten * Auslastung / 100);
+
                 if (ausLager < ausArbeitern)
                     lagerBindet++;
 
@@ -427,6 +455,30 @@ namespace Conspiratio.Lib.Harness
             BindendeGrenze = lagerBindet == 0 ? "Arbeiter"
                 : lagerBindet == _linien.Count ? "Lager"
                 : "gemischt";
+        }
+
+        /// <summary>
+        /// Fuehrt die Auslastung nach dem Jahresergebnis nach: Verlust drosselt, Gewinn baut wieder
+        /// auf. Das ist eine Faustregel und keine optimale Strategie - sie soll nur verhindern, dass
+        /// der Haendler auf Anschlag weiterproduziert, waehrend er ruiniert wird.
+        ///
+        /// <b>Ein Versatz steckt darin:</b> Im Exportbetrieb steht im Erloes das <i>Vorjahr</i> (der
+        /// Karawanenzug rechnet erst dann ab), in den Kosten aber das laufende Jahr. Fuer eine
+        /// Faustregel reicht das; wer den Betriebspunkt genau bestimmen will, darf sich darauf
+        /// nicht verlassen.
+        ///
+        /// Das erste Jahr bleibt aussen vor: Da ist das Buch noch leer, der Erloes also 0, und der
+        /// Haendler wuerde drosseln, bevor er ueberhaupt etwas verkauft hat.
+        /// </summary>
+        private void PasseAuslastungAn(Jahreszeile zeile)
+        {
+            if (!_aufbau.Adaptiv || zeile.Jahr <= SW.Statisch.StartJahr)
+                return;
+
+            if (zeile.Erloes < zeile.Gesamtkosten)
+                Auslastung = Math.Max(MindestAuslastung, Auslastung - SchrittRunter);
+            else
+                Auslastung = Math.Min(100, Auslastung + SchrittHoch);
         }
 
         #endregion
@@ -556,6 +608,9 @@ namespace Conspiratio.Lib.Harness
             zeile.Amt = SW.Statisch.GetAmtwithID(spieler.GetAmtID()).GetAmtsname(spieler.GetMaennlich());
             zeile.Ansehen = spieler.GetAnsehen();
             zeile.StandesAnsehen = spieler.GetStandesAnsehen();
+
+            PasseAuslastungAn(zeile);
+            zeile.Auslastung = Auslastung;
 
             return zeile;
         }

@@ -80,7 +80,8 @@ namespace Conspiratio.Lib.Harness
                 Ware = Zahl(args, "ware", 0),
                 Besetzung = Text(args, "arbeiter", "voll"),
                 Fertigkeit = Zahl(args, "fertigkeit", 0),
-                Lehrgeld = Schalter(args, "lehrgeld")
+                Lehrgeld = Schalter(args, "lehrgeld"),
+                Adaptiv = Schalter(args, "adaptiv")
             };
 
             int jahre = Zahl(args, "jahre", 20);
@@ -97,7 +98,8 @@ namespace Conspiratio.Lib.Harness
                               (aufbau.Aemter ? ", mit Aemtern" : "") +
                               (aufbau.Wahlen ? ", mit Wahlen" : "") +
                               (aufbau.Fertigkeit > 0 ? ", Fertigkeit " + aufbau.Fertigkeit : "") +
-                              (aufbau.Lehrgeld ? " (bezahlt)" : ""));
+                              (aufbau.Lehrgeld ? " (bezahlt)" : "") +
+                              (aufbau.Adaptiv ? ", adaptiv" : ""));
             Console.WriteLine();
 
             var endstaende = new List<int>();
@@ -124,8 +126,8 @@ namespace Conspiratio.Lib.Harness
                                       " Arbeiter, bindende Grenze: " + spiel.BindendeGrenze);
                     Console.WriteLine();
                     Console.WriteLine("Jahr    Produziert   Verkauft       Erloes    Unterhalt   Hofhaltung   " +
-                                      "Gesamtkosten    Kapazitaet       Taler     Vermoegen   Abschlag");
-                    Console.WriteLine(new string('-', 125));
+                                      "Gesamtkosten    Kapazitaet       Taler     Vermoegen   Abschlag   Auslast.");
+                    Console.WriteLine(new string('-', 136));
 
                     foreach (var z in zeilen)
                         Console.WriteLine(
@@ -139,7 +141,8 @@ namespace Conspiratio.Lib.Harness
                             G(z.Kapazitaet).PadLeft(10) + "  " +
                             G(z.Taler).PadLeft(10) + "  " +
                             G(z.Vermoegen).PadLeft(12) + "  " +
-                            (z.Abschlag + " %").PadLeft(9));
+                            (z.Abschlag + " %").PadLeft(9) + "  " +
+                            (z.Auslastung + " %").PadLeft(9));
 
                     Console.WriteLine();
                 }
