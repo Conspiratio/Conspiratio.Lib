@@ -51,10 +51,22 @@ namespace Conspiratio.Lib.Gameplay.Privilegien.Untergebene
         /// <summary>
         /// Leitet eine Amtsenthebung gegen den Untergebenen ein und liefert die Ergebnismeldung.
         /// (Ist bereits eine Enthebung im Gange, bleibt das intern wirkungslos – wie im Original.)
+        ///
+        /// Die Antragssperre gilt für den Menschen wie für die KI: Wer eben erst gegen jemanden vorging,
+        /// muss warten. Sonst wäre das, was der KI verwehrt ist, dem Spieler als Dauerfeuer erlaubt.
+        /// Das Jahr steht in der Meldung, damit die Sperre nicht als kaputter Knopf erscheint.
         /// </summary>
         public string LeiteAmtsenthebungEin(int id)
         {
-            SW.Dynamisch.SetAmtsenthebungVonID(id);
+            int antragsteller = SW.Dynamisch.GetAktiverSpieler();
+            int gesperrtBis = SW.Dynamisch.GetAbsetzungGesperrtBis(antragsteller, id);
+
+            if (gesperrtBis > 0)
+                return "Gegen " + SW.Dynamisch.GetSpWithID(id).GetKompletterName() +
+                       " habt Ihr bereits ein Verfahren angestrengt. Ein neues könnt Ihr erst im Jahre " +
+                       gesperrtBis + " betreiben.";
+
+            SW.Dynamisch.SetAmtsenthebungVonID(id, antragsteller);
             return "Eine Amtsenthebung von " + SW.Dynamisch.GetSpWithID(id).GetKompletterName() +
                    " wird in die Wege geleitet...";
         }

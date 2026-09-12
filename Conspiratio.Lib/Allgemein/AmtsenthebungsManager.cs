@@ -78,7 +78,9 @@ namespace Conspiratio.Lib.Allgemein
                 var opfer = SW.Dynamisch.GetSpWithID(antrag.OpferID);
 
                 verfahren.Add(new AmtsenthebungsVerfahren(slot, antrag.OpferID, opfer.GetKompletterName(),
-                                                          opfer.GetName(), opfer.GetSeinIhr(), waehler));
+                                                          opfer.GetName(), opfer.GetSeinIhr(), waehler,
+                                                          antrag.AntragstellerID,
+                                                          ErmittleAntragstellerName(antrag.AntragstellerID)));
             }
 
             return verfahren;
@@ -136,6 +138,19 @@ namespace Conspiratio.Lib.Allgemein
             return new AmtsenthebungsErgebnis(abgesetzt, meldung);
         }
 
+        /// <summary>
+        /// Der Name des Antragstellers für die Anzeige. Die 0 steht für „ohne benennbaren Antragsteller“ –
+        /// so kommt das Feld sowohl aus Spielständen, die vor seiner Einführung entstanden sind, als auch
+        /// aus einem gerichtlich angesetzten Verfahren, hinter dem keine Person steht.
+        /// </summary>
+        private static string ErmittleAntragstellerName(int antragstellerId)
+        {
+            if (antragstellerId == 0)
+                return "";
+
+            return SW.Dynamisch.GetSpWithID(antragstellerId)?.GetKompletterName() ?? "";
+        }
+
         private static void LeereSlot(int slot)
         {
             SW.Dynamisch.SetAmtsenthebungDaten(slot, 0, 0, 0, 0);
@@ -146,7 +161,8 @@ namespace Conspiratio.Lib.Allgemein
     public class AmtsenthebungsVerfahren
     {
         public AmtsenthebungsVerfahren(int slotId, int opferId, string opferName, string opferKurzname,
-                                       string opferSeinIhr, List<AmtsenthebungsWaehler> waehler)
+                                       string opferSeinIhr, List<AmtsenthebungsWaehler> waehler,
+                                       int antragstellerId = 0, string antragstellerName = "")
         {
             SlotId = slotId;
             OpferId = opferId;
@@ -154,6 +170,8 @@ namespace Conspiratio.Lib.Allgemein
             OpferKurzname = opferKurzname;
             OpferSeinIhr = opferSeinIhr;
             Waehler = waehler;
+            AntragstellerId = antragstellerId;
+            AntragstellerName = antragstellerName;
         }
 
         /// <summary>Platz im Amtsenthebungs-Array; wird beim Auswerten geleert.</summary>
@@ -172,6 +190,24 @@ namespace Conspiratio.Lib.Allgemein
 
         /// <summary>Die tatsächlich vorhandenen Wähler (ein bis drei), ohne Leerstellen.</summary>
         public List<AmtsenthebungsWaehler> Waehler { get; }
+
+        /// <summary>Wer den Antrag gestellt hat; 0, wenn niemand Bestimmtes dahintersteht.</summary>
+        public int AntragstellerId { get; }
+
+        /// <summary>Name des Antragstellers, leer bei <see cref="AntragstellerId"/> 0.</summary>
+        public string AntragstellerName { get; }
+
+        /// <summary>
+        /// Die Eröffnungszeile des Verfahrens. Nennt den Antragsteller, sofern bekannt – ohne ihn weiß
+        /// das Opfer nicht, gegen wen es sich wehren müsste.
+        /// </summary>
+        public string GetAntragText()
+        {
+            if (string.IsNullOrEmpty(AntragstellerName))
+                return "Eine Absetzung von " + OpferName + " wurde beantragt.";
+
+            return AntragstellerName + " hat die Absetzung von " + OpferName + " beantragt.";
+        }
 
         /// <summary>
         /// Ist ein menschlicher Spieler beteiligt (als Opfer oder als Wähler)? Nur dann zeigt der Client

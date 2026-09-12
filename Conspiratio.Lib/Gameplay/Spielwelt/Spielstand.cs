@@ -46,6 +46,13 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
 
         public List<Fest> Feste { get; set; } = new List<Fest>();
 
+        /// <summary>
+        /// Wer wen wann schon einmal abzusetzen versucht hat – die Grundlage der Antragssperre.
+        /// Aus älteren Spielständen kommt die Liste als null; der Zugriff läuft deshalb ausschließlich
+        /// über <c>DynamischeSpieldaten.GetAbsetzungssperren()</c>, der sie bei Bedarf anlegt.
+        /// </summary>
+        public List<Absetzungssperre> Absetzungssperren { get; set; }
+
         [OnDeserializing]
         void OnDeserializing(StreamingContext c)
         {

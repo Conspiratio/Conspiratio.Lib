@@ -570,24 +570,24 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             //Die Basisklasse, wenn jemand kein Amt trägt:
             Aemter[0] = new Amt(0, "Ohne Amt;Ohne Amt", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
             //Stufe 0 - Politische Ämter
-            Aemter[1] = new AmtRatsherr(1, "Ratsherr;Ratsherrin", 100, 20, 5, 40, 4, 5, 6, 1, 3, 700);
-            Aemter[2] = new AmtRatsherr(2, "Ratsherr;Ratsherrin", 100, 20, 5, 40, 4, 5, 6, 1, 3, 700);
-            Aemter[3] = new AmtRatsherr(3, "Ratsherr;Ratsherrin", 100, 20, 5, 40, 4, 5, 6, 1, 3, 700);
-            Aemter[4] = new AmtBaumeister(4, "Baumeister;Baumeisterin", 50, 5, 10, 10, 7, 0, 0, 3, 7, 1000);
-            Aemter[5] = new AmtRichter(5, "Richter;Richterin", 50, 5, 10, 5, 7, 0, 0, 3, 8, 900);
-            Aemter[6] = new AmtKaemmerer(6, "Kämmerer;Kämmerin", 50, 10, 10, 20, 7, 0, 0, 3, 8, 800);
-            Aemter[7] = new AmtBuergermeister(7, "Bürgermeister;Bürgermeisterin", 25, 30, 20, 30, 22, 0, 0, 5, 12, 1500);
+            Aemter[1] = new AmtRatsherr(1, "Ratsherr;Ratsherrin", 100, 20, 5, 40, 4, 5, 6, 1, 3, 1400);
+            Aemter[2] = new AmtRatsherr(2, "Ratsherr;Ratsherrin", 100, 20, 5, 40, 4, 5, 6, 1, 3, 1400);
+            Aemter[3] = new AmtRatsherr(3, "Ratsherr;Ratsherrin", 100, 20, 5, 40, 4, 5, 6, 1, 3, 1400);
+            Aemter[4] = new AmtBaumeister(4, "Baumeister;Baumeisterin", 50, 5, 10, 10, 7, 0, 0, 3, 7, 2000);
+            Aemter[5] = new AmtRichter(5, "Richter;Richterin", 50, 5, 10, 5, 7, 0, 0, 3, 8, 1800);
+            Aemter[6] = new AmtKaemmerer(6, "Kämmerer;Kämmerin", 50, 10, 10, 20, 7, 0, 0, 3, 8, 1600);
+            Aemter[7] = new AmtBuergermeister(7, "Bürgermeister;Bürgermeisterin", 25, 30, 20, 30, 22, 0, 0, 5, 12, 3000);
             //Stufe 0 - Kirchliche Ämter
-            Aemter[8] = new AmtPriester(8, "Priester;Priesterin", 50, -10, 10, -10, 10, 0, 0, 2, 4, 200);
-            Aemter[9] = new AmtPriester(9, "Priester;Priesterin", 50, -10, 10, -10, 10, 0, 0, 2, 4, 200);
-            Aemter[10] = new AmtDomherr(10, "Domherr;Domherrin", 25, 0, 25, 10, 27, 0, 0, 4, 10, 700);
+            Aemter[8] = new AmtPriester(8, "Priester;Priesterin", 50, -10, 10, -10, 10, 0, 0, 2, 4, 400);
+            Aemter[9] = new AmtPriester(9, "Priester;Priesterin", 50, -10, 10, -10, 10, 0, 0, 2, 4, 400);
+            Aemter[10] = new AmtDomherr(10, "Domherr;Domherrin", 25, 0, 25, 10, 27, 0, 0, 4, 10, 1400);
             //Stufe 0 - Militärische Ämter
-            Aemter[11] = new AmtStadtwache(11, "Stadtwache;Stadtwache", 100, 50, 3, 30, 14, 15, 0, 1, 2, 150);
-            Aemter[12] = new AmtFolterknecht(12, "Folterknecht;Foltermagd", 100, 50, 3, 30, 14, 15, 0, 1, 2, 150);
-            Aemter[13] = new AmtHenker(13, "Henker;Henkerin", 100, 50, 3, 30, 14, 15, 0, 1, 2, 150);
-            Aemter[14] = new AmtWachkommandant(14, "Wachkommandant;Wachkommandantin", 100, 60, 8, 40, 16, 0, 0, 3, 6, 350);
-            Aemter[15] = new AmtKerkermeister(15, "Kerkermeister;Kerkermeisterin", 100, 60, 8, 40, 16, 0, 0, 3, 6, 350);
-            Aemter[16] = new AmtStadtkommandant(16, "Stadtkommandant;Stadtkommandantin", 50, 50, 15, 30, 33, 0, 0, 5, 10, 800);
+            Aemter[11] = new AmtStadtwache(11, "Stadtwache;Stadtwache", 100, 50, 3, 30, 14, 15, 0, 1, 2, 300);
+            Aemter[12] = new AmtFolterknecht(12, "Folterknecht;Foltermagd", 100, 50, 3, 30, 14, 15, 0, 1, 2, 300);
+            Aemter[13] = new AmtHenker(13, "Henker;Henkerin", 100, 50, 3, 30, 14, 15, 0, 1, 2, 300);
+            Aemter[14] = new AmtWachkommandant(14, "Wachkommandant;Wachkommandantin", 100, 60, 8, 40, 16, 0, 0, 3, 6, 700);
+            Aemter[15] = new AmtKerkermeister(15, "Kerkermeister;Kerkermeisterin", 100, 60, 8, 40, 16, 0, 0, 3, 6, 700);
+            Aemter[16] = new AmtStadtkommandant(16, "Stadtkommandant;Stadtkommandantin", 50, 50, 15, 30, 33, 0, 0, 5, 10, 1600);
             //Stufe 1 - Politische Ämter
             Aemter[17] = new AmtGeheimrat(17, "Geheimrat;Geheimrätin", 20, 40, 30, 50, 20, 21, 0, 6, 15, 2000);
             Aemter[18] = new AmtGeheimrat(18, "Geheimrat;Geheimrätin", 20, 40, 30, 50, 20, 21, 0, 6, 15, 2000);

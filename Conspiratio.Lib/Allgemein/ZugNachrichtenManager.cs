@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 
 using Conspiratio.Lib.Extensions;
+using Conspiratio.Lib.Gameplay.Personen;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
 using JetBrains.Annotations;
@@ -233,7 +234,31 @@ namespace Conspiratio.Lib.Allgemein
             var spieler = SW.Dynamisch.GetAktHum();
 
             return spieler.GetTaler() <= -100 &&
-                   spieler.GetTaler() < SW.Statisch.GetMaxSchulden() - spieler.GetAnsehen() * 10;
+                   spieler.GetTaler() < ErmittleSchuldentoleranz(spieler) - spieler.GetAnsehen() * 10;
+        }
+
+        /// <summary>
+        /// Ab welchem Minus ein Spieler sich vor den Gläubigern verantworten muss – negativ, wie
+        /// <c>StatischeSpieldaten.GetMaxSchulden()</c>, das den Boden von −500 Talern stellt.
+        ///
+        /// <b>Warum das nicht die feste Zahl bleiben konnte.</b> Die −500 sind unabhängig davon, wie
+        /// groß der Betrieb ist, den sie beurteilen. Schon eine einzige Werkstatt kostet rund 5 000
+        /// Taler im Jahr: Ein einziges Verlustjahr brachte damit vor Gericht. Gemessen (Harness,
+        /// 1 Stadt, 1 Platz, 1 000 Starttaler): Der Betrieb rutscht im fünften Jahr erstmals ins Minus
+        /// und wäre sofort angeklagt worden, mit einem Schuldspruch als Beinahe-Gewissheit – die
+        /// Geschworenen rechnen die Schuldenhöhe unmittelbar in ihre Stimme ein. Der Schuldturm kostet
+        /// dann den Zug und damit das Einkommen, mit dem die Schuld zu tilgen wäre: ein Zustand, aus
+        /// dem heraus es kaum zurückgeht.
+        ///
+        /// Ein Jahresbetriebskostenblock als Toleranz heißt in Spielersprache: Ein schlechtes Jahr ist
+        /// ein Rückschlag, zwei sind ein Prozess. Der Boden von −500 bleibt für den, der gar nichts
+        /// produziert – sonst stünde ein Spieler ohne Betrieb ganz ohne Toleranz da.
+        /// </summary>
+        private static int ErmittleSchuldentoleranz(HumSpieler spieler)
+        {
+            int betriebskosten = AbrechnungsManager.BerechneJahresBetriebskosten(spieler);
+
+            return Math.Min(SW.Statisch.GetMaxSchulden(), -betriebskosten);
         }
 
         /// <summary>

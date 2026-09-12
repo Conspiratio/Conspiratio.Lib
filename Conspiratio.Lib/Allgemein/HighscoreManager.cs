@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 
 using Conspiratio.Lib.Gameplay.Einstellungen;
+using Conspiratio.Lib.Gameplay.Spielwelt;
 
 using JetBrains.Annotations;
 
@@ -53,6 +54,12 @@ namespace Conspiratio.Lib.Allgemein
         [PublicAPI]
         public void FuegeEintragHinzu(EnumAuftrag auftrag, string spielerName, int spieljahr, int jahreGespielt, int mitspielerAnzahl)
         {
+            // Aus demselben Grund wie in ProfilManager.WerteLaufendesSpiel: Wer sich die Taler setzen
+            // kann, erfüllt jeden Wohlstandsauftrag im ersten Jahr. Ein solcher Eintrag stünde für
+            // immer an der Spitze einer Liste, die allein nach gespielten Jahren sortiert.
+            if (SW.Dynamisch.Cheatmodus)
+                return;
+
             _eintraege.Add(new HighscoreEintrag
             {
                 Auftrag = auftrag,

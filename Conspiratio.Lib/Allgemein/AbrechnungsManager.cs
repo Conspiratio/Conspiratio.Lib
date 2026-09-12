@@ -3,6 +3,7 @@
 using Conspiratio.Lib.Gameplay.Kampf;
 using Conspiratio.Lib.Gameplay.Kampf.Einheiten;
 using Conspiratio.Lib.Gameplay.Niederlassung;
+using Conspiratio.Lib.Gameplay.Personen;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
 using JetBrains.Annotations;
@@ -184,6 +185,41 @@ namespace Conspiratio.Lib.Allgemein
         /// und setzt seine Umsätze zurück.
         /// </summary>
         [PublicAPI]
+        /// <summary>
+        /// Der jährliche Betriebskostenblock eines Spielers: Arbeiterlöhne plus Stättenkosten über alle
+        /// produzierenden Plätze. Reine Auskunft, ohne Nebenwirkung – im Unterschied zu
+        /// <see cref="ErstelleAbrechnungFuerAktivenSpieler"/>, das bucht.
+        ///
+        /// Gedacht als Maßstab für „wie groß ist dieser Betrieb": Die Schuldentoleranz
+        /// (<c>ZugNachrichtenManager.MussSichVorGlaeubigernVerantworten</c>) bemisst sich daran, und der
+        /// E2E-Treiber rechnet dieselbe Summe für seine Rücklage.
+        /// </summary>
+        public static int BerechneJahresBetriebskosten(HumSpieler spieler)
+        {
+            if (spieler == null)
+                return 0;
+
+            int kosten = 0;
+
+            for (int stadtId = 1; stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
+            {
+                for (int slot = 0; slot < SW.Statisch.GetMaxProdSlots(); slot++)
+                {
+                    var produktionsslot = spieler.GetProduktionsslot(stadtId, slot);
+
+                    if (produktionsslot.GetTaetigkeit() != (int)EnumProduktionsslotAktionsart.Produzieren)
+                        continue;
+
+                    var ware = SW.Dynamisch.GetRohstoffwithID(produktionsslot.GetProduktionRohstoff());
+
+                    kosten += produktionsslot.GetProduktionArbeiter() * ware.GetWSArbeiterpreis();
+                    kosten += produktionsslot.GetProduktionStaetten() * ware.GetWSEinzelpreis();
+                }
+            }
+
+            return kosten;
+        }
+
         public AbrechnungsErgebnis ErstelleAbrechnungFuerAktivenSpieler()
         {
             var ergebnis = new AbrechnungsErgebnis();

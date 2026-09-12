@@ -117,6 +117,14 @@ namespace Conspiratio.Lib.Allgemein
         [PublicAPI]
         public void WerteLaufendesSpiel()
         {
+            // Ein Spiel mit aktivem Cheatmodus wird nicht gewertet: Taler und Ansehen lassen sich dort
+            // frei setzen, die spielübergreifende Statistik vergleicht aber Spiele miteinander. Ein
+            // einziges erschummeltes Spiel verdirbt jede Zahl im Profil dauerhaft, denn der Delta-Fold
+            // ist nicht rückgängig zu machen. Geprüft wird hier und nicht beim Aufrufer, damit es keine
+            // der Speicherstellen (Autosave, Speichern-Dialog, Zugende) vergessen kann.
+            if (SW.Dynamisch.Cheatmodus)
+                return;
+
             bool geaendert = false;
 
             for (int id = 1; id < SW.Statisch.GetMinKIID(); id++)

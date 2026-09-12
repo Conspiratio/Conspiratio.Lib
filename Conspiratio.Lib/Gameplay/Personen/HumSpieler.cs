@@ -71,6 +71,17 @@ namespace Conspiratio.Lib.Gameplay.Personen
         public bool DuellGefuehrtDiesesJahr { get; set; }
 
         /// <summary>
+        /// Wie oft der Spieler in diesem Zug ein Kreditangebot abgelehnt hat. Reset zu Zugbeginn, analog
+        /// zu <see cref="DuellGefuehrtDiesesJahr"/>. Feldbasierte Serialisierung: Ein alter Spielstand
+        /// kennt das Feld nicht und liefert 0 – „in diesem Zug noch nichts abgelehnt", also genau richtig.
+        ///
+        /// Begrenzt zusammen mit <c>SchreibstubeManager.MaxKreditAbsagenProZug</c>, wie oft ein neues
+        /// Angebot erwürfelt werden darf, und verschlechtert nebenbei die Konditionen: Wer den
+        /// Geldverleiher warten lässt, bekommt nicht noch einmal denselben freundlichen Satz.
+        /// </summary>
+        public int KreditAbsagenDiesenZug { get; set; }
+
+        /// <summary>
         /// Punkte permanenten Ansehens, die dieser Spieler in diesem Jahr bereits aus Bauwerk-Stiftungen
         /// gewonnen hat (<see cref="Privilegien.BauwerkStiften.BauwerkStiftenManager.FuehreStiftungAus"/>) –
         /// gedeckelt auf <see cref="Allgemein.AbrechnungsManager.AnsehenMaxProJahr"/> wie die beiden

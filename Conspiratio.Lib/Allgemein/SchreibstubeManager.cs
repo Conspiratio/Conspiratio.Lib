@@ -22,7 +22,57 @@ namespace Conspiratio.Lib.Allgemein
         [PublicAPI]
         public bool KannKreditNehmen()
         {
+            return HatFreienKreditplatz() && GetVerbleibendeAbsagen() > 0;
+        }
+
+        /// <summary>
+        /// Wie oft je Zug ein Angebot ausgeschlagen werden darf, bevor der Geldverleiher für dieses Jahr
+        /// nicht mehr zu sprechen ist.
+        ///
+        /// <b>Warum es eine Grenze braucht.</b> Ablehnen kostete nichts und würfelte ein neues Angebot,
+        /// Höhe und Zinssatz waren also beliebig oft nachziehbar: Wer es wusste, wartete einfach auf
+        /// 1 200 Taler zu 10 %, und der Zufall im Angebot war keiner mehr. Mit drei Versuchen bleibt die
+        /// Wahl echt, ohne dass ein ungünstiger erster Wurf den Zug entscheidet.
+        /// </summary>
+        public const int MaxKreditAbsagenProZug = 3;
+
+        /// <summary>
+        /// Kleinster aufnehmbarer Betrag. Darunter lohnt der Weg zum Geldverleiher nicht, und ein Kredit
+        /// über wenige Taler belegte nur einen der vier Kreditplätze.
+        /// </summary>
+        public const int MindestKreditbetrag = 100;
+
+        /// <summary>
+        /// Zinsaufschlag in Prozentpunkten je Absage in diesem Zug – er hebt die <em>Untergrenze</em> des
+        /// gewürfelten Satzes, nicht die Obergrenze. Ein günstiger Satz wird damit unwahrscheinlicher,
+        /// ohne dass der schlechteste Fall schlechter würde: Nach drei Absagen liegt die Spanne bei
+        /// 13 bis 20 statt 10 bis 20 Prozent, der Erwartungswert also bei 16,5 statt 15. Bewusst klein
+        /// gehalten – die Absage soll etwas kosten, aber nicht bestrafen.
+        /// </summary>
+        public const int ZinsaufschlagJeAbsage = 1;
+
+        /// <summary>Ist überhaupt noch einer der vier Kreditplätze frei?</summary>
+        [PublicAPI]
+        public bool HatFreienKreditplatz()
+        {
             return SW.Dynamisch.GetAktHum().GetEmptyKreditID() != SW.Statisch.GetMaxKredite();
+        }
+
+        /// <summary>Wie viele Absagen bleiben dem Spieler in diesem Zug noch?</summary>
+        [PublicAPI]
+        public int GetVerbleibendeAbsagen()
+        {
+            return Math.Max(0, MaxKreditAbsagenProZug - SW.Dynamisch.GetAktHum().KreditAbsagenDiesenZug);
+        }
+
+        /// <summary>
+        /// Vermerkt eine Absage. Danach ist das Angebot verfallen; das nächste wird neu gewürfelt und
+        /// fällt tendenziell etwas teurer aus (<see cref="ZinsaufschlagJeAbsage"/>).
+        /// </summary>
+        [PublicAPI]
+        public void LehneKreditAb()
+        {
+            SW.Dynamisch.GetAktHum().KreditAbsagenDiesenZug++;
         }
 
         /// <summary>
@@ -34,7 +84,15 @@ namespace Conspiratio.Lib.Allgemein
         {
             int kiId = SW.Statisch.Rnd.Next(SW.Statisch.GetMinKIID(), SW.Statisch.GetMaxKIID());
             int summe = Convert.ToInt32(0.1 * SW.Dynamisch.GetKIwithID(kiId).GetTaler());
-            int zins = SW.Statisch.Rnd.Next(SW.Statisch.GetKreditZinsMin(), SW.Statisch.GetKreditZinsMax() + 1);
+
+            // Jede Absage in diesem Zug hebt die Untergrenze des Wurfs, nicht die Obergrenze: Der
+            // günstige Satz wird unwahrscheinlicher, der schlechteste Fall bleibt derselbe. Die
+            // Untergrenze darf die Obergrenze nicht überholen, sonst wirft Rnd.Next eine Ausnahme.
+            int zinsUntergrenze = Math.Min(SW.Statisch.GetKreditZinsMax(),
+                                           SW.Statisch.GetKreditZinsMin() +
+                                           SW.Dynamisch.GetAktHum().KreditAbsagenDiesenZug * ZinsaufschlagJeAbsage);
+
+            int zins = SW.Statisch.Rnd.Next(zinsUntergrenze, SW.Statisch.GetKreditZinsMax() + 1);
 
             if (SW.Dynamisch.GetAktHum().CheckPrivilegX(30))
                 zins = zins / 2;
@@ -45,24 +103,51 @@ namespace Conspiratio.Lib.Allgemein
         }
 
         /// <summary>
-        /// Nimmt das Kreditangebot an: Der Spieler erhält die Summe, der KI-Spieler gibt sie her.
-        /// Ist die Kreditaufnahme per Gesetz verboten, gibt es einen Deliktpunkt.
+        /// Nimmt das Kreditangebot in voller Höhe an. Bequemlichkeitsüberladung von
+        /// <see cref="NimmKredit(KreditAngebot,int)"/>.
         /// </summary>
         [PublicAPI]
         public void NimmKredit(KreditAngebot angebot)
         {
+            NimmKredit(angebot, angebot.Summe);
+        }
+
+        /// <summary>
+        /// Nimmt vom Kreditangebot den gewünschten Teilbetrag auf: Der Spieler erhält ihn, der
+        /// KI-Spieler gibt ihn her. Ist die Kreditaufnahme per Gesetz verboten, gibt es einen
+        /// Deliktpunkt.
+        ///
+        /// <b>Warum der Betrag wählbar ist.</b> Die Angebotshöhe ist ein Zehntel des Vermögens eines
+        /// <em>zufälligen</em> Gläubigers und hat mit dem Bedarf des Kreditnehmers nichts zu tun – zu
+        /// Spielbeginn sind das 1 200 bis 12 000 Taler, während die einzige lohnende Investition eines
+        /// Anfängers (ein auf den Stadtbedarf dimensionierter Werkstattplatz samt Lager) rund 2 600
+        /// kostet. Gemessen wirft die 49 % im Jahr ab, der Kredit kostet 10 bis 20 – ein gutes Geschäft.
+        /// Nur ließ sich die Summe bisher nicht teilen: Wer 12 000 annahm, um 2 600 zu investieren,
+        /// zahlte auf die vollen 12 000 Zinsen, und der Rest lag ungenutzt herum. Bei 20 % waren das
+        /// 2 400 Taler im Jahr gegen einen Betrieb, der 1 292 verdient – der Kredit allein verdoppelte
+        /// den Verlust. Das war der Grund, aus dem sich Kredite im Frühspiel nie lohnten, nicht der
+        /// Zinssatz.
+        ///
+        /// <paramref name="betrag"/> wird auf <see cref="MindestKreditbetrag"/> bis
+        /// <see cref="KreditAngebot.Summe"/> geklemmt.
+        /// </summary>
+        [PublicAPI]
+        public void NimmKredit(KreditAngebot angebot, int betrag)
+        {
+            betrag = Math.Max(MindestKreditbetrag, Math.Min(betrag, angebot.Summe));
+
             var spieler = SW.Dynamisch.GetAktHum();
             var kredit = spieler.GetKreditMitID(spieler.GetEmptyKreditID());
 
             kredit.SetDauer(angebot.Jahre);
-            kredit.SetTaler(angebot.Summe);
+            kredit.SetTaler(betrag);
             kredit.SetZinsen(angebot.Zins);
             kredit.SetKIID(angebot.KiId);
             // Rückzahlungsjahr fest verankern, damit es nicht mit dem fortschreitenden Jahr mitwandert.
             kredit.SetRueckzahlungsjahr(SW.Dynamisch.GetAktuellesJahr() + angebot.Jahre);
 
-            spieler.ErhoeheTaler(angebot.Summe);
-            SW.Dynamisch.GetKIwithID(angebot.KiId).ErhoeheTaler(-angebot.Summe);
+            spieler.ErhoeheTaler(betrag);
+            SW.Dynamisch.GetKIwithID(angebot.KiId).ErhoeheTaler(-betrag);
 
             // Falls die Kreditaufnahme verboten ist...
             if (SW.Dynamisch.GetGesetzX(0) != 0)
@@ -299,6 +384,33 @@ namespace Conspiratio.Lib.Allgemein
         {
             return AnbieterName + " bietet Euch " + Summe.ToStringGeld() + " zu " + Zins + "% Zinsen jährlich, rückzahlbar bis zum Jahre " +
                    (SW.Dynamisch.GetAktuellesJahr() + Jahre) + ". Wollt Ihr annehmen?";
+        }
+
+        /// <summary>Das Jahr, in dem die Summe in einem Betrag fällig wird.</summary>
+        public int Rueckzahlungsjahr => SW.Dynamisch.GetAktuellesJahr() + Jahre;
+
+        /// <summary>
+        /// Der Angebotstext ohne die Frage am Ende – für die Ansicht, in der der Betrag erst noch
+        /// gewählt wird und die Frage deshalb an den Knöpfen hängt.
+        /// </summary>
+        public string GetAngebotsKopf()
+        {
+            return AnbieterName + " streckt Euch bis zu " + Summe.ToStringGeld() + " vor,\n" +
+                   "zu " + Zins + " % Zinsen jährlich, fällig im Jahre " + Rueckzahlungsjahr + ".";
+        }
+
+        /// <summary>
+        /// Was der gewählte Betrag kostet: Zinsen im Jahr, Zinsen insgesamt und die Summe, die am Ende
+        /// in einem Betrag zurückzuzahlen ist. Die Rückzahlung wird erzwungen, notfalls ins Minus –
+        /// deshalb steht sie hier neben den Zinsen und nicht im Kleingedruckten.
+        /// </summary>
+        public string GetKostenText(int betrag)
+        {
+            int zinsenJeJahr = betrag * Zins / 100;
+
+            return "Zinsen: " + zinsenJeJahr.ToStringGeld() + " im Jahr, " +
+                   (zinsenJeJahr * Jahre).ToStringGeld() + " über " + Jahre + " Jahre.\n" +
+                   "Im Jahre " + Rueckzahlungsjahr + " werden " + betrag.ToStringGeld() + " in einem Betrag fällig.";
         }
     }
 

@@ -62,6 +62,11 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             {
                 Amtsenthebungen[i] = new Amtsenthebung(0, 0, 0, 0);
             }
+
+            // Muss hier mit zurueckgesetzt werden: NeuInitialisieren legt keinen neuen Spielstand an,
+            // sondern setzt die Felder des vorhandenen. Ohne diese Zeile nimmt ein neues Spiel die
+            // Antragssperren des vorigen mit.
+            Spielstand.Absetzungssperren = null;
             #endregion
 
             #region Rohstoffe
@@ -430,8 +435,20 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             KSpieler[X].SetAlter(SW.Statisch.GetStartAlter() + SW.Statisch.Rnd.Next(0, 4));
         }
 
-        public void SetAmtsenthebungVonID(int OpferID)
+        /// <summary>
+        /// Setzt ein Amtsenthebungsverfahren gegen <paramref name="OpferID"/> an.
+        ///
+        /// <paramref name="antragstellerID"/> benennt, wer den Antrag stellt. Von 0 verschieden, greift
+        /// die Antragssperre: Derselbe Antragsteller kommt gegen dasselbe Opfer erst nach
+        /// <see cref="GetAbsetzungssperreJahre"/> Jahren wieder zum Zug. 0 heißt „niemand Bestimmtes“ –
+        /// so ruft das Gericht auf, dessen Urteil keine Sperre kennt und keine begründet.
+        /// </summary>
+        public void SetAmtsenthebungVonID(int OpferID, int antragstellerID = 0)
         {
+            // Die Sperre steht vor allem anderen: Ein gesperrter Antrag darf auch keinen Slot belegen.
+            if (IstAbsetzungGesperrt(antragstellerID, OpferID))
+                return;
+
             int aid = GetLeereAmtsenthebungsID();
 
             if (GetSpWithID(OpferID).GetAmtID() != 0)
@@ -449,6 +466,8 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
 
                 if (done == false)
                 {
+                    MerkeAbsetzungsantrag(antragstellerID, OpferID);
+
                     //Die 3 Waehler herausfinden
                     int[] waehlerAmtIDS = new int[3];
                     waehlerAmtIDS[0] = SW.Statisch.GetAmtwithID(GetSpWithID(OpferID).GetAmtID()).GetWaehler1AmtID();
@@ -485,7 +504,7 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
                         }
                     }
 
-                    SetAmtsenthebungDaten(aid, OpferID, wid[0], wid[1], wid[2]);
+                    SetAmtsenthebungDaten(aid, OpferID, wid[0], wid[1], wid[2], antragstellerID);
                 }
             }
             else
@@ -494,13 +513,114 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
             }
         }
 
-        public void SetAmtsenthebungDaten(int x, int oid, int w1, int w2, int w3)
+        public void SetAmtsenthebungDaten(int x, int oid, int w1, int w2, int w3, int antragstellerID = 0)
         {
+            Amtsenthebungen[x].AntragstellerID = antragstellerID;
             Amtsenthebungen[x].OpferID = oid;
             Amtsenthebungen[x].Waehler1 = w1;
             Amtsenthebungen[x].Waehler2 = w2;
             Amtsenthebungen[x].Waehler3 = w3;
         }
+
+        #region Absetzungssperre
+
+        /// <summary>
+        /// Obergrenze der Sperrdauer – zugleich die Schwelle, ab der ein Vermerk aufgeräumt werden darf.
+        /// Sie muss mindestens so groß sein wie der größte Wert, den <see cref="GetAbsetzungssperreJahre"/>
+        /// liefern kann; sonst würde ein Vermerk weggeräumt, den eine später herabgesetzte Aggressivität
+        /// wieder brauchte.
+        /// </summary>
+        private const int MaxAbsetzungssperreJahre = 20;
+
+        /// <summary>
+        /// Die Sperrliste; wird bei Bedarf angelegt (aus älteren Spielständen kommt sie als null).
+        /// </summary>
+        public List<Absetzungssperre> GetAbsetzungssperren()
+        {
+            if (Spielstand.Absetzungssperren == null)
+                Spielstand.Absetzungssperren = new List<Absetzungssperre>();
+
+            return Spielstand.Absetzungssperren;
+        }
+
+        /// <summary>
+        /// Wie viele Jahre derselbe Antragsteller warten muss, bevor er dasselbe Opfer erneut absetzen
+        /// lassen darf: 20 Jahre bei niedrigster, 11 bei mittlerer, 2 bei höchster KI-Aggressivität.
+        ///
+        /// <b>Warum es die Sperre gibt.</b> Ohne sie stellte dieselbe KI den Antrag Jahr für Jahr, sobald
+        /// ihre Beziehung zum Spieler unter die Schwelle gerutscht war – und die rutscht nicht von allein
+        /// zurück. Wer ein Amt errang, saß damit in einem jährlichen Absetzungsverfahren fest.
+        ///
+        /// <b>Warum das kein Freibrief ist.</b> Antragsberechtigt sind die Inhaber der bis zu drei
+        /// Wähler-Ämter des betroffenen Amtes (<see cref="GetUntergebene"/>), und die Sperre gilt je
+        /// Antragsteller. Bei mittlerer Aggressivität und drei verfeindeten Vorgesetzten bleibt im Schnitt
+        /// alle drei bis vier Jahre ein Verfahren möglich.
+        /// </summary>
+        public int GetAbsetzungssperreJahre()
+        {
+            return InterpoliereNachAggressivitaet(20, 11, 2);
+        }
+
+        /// <summary>
+        /// Darf <paramref name="antragstellerID"/> derzeit keinen Antrag gegen <paramref name="opferID"/>
+        /// stellen? Ein Antragsteller 0 (Gericht) ist nie gesperrt.
+        /// </summary>
+        public bool IstAbsetzungGesperrt(int antragstellerID, int opferID)
+        {
+            return GetAbsetzungGesperrtBis(antragstellerID, opferID) > 0;
+        }
+
+        /// <summary>
+        /// Das erste Jahr, in dem <paramref name="antragstellerID"/> wieder gegen
+        /// <paramref name="opferID"/> vorgehen darf, oder 0, wenn keine Sperre besteht. Für die Anzeige
+        /// gedacht: Ein „geht nicht“ ohne Jahreszahl lässt den Spieler raten.
+        /// </summary>
+        public int GetAbsetzungGesperrtBis(int antragstellerID, int opferID)
+        {
+            if (antragstellerID == 0)
+                return 0;
+
+            int dauer = GetAbsetzungssperreJahre();
+
+            foreach (var sperre in GetAbsetzungssperren())
+            {
+                if (sperre.AntragstellerId != antragstellerID || sperre.OpferId != opferID)
+                    continue;
+
+                if (AktuellesJahr - sperre.Antragsjahr < dauer)
+                    return sperre.Antragsjahr + dauer;
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// Hält fest, dass hier und jetzt ein Antrag gestellt wurde, und räumt bei der Gelegenheit die
+        /// endgültig abgelaufenen Vermerke weg. Das Aufräumen hängt bewusst am Anlegen: Nur dann wächst
+        /// die Liste, und so braucht es keinen eigenen Aufruf im Rundenende, den ein späterer Pfad
+        /// vergessen könnte.
+        /// </summary>
+        private void MerkeAbsetzungsantrag(int antragstellerID, int opferID)
+        {
+            if (antragstellerID == 0)
+                return;
+
+            var sperren = GetAbsetzungssperren();
+
+            sperren.RemoveAll(s => AktuellesJahr - s.Antragsjahr >= MaxAbsetzungssperreJahre);
+
+            // Denselben Antragsteller/Opfer-Vermerk gibt es nur einmal; er wird fortgeschrieben.
+            sperren.RemoveAll(s => s.AntragstellerId == antragstellerID && s.OpferId == opferID);
+
+            sperren.Add(new Absetzungssperre
+            {
+                AntragstellerId = antragstellerID,
+                OpferId = opferID,
+                Antragsjahr = AktuellesJahr
+            });
+        }
+
+        #endregion
 
         public void SetAktuellesJahr(int j)
         {
@@ -2455,8 +2575,10 @@ namespace Conspiratio.Lib.Gameplay.Spielwelt
                 {
                     if (GetKIwithID(i).GetBeziehungZuKIX(untergebene[j]) < maxAbsetzSympathie)
                     {
-                        // KI fordert Absetzung
-                        SetAmtsenthebungVonID(untergebene[j]);
+                        // KI fordert Absetzung. Die Beziehung erholt sich nicht von allein, die Bedingung
+                        // bliebe also jahrelang erfüllt – die Antragssperre in SetAmtsenthebungVonID
+                        // verhindert, dass daraus ein jährliches Verfahren gegen dasselbe Opfer wird.
+                        SetAmtsenthebungVonID(untergebene[j], i);
                     }
                 }
                 #endregion
